@@ -1,0 +1,35 @@
+/* force-directed-graph */
+
+.fdg-main {
+    height: calc(100vh - 16px);
+}
+.fdg-hidden {
+    display: none !important;
+}
+.fdg-invisible {
+    visibility: hidden !important;
+}
+.fdg-main > * {
+    display: inline-block;
+}
+
+.fdg-axis path,
+.fdg-axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.fdg-axis text {
+  font: 10px sans-serif;
+}
+
+.fdg-cells path {
+  fill: none;
+  stroke: #aaa;
+  pointer-events: all;
+}
+
+.fdg-cells :hover circle {
+  fill: red;
+}

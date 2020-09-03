@@ -1,0 +1,35 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300);
+* {
+    padding: 0;
+    margin: 0;
+    font-family: 'Open Sans';
+}
+body > * {
+    width: 96%;
+    margin: .75rem 2%;
+}
+#title {
+    padding: 0 0 .75rem 0;
+    border-bottom: 2px solid lightgray;
+    margin-top: 1.5rem;
+    font-size: 2rem;
+    font-weight: normal;
+}
+#subtitle {
+    margin-top: 0;
+    font-size: 1.5rem;
+    font-weight: lighter;
+}
+#description {
+    text-align: left;
+    font-size: 20px;
+    font-weight: lighter;
+    width: calc(94% - 2px);
+    border: 1px solid #333;
+    background: #eee;
+    border-radius: 4px;
+    padding: 4px 1% 8px 1%;
+}
+#container {
+    display: inline-block;
+}
