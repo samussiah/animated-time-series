@@ -1,2 +1,1 @@
-export default function id() {
-}
+export default function id() {}

@@ -3,5 +3,18 @@ export default function mutate() {
         (d) => /^-?\d+\.?\d*$/.test(d.id) || /^-?\d*\.?\d+$/.test(d.id)
     );
 
-    this.data.forEach((d) => {});
+    this.data.forEach((d) => {
+        // Rename data variables.
+        Object.keys(this.settings)
+            .filter((setting) => /_var$/.test(setting))
+            .forEach((setting) => {
+                d[setting.replace(/_var$/, '')] = [
+                    'visit_order_var',
+                    'day_var',
+                    'result_var',
+                ].includes(setting)
+                    ? +d[this.settings[setting]]
+                    : d[this.settings[setting]];
+            });
+    });
 }

@@ -1,5 +1,5 @@
 {
-  "TODO": "data/nest.js",
+  "TODO": "transition lines back to baseline, delay repeat, add color legend",
   "name": "animated-time-series",
   "version": "0.1.0",
   "description": "an animated, paneled time series chart",

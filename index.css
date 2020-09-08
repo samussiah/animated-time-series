@@ -1,35 +1,42 @@
-/* force-directed-graph */
+/* main */
 
-.fdg-main {
-    height: calc(100vh - 16px);
+.atm-main {
+    width: 100%;
 }
-.fdg-hidden {
+.atm-hidden {
     display: none !important;
 }
-.fdg-invisible {
+.atm-invisible {
     visibility: hidden !important;
 }
-.fdg-main > * {
+.atm-main > * {
+}
+
+/* charts */
+
+.atm-container {
     display: inline-block;
+    width: calc(50% - 2px);
+    border: 1px solid #aaa;
 }
 
-.fdg-axis path,
-.fdg-axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+.atm-axis path,
+.atm-axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
 }
 
-.fdg-axis text {
-  font: 10px sans-serif;
+.atm-axis text {
+    font: 10px sans-serif;
 }
 
-.fdg-cells path {
-  fill: none;
-  stroke: #aaa;
-  pointer-events: all;
+.atm-cells path {
+    fill: none;
+    stroke: #aaa;
+    pointer-events: all;
 }
 
-.fdg-cells :hover circle {
-  fill: red;
+.atm-cells :hover circle {
+    fill: red;
 }

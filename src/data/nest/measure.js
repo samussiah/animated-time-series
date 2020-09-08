@@ -1,2 +1,1 @@
-export default function measure() {
-}
+export default function measure() {}
