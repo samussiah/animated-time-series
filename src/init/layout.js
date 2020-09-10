@@ -1,38 +1,60 @@
 import addElement from '../layout/addElement';
+import makeLegend from './layout/legend';
 
-export default function layout(key) {
+export default function layout(measure, key) {
     const keyClass = key.toLowerCase().replace(/[^a-z0-9_]/g, '-');
 
     // container
-    const main = addElement('container', this.containers.main)
+    const main = addElement('container', this.containers.charts)
         .attr('width', this.settings.width)
         .attr('height', this.settings.height);
 
     // header
     const header = addElement('header', main, 'h3').text(key);
 
-    // SVG
-    const svg = addElement('svg', main, 'svg')
-        .attr('width', this.settings.width)
+    // legend
+    const legend = addElement('legend', main);
+    legend.node().appendChild(
+        makeLegend({
+            color: measure.colorScale,
+            title: 'Change',
+        })
+    );
+
+    // time series
+    const timeSeries = addElement('time-series', main)
+        .classed('atm-svg-container', true);
+    timeSeries.svg = addElement('svg', timeSeries, 'svg')
+        .attr('width', this.settings.widthTimeSeries)
         .attr('height', this.settings.height);
 
-    const xAxis = addElement('x-axis', svg, 'g');
-    const yAxis = addElement('y-axis', svg, 'g');
-    const canvas = addElement('canvas', svg, 'g');
+    const xAxis = addElement('x-axis', timeSeries.svg, 'g');
+    const yAxis = addElement('y-axis', timeSeries.svg, 'g');
+    const canvas = addElement('canvas', timeSeries.svg, 'g');
     const lines = addElement('lines', canvas, 'g');
     const points = addElement('points', canvas, 'g');
     const linesAggregate = addElement('lines-aggregate', canvas, 'g');
     const pointsAggregate = addElement('points-aggregate', canvas, 'g');
 
+    // pie chart
+    const pieChart = addElement('pie-chart', main)
+        .classed('atm-svg-container', true);
+    pieChart.svg = addElement('svg', pieChart, 'svg')
+        .attr('width', this.settings.widthPieChart)
+        .attr('height', this.settings.height);
+
     return {
         main,
-        svg,
+        header,
+        legend,
+        timeSeries,
         xAxis,
         yAxis,
         canvas,
-        points,
         lines,
-        pointsAggregate,
+        points,
         linesAggregate,
+        pointsAggregate,
+        pieChart,
     };
 }

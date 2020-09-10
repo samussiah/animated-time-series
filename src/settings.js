@@ -5,8 +5,9 @@ const settings = {
     day_var: 'ADY',
     measure_var: 'PARAM',
     result_var: 'AVAL',
-    speed: 2500,
     aggregate: 'mean',
+    speed: 2500,
+    loop_time: 5000,
 };
 
 export default settings;

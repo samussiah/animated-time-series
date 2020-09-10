@@ -9,7 +9,6 @@ export default function init() {
     this.visitIndex = 0;
     this.visit = this.data.visits[this.visitIndex];
     this.timepoint = this.data.timepoints[this.visitIndex];
-    console.log(this.timepoint);
     this.containers.timepoint.text(this.visit);
 
     this.xScale = getXScale.call(this, this.data);
@@ -18,7 +17,7 @@ export default function init() {
         measure.xScale = this.xScale;
         measure.yScale = getYScale.call(this, measure);
         measure.colorScale = getColorScale.call(this, measure.yScale);
-        measure.containers = layout.call(this, key);
+        measure.containers = layout.call(this, measure, key);
         measure.ids = d3.group(measure, (d) => d.id);
         measure.aggregate = this.data.visits.reduce((aggregate, visit) => {
             aggregate.push([
@@ -34,7 +33,7 @@ export default function init() {
         draw.call(this, measure);
     });
 
-    d3.interval(() => {
+    this.interval = d3.interval(() => {
         update.call(this);
     }, this.settings.speed);
 }

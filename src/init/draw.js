@@ -4,6 +4,7 @@ import drawLines from './draw/lines';
 import drawPoints from './draw/points';
 import drawLinesAggregate from './draw/linesAggregate';
 import drawPointsAggregate from './draw/pointsAggregate';
+import drawPieChart from './draw/pieChart';
 
 export default function draw(measure) {
     measure.xAxis = drawXAxis.call(this, measure);
@@ -12,4 +13,5 @@ export default function draw(measure) {
     measure.points = drawPoints.call(this, measure);
     measure.linesAggregate = drawLinesAggregate.call(this, measure);
     measure.pointsAggregate = drawPointsAggregate.call(this, measure);
+    measure.pieChart = drawPieChart.call(this, measure);
 }

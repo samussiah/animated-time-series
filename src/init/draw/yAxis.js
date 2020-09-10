@@ -16,7 +16,7 @@ export default function yAxis(measure) {
                 .attr('x1', 0)
                 .attr(
                     'x2',
-                    this.settings.width - this.settings.margin.right - this.settings.margin.left
+                    this.settings.widthTimeSeries - this.settings.margin.right - this.settings.margin.left
                 )
         );
 }

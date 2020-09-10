@@ -1,5 +1,5 @@
 {
-  "TODO": "transition lines back to baseline, delay repeat, add color legend",
+  "TODO": "draw and animate pie charts using tertiles of absolute change from baseline based on the interquartile range?",
   "name": "animated-time-series",
   "version": "0.1.0",
   "description": "an animated, paneled time series chart",
