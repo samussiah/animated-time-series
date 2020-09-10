@@ -144,16 +144,33 @@ export default function legend({
         )
         .call(tickAdjust)
         .call((g) => g.select('.domain').remove())
-        .call((g) =>
-            g
-                .append('text')
+        .call((g) => {
+            const fontSize = '1rem';
+            g.append('text')
                 .attr('x', marginLeft)
                 .attr('y', marginTop + marginBottom - height - 6)
                 .attr('fill', 'currentColor')
                 .attr('text-anchor', 'start')
                 .attr('font-weight', 'bold')
-                .text(title)
-        );
+                .attr('font-size', fontSize)
+                .text('-');
+            g.append('text')
+                .attr('x', width / 2)
+                .attr('y', marginTop + marginBottom - height - 6)
+                .attr('fill', 'currentColor')
+                .attr('text-anchor', 'middle')
+                .attr('font-weight', 'bold')
+                .attr('font-size', fontSize)
+                .text(title);
+            g.append('text')
+                .attr('x', width - marginRight)
+                .attr('y', marginTop + marginBottom - height - 6)
+                .attr('fill', 'currentColor')
+                .attr('text-anchor', 'end')
+                .attr('font-weight', 'bold')
+                .attr('font-size', fontSize)
+                .text('+');
+        });
 
     return svg.node();
 }

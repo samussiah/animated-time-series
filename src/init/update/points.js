@@ -22,10 +22,10 @@ export default function updatePoints(measure) {
             transition
                 .attr('cx', measure.xScale(d.day))
                 .attr('cy', measure.yScale(d.result))
-                .attr('fill', baseline ? measure.colorScale(d.result - baseline.result) : 0)
+                .attr('fill', measure.colorScale(d.change))
                 .attr('fill-opacity', 0.25)
-                .attr('stroke', baseline ? measure.colorScale(d.result - baseline.result) : 0)
+                .attr('stroke', measure.colorScale(d.change))
                 .style('display', null);
-        else transition.attr('fill-opacity', 0.25).attr('stroke-opactiy', 0.5);
+        else transition.attr('fill-opacity', 0.25).attr('stroke-opacity', 0.5);
     });
 }

@@ -12,8 +12,11 @@ export default function mutate() {
                     'visit_order_var',
                     'day_var',
                     'result_var',
+                    'baseline_var',
+                    'change_var',
+                    'percent_change_var',
                 ].includes(setting)
-                    ? +d[this.settings[setting]]
+                    ? parseFloat(d[this.settings[setting]])
                     : d[this.settings[setting]];
             });
     });

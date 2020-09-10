@@ -12,24 +12,25 @@
 .atm-main > * {
 }
 
-/* charts */
+/* time series */
 
 .atm-container {
+    width: 50%;
     display: inline-block;
     position: relative;
     margin-bottom: 2rem;
-/*
+    /*
     width: 48%;
     padding: 1rem 0;
 */
 }
 .atm-container:nth-child(odd) {
-/*
+    /*
     padding-right: 2%;
 */
 }
 .atm-container:nth-child(even) {
-/*
+    /*
     padding-left: 2%;
 */
 }
@@ -38,7 +39,7 @@
     position: absolute;
     top: 0;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
 }
 
 .atm-svg-container {
@@ -64,4 +65,17 @@
 
 .atm-cells :hover circle {
     fill: red;
+}
+
+/* pie chart */
+
+.atm-pie-chart {
+    position: relative;
+}
+.atm-pie-chart__header {
+    position: absolute;
+    top: -2rem;
+    font-size: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
 }

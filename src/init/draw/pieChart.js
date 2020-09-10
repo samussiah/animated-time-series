@@ -1,10 +1,14 @@
 export default function pieChart(measure) {
-    measure.containers.pieChart.svg
-        .append('circle')
-        .attr('cx', this.settings.widthPieChart/2)
-        .attr('cy', this.settings.height/2)
-        .attr('r', this.settings.widthPieChart/2 - 50)
-        .attr('stroke-width', 25)
-        .attr('stroke', 'steelblue')
-        .attr('fill', 'white');
+    const pieChart = measure.containers.pieChart.g
+        .append('g')
+        .selectAll('path')
+        .data(measure.pieData)
+        .join('path')
+        .attr('d', measure.arc)
+        .attr('fill', (d) => measure.pieColor(d.data))
+        .attr('stroke', 'black')
+        .attr('stroke-width', '2px')
+        .style('opacity', 0.7);
+
+    return pieChart;
 }
