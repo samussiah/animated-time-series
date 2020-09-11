@@ -7,6 +7,7 @@ fetch('./adlb-trend.csv')
             '#container',
             {
                 //speed: 1000,
+                loop_time: 15000,
             }
         );
     });

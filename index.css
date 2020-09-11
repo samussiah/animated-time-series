@@ -12,6 +12,15 @@
 .atm-main > * {
 }
 
+.atm-timepoint {
+    text-align: center;
+    font-weight: lighter;
+    font-size: 2rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #aaa;
+}
+
 /* time series */
 
 .atm-container {
@@ -40,6 +49,11 @@
     top: 0;
     left: 50%;
     transform: translateX(-50%);
+}
+
+.atm-header {
+    font-weight: lighter;
+    font-size: 1.5rem;
 }
 
 .atm-svg-container {
@@ -75,7 +89,8 @@
 .atm-pie-chart__header {
     position: absolute;
     top: -2rem;
-    font-size: 1.5rem;
+    white-space: nowrap;
+    font-size: 1.25rem;
     left: 50%;
     transform: translateX(-50%);
 }

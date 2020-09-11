@@ -18,6 +18,7 @@ export default function layout(measure, key) {
         makeLegend({
             color: measure.colorScale,
             title: 'Change from Baseline',
+            width: 275,
         })
     );
 
