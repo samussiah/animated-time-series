@@ -18,6 +18,15 @@ export default function update() {
         }, this.settings.loop_time);
     }
 
+    if (this.visitIndex === 0) {
+        this.interval.stop();
+        d3.timeout((elapsed) => {
+            this.interval = d3.interval(() => {
+                update.call(this);
+            }, this.settings.speed);
+        }, 1000);
+    }
+
     this.visit = this.data.visits[this.visitIndex];
     this.timepoint = this.data.timepoints[this.visitIndex];
     this.containers.timepoint

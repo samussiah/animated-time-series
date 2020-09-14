@@ -1,4 +1,5 @@
 export default function yAxis(measure) {
+    measure.containers.yAxis.selectAll('*').remove();
     return measure.containers.yAxis
         .attr('transform', `translate(${this.settings.margin.left},0)`)
         .call(d3.axisLeft(measure.yScale))

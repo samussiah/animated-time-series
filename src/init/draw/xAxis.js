@@ -1,4 +1,5 @@
 export default function xAxis(measure) {
+    measure.containers.xAxis.selectAll('*').remove();
     return measure.containers.xAxis
         .attr('transform', `translate(0,${this.settings.height - this.settings.margin.bottom})`)
         .call(d3.axisBottom(measure.xScale).ticks(this.settings.widthTimeSeries / 80))

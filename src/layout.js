@@ -1,17 +1,21 @@
 import addElement from './layout/addElement';
+import getDimensions from './layout/getDimensions';
+import addControls from './layout/addControls';
+import resize from './layout/resize';
 
 export default function layout() {
     const main = addElement('main', d3.select(this.element));
-    this.settings.width = main.node().clientWidth / 2;
-    this.settings.widthTimeSeries = (2 * this.settings.width) / 3 - 10;
-    this.settings.widthPieChart = (1 * this.settings.width) / 3 - 10;
-    this.settings.height = this.settings.width / 3;
-    this.settings.margin = { top: 30, right: 30, bottom: 40, left: 40 };
+    getDimensions.call(this, main); // determine widths of DOM elements based on width of main container
+    const controls = addElement('controls', main);
+    addControls.call(this, controls);
     const timepoint = addElement('timepoint', main, 'h2');
     const charts = addElement('charts', main);
 
+    window.addEventListener('resize', resize.bind(this));
+
     return {
         main,
+        controls,
         timepoint,
         charts,
     };

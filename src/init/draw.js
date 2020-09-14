@@ -1,3 +1,4 @@
+import clearCanvas from './draw/clearCanvas';
 import drawXAxis from './draw/xAxis';
 import drawYAxis from './draw/yAxis';
 import drawLines from './draw/lines';
@@ -8,6 +9,7 @@ import drawPieChart from './draw/pieChart';
 import drawPieText from './draw/pieText';
 
 export default function draw(measure) {
+    clearCanvas.call(this, measure);
     measure.xAxis = drawXAxis.call(this, measure);
     measure.yAxis = drawYAxis.call(this, measure);
     measure.lines = drawLines.call(this, measure);

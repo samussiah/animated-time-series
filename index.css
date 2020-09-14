@@ -12,6 +12,31 @@
 .atm-main > * {
 }
 
+.atm-controls {
+    display: inline-block;
+}
+.atm-play-pause-toggle {
+    display: inline-block;
+}
+.atm-button__play-pause {
+    box-sizing: border-box;
+    height: 50px;
+    border-color: transparent transparent transparent #202020;
+    transition: 100ms all ease;
+    will-change: border-width;
+    cursor: pointer;
+
+    /* play state */
+    border-style: solid;
+    border-width: 25px 0px 25px 40px;
+}
+
+.atm-button__play-pause.atm-paused {
+    height: 50px;
+    border-style: double;
+    border-width: 0px 0px 0px 40px;
+}
+
 .atm-timepoint {
     text-align: center;
     font-weight: lighter;

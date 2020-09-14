@@ -44,7 +44,6 @@ export default function init() {
                 0.6
             ),
         ];
-        console.log(measure.cuts);
         measure.pct = this.data.visits.reduce((pct, visit) => {
             const results = measure.filter((d) => d.visit === visit);
             pct.push([

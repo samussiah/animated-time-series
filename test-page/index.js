@@ -6,8 +6,8 @@ fetch('./adlb-trend.csv')
             data.filter(d => !(d.AVISITN%1) && /count/.test(d.PARAM)),
             '#container',
             {
-                //speed: 1000,
-                loop_time: 15000,
+                speed: 1000,
+                loop_time: 1000,
             }
         );
     });
