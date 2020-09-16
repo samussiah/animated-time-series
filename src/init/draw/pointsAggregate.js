@@ -1,5 +1,5 @@
 export default function pointsAggregate(measure) {
-    const points = measure.containers.pointsAggregate
+    const points = measure.containers.timeSeries.pointsAggregate
         .append('circle')
         .datum(measure.aggregate)
         .classed('atm-point-aggregate', true)

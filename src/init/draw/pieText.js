@@ -1,10 +1,12 @@
 export default function pieText(measure) {
-    const pieText = measure.containers.pieChart.g
-        .append('g')
+    const pieText = measure.containers.pieChart.gText
         .selectAll('text')
         .data(measure.pieData)
         .join('text')
         .attr('transform', (d) => `translate(${measure.arcLabel.centroid(d)})`)
+        .each(function(d) {
+            this._current = d;
+        })
         .call((text) =>
             text
                 .append('tspan')

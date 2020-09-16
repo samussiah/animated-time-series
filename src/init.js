@@ -12,8 +12,14 @@ export default function init() {
     this.containers.timepoint.text(this.visit);
 
     this.xScale = getXScale.call(this, this.data);
+    // TODO: make cuts dynamic, i.e. allow for additional cuts
+    this.pieColorScale = d3
+        .scaleOrdinal()
+        .domain([0,1,2])
+        .range(['#bcdf27', '#21918d', '#482575']);
 
     this.data.groups.measure.forEach((measure, key) => {
+        // time series
         measure.xScale = this.xScale;
         measure.yScale = getYScale.call(this, measure);
         measure.colorScale = getColorScale.call(this, measure);
@@ -34,14 +40,17 @@ export default function init() {
 
             return aggregate;
         }, []);
+
+        // pie chart
+        measure.pieColorScale = this.pieColorScale;
         measure.cuts = [
             d3.quantile(
                 measure.map((d) => d.result).sort((a, b) => a - b),
-                0.4
+                0.45
             ),
             d3.quantile(
                 measure.map((d) => d.result).sort((a, b) => a - b),
-                0.6
+                0.55
             ),
         ];
         measure.pct = this.data.visits.reduce((pct, visit) => {
@@ -58,10 +67,12 @@ export default function init() {
 
             return pct;
         }, []);
+
         draw.call(this, measure);
     });
 
-    this.interval = d3.interval(() => {
-        update.call(this);
-    }, this.settings.speed);
+    if (!this.settings.paused)
+        this.interval = d3.interval(() => {
+            update.call(this);
+        }, this.settings.speed);
 }

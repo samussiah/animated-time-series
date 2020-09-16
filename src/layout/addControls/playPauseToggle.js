@@ -1,14 +1,29 @@
 import addElement from '../addElement';
+import update from '../../init/update';
 
 export default function playPauseToggle(container) {
-    const play = addElement('button__play-pause', container, 'button')
-        .attr('title', 'Pause animation.');
-    //const pause = addElement('button__pause', container, 'button');
-    play.on('click', function() {
+    const main = this;
+
+    // Add element to DOM.
+    const playPause = addElement('button__play-pause', container, 'button')
+        .classed('atm-paused', !this.settings.paused)
+        .attr('title', this.settings.paused ? 'Play animation.' : 'Pause animation.');
+
+    // Add event listener.
+    playPause.on('click', function() {
         this.classList.toggle('atm-paused');
-        this.title = this.classList.contains('atm-paused')
-            ? 'Play animation.'
-            : 'Pause animation.';
+        main.settings.paused = !main.settings.paused;
+
+        if (main.settings.paused) {
+            main.interval.stop();
+            this.title = 'Play animation.';
+        } else {
+            main.interval = d3.interval(() => {
+                update.call(main);
+            }, main.settings.speed);
+            this.title = 'Pause animation.';
+        }
+
         return false;
     });
 }

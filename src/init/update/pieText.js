@@ -1,8 +1,9 @@
 export default function pieText(measure) {
+    //measure.pieText = measure.pieText.data(measure.pieData, d => d.index);
     measure.pieText
-        .data(measure.pieData)
         .transition()
         .duration(this.settings.speed / 2)
+        .ease(d3.easeQuad)
         .attrTween('transform', function (d) {
             const i = d3.interpolate(this._current, d);
             this._current = i(0);
@@ -11,4 +12,4 @@ export default function pieText(measure) {
             };
         });
     measure.pieText.select('tspan:last-child').text((d) => d3.format('.1%')(d.data));
-}
+

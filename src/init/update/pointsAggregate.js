@@ -18,7 +18,7 @@ export default function pointsAggregate(measure) {
 
     if (this.visitIndex === 0) {
         const delay = this.settings.speed / this.data.visits.length;
-        const clones = measure.containers.canvas.selectAll('.atm-clone');
+        const clones = measure.containers.timeSeries.canvas.selectAll('.atm-clone');
         clones
             .transition()
             .duration(delay)

@@ -1,5 +1,5 @@
 export default function points(measure) {
-    const points = measure.containers.points
+    const points = measure.containers.timeSeries.points
         .selectAll('circle')
         .data(measure.ids, (d) => d[0])
         .join('circle')

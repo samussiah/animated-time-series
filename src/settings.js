@@ -11,6 +11,7 @@ const settings = {
     aggregate: 'mean',
     speed: 2500,
     loop_time: 5000,
+    paused: false,
 };
 
 export default settings;
