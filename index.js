@@ -45,8 +45,9 @@
     function getDimensions(main) {
       var container = this.containers ? this.containers.main : main;
       this.settings.width = container.node().clientWidth / 2;
-      this.settings.widthTimeSeries = 2 * this.settings.width / 3 - 10;
-      this.settings.widthPieChart = 1 * this.settings.width / 3 - 10;
+      this.settings.widthTimeSeries = this.settings.width; //(2 * this.settings.width) / 3 - 10;
+      //this.settings.widthPieChart = (1 * this.settings.width) / 3 - 10;
+
       this.settings.height = this.settings.width / 3;
       this.settings.margin = {
         top: 30,
@@ -132,31 +133,6 @@
       }
     }
 
-    function pieChart(measure) {
-      //measure.pieChart.data(measure.pieData, d => d.index);
-      measure.pieChart.transition().duration(this.settings.speed / 2).ease(d3.easeQuad).attrTween('d', function (d) {
-        var i = d3.interpolate(this._current, d);
-        this._current = i(0);
-        return function (t) {
-          return measure.arc(i(t));
-        };
-      });
-    }
-
-    function pieText(measure) {
-      //measure.pieText = measure.pieText.data(measure.pieData, d => d.index);
-      measure.pieText.transition().duration(this.settings.speed / 2).ease(d3.easeQuad).attrTween('transform', function (d) {
-        var i = d3.interpolate(this._current, d);
-        this._current = i(0);
-        return function (t) {
-          return "translate(".concat(measure.arcLabel.centroid(i(t)), ")");
-        };
-      });
-      measure.pieText.select('tspan:last-child').text(function (d) {
-        return d3.format('.1%')(d.data);
-      });
-    }
-
     function update() {
       var _this = this;
 
@@ -192,14 +168,13 @@
         updateLines.call(_this, measure);
         updatePoints.call(_this, measure);
         linesAggregate.call(_this, measure);
-        pointsAggregate.call(_this, measure);
-        measure.participantBreakdown = measure.pct[_this.visitIndex][1];
-        var pieData = measure.pieGenerator(measure.participantBreakdown);
-        measure.pieData.forEach(function (d, i) {
-          Object.assign(d, pieData[i]);
-        });
-        pieChart.call(_this, measure);
-        pieText.call(_this, measure);
+        pointsAggregate.call(_this, measure); //measure.participantBreakdown = measure.pct[this.visitIndex][1];
+        //const pieData = measure.pieGenerator(measure.participantBreakdown);
+        //measure.pieData.forEach((d,i) => {
+        //    Object.assign(d, pieData[i]);
+        //});
+        //updatePieChart.call(this, measure);
+        //updatePieText.call(this, measure);
       });
       if (step === true) this.interval.stop();
     }
@@ -262,9 +237,8 @@
       measure.containers.timeSeries.lines.selectAll('*').remove();
       measure.containers.timeSeries.points.selectAll('*').remove();
       measure.containers.timeSeries.pointsAggregate.selectAll('*').remove();
-      measure.containers.timeSeries.linesAggregate.selectAll('*').remove();
-      measure.containers.pieChart.gArcs.selectAll('*').remove();
-      measure.containers.pieChart.gText.selectAll('*').remove();
+      measure.containers.timeSeries.linesAggregate.selectAll('*').remove(); //measure.containers.pieChart.gArcs.selectAll('*').remove();
+      //measure.containers.pieChart.gText.selectAll('*').remove();
     }
 
     function xAxis(measure) {
@@ -335,34 +309,6 @@
       return points;
     }
 
-    function pieChart$1(measure) {
-      var pieChart = measure.containers.pieChart.gArcs.selectAll('path').data(measure.pieData, function (d) {
-        return d.index;
-      }).join('path').attr('d', measure.arc).attr('fill', function (d) {
-        return measure.pieColorScale(d.index);
-      }).attr('stroke', 'black').attr('stroke-width', '2px').style('opacity', 0.7).each(function (d) {
-        this._current = d;
-      });
-      return pieChart;
-    }
-
-    function pieText$1(measure) {
-      var pieText = measure.containers.pieChart.gText.selectAll('text').data(measure.pieData).join('text').attr('transform', function (d) {
-        return "translate(".concat(measure.arcLabel.centroid(d), ")");
-      }).each(function (d) {
-        this._current = d;
-      }).call(function (text) {
-        return text.append('tspan').attr('y', '-0.4em').attr('font-weight', 'bold').text(function (d, i) {
-          return i === 0 ? 'Increase' : i === 1 ? 'No change' : 'Decrease';
-        });
-      }).call(function (text) {
-        return text.append('tspan').attr('x', 0).attr('y', '0.7em').attr('fill-opacity', 0.7).text(function (d) {
-          return d3.format('.1%')(d.data);
-        });
-      });
-      return pieText;
-    }
-
     function draw(measure) {
       clearCanvas.call(this, measure);
       measure.xAxis = xAxis.call(this, measure);
@@ -370,18 +316,27 @@
       measure.lines = drawLines.call(this, measure);
       measure.points = points.call(this, measure);
       measure.linesAggregate = linesAggregate$1.call(this, measure);
-      measure.pointsAggregate = pointsAggregate$1.call(this, measure);
-      measure.arc = d3.arc() //.innerRadius(this.settings.widthPieChart/2 - 25)
-      .innerRadius(0).outerRadius(this.settings.widthPieChart / 2 - 4);
-      measure.arcLabel = d3.arc().innerRadius((this.settings.widthPieChart / 2 - 4) * 0.7).outerRadius((this.settings.widthPieChart / 2 - 4) * 0.7);
-      measure.participantBreakdown = measure.pct[0][1];
-      measure.pieColor = d3.scaleOrdinal().domain(measure.participantBreakdown).range(['#bcdf27', '#21918d', '#482575']);
-      measure.pieGenerator = d3.pie().value(function (d) {
-        return d;
-      }).sort(null);
-      measure.pieData = measure.pieGenerator(measure.participantBreakdown);
-      measure.pieChart = pieChart$1.call(this, measure);
-      measure.pieText = pieText$1.call(this, measure);
+      measure.pointsAggregate = pointsAggregate$1.call(this, measure); //measure.arc = d3
+      //    .arc()
+      //    //.innerRadius(this.settings.widthPieChart/2 - 25)
+      //    .innerRadius(0)
+      //    .outerRadius(this.settings.widthPieChart / 2 - 4);
+      //measure.arcLabel = d3
+      //    .arc()
+      //    .innerRadius((this.settings.widthPieChart / 2 - 4) * 0.7)
+      //    .outerRadius((this.settings.widthPieChart / 2 - 4) * 0.7);
+      //measure.participantBreakdown = measure.pct[0][1];
+      //measure.pieColor = d3
+      //    .scaleOrdinal()
+      //    .domain(measure.participantBreakdown)
+      //    .range(['#bcdf27', '#21918d', '#482575']);
+      //measure.pieGenerator = d3
+      //    .pie()
+      //    .value((d) => d)
+      //    .sort(null);
+      //measure.pieData = measure.pieGenerator(measure.participantBreakdown);
+      //measure.pieChart = drawPieChart.call(this, measure);
+      //measure.pieText = drawPieText.call(this, measure);
     }
 
     function resize() {
@@ -493,7 +448,9 @@
         visit: d3.group(this.data, function (d) {
           return d.visit;
         }),
-        measure: d3.group(this.data, function (d) {
+        measure: d3.group(this.data.sort(function (a, b) {
+          return a.measure < b.measure ? -1 : b.measure < a.measure ? 1 : 0;
+        }), function (d) {
           return d.measure;
         })
       };
@@ -705,37 +662,25 @@
       /**/
 
       timeSeries.pointsAggregate = addElement('points-aggregate', timeSeries.canvas, 'g'); // pie chart
+      //const pieChart = addElement('pie-chart', main).classed('atm-svg-container', true);
+      //pieChart.header = addElement('pie-chart__header', pieChart).text('Participant Breakdown');
+      //pieChart.svg = addElement('pie-chart__svg', pieChart, 'svg')
+      //    .attr('width', this.settings.widthPieChart)
+      //    .attr('height', this.settings.height);
+      ///**/pieChart.g = addElement('pie-chart__g', pieChart.svg, 'g')
+      ///**/    .attr(
+      ///**/        'transform',
+      ///**/        `translate(${this.settings.widthPieChart / 2},${this.settings.height / 2})`
+      ///**/    );
+      ///**//**/pieChart.gArcs = addElement('pie-chart__arcs', pieChart.g, 'g');
+      ///**//**/pieChart.gText = addElement('pie-chart__text', pieChart.g, 'g');
 
-      var pieChart = addElement('pie-chart', main).classed('atm-svg-container', true);
-      pieChart.header = addElement('pie-chart__header', pieChart).text('Participant Breakdown');
-      pieChart.svg = addElement('pie-chart__svg', pieChart, 'svg').attr('width', this.settings.widthPieChart).attr('height', this.settings.height);
-      /**/
-
-      pieChart.g = addElement('pie-chart__g', pieChart.svg, 'g')
-      /**/
-      .attr(
-      /**/
-      'transform',
-      /**/
-      "translate(".concat(this.settings.widthPieChart / 2, ",").concat(this.settings.height / 2, ")")
-      /**/
-      );
-      /**/
-
-      /**/
-
-      pieChart.gArcs = addElement('pie-chart__arcs', pieChart.g, 'g');
-      /**/
-
-      /**/
-
-      pieChart.gText = addElement('pie-chart__text', pieChart.g, 'g');
       return {
         main: main,
         header: header,
         legend: legend$1,
-        timeSeries: timeSeries,
-        pieChart: pieChart
+        timeSeries: timeSeries //pieChart,
+
       };
     }
 
@@ -747,8 +692,11 @@
       this.timepoint = this.data.timepoints[this.visitIndex];
       this.containers.timepoint.text(this.visit);
       this.xScale = getXScale.call(this, this.data); // TODO: make cuts dynamic, i.e. allow for additional cuts
+      //this.pieColorScale = d3
+      //    .scaleOrdinal()
+      //    .domain([0,1,2])
+      //    .range(['#bcdf27', '#21918d', '#482575']);
 
-      this.pieColorScale = d3.scaleOrdinal().domain([0, 1, 2]).range(['#bcdf27', '#21918d', '#482575']);
       this.data.groups.measure.forEach(function (measure, key) {
         // time series
         measure.xScale = _this.xScale;
@@ -770,30 +718,31 @@
           })]);
           return aggregate;
         }, []); // pie chart
+        //measure.pieColorScale = this.pieColorScale;
+        //measure.cuts = [
+        //    d3.quantile(
+        //        measure.map((d) => d.result).sort((a, b) => a - b),
+        //        0.45
+        //    ),
+        //    d3.quantile(
+        //        measure.map((d) => d.result).sort((a, b) => a - b),
+        //        0.55
+        //    ),
+        //];
+        //measure.pct = this.data.visits.reduce((pct, visit) => {
+        //    const results = measure.filter((d) => d.visit === visit);
+        //    pct.push([
+        //        visit,
+        //        [
+        //            results.filter((d) => measure.cuts[1] <= d.result).length / results.length,
+        //            results.filter((d) => measure.cuts[0] <= d.result && d.result < measure.cuts[1])
+        //                .length / results.length,
+        //            results.filter((d) => d.result < measure.cuts[0]).length / results.length,
+        //        ],
+        //    ]);
+        //    return pct;
+        //}, []);
 
-        measure.pieColorScale = _this.pieColorScale;
-        measure.cuts = [d3.quantile(measure.map(function (d) {
-          return d.result;
-        }).sort(function (a, b) {
-          return a - b;
-        }), 0.45), d3.quantile(measure.map(function (d) {
-          return d.result;
-        }).sort(function (a, b) {
-          return a - b;
-        }), 0.55)];
-        measure.pct = _this.data.visits.reduce(function (pct, visit) {
-          var results = measure.filter(function (d) {
-            return d.visit === visit;
-          });
-          pct.push([visit, [results.filter(function (d) {
-            return measure.cuts[1] <= d.result;
-          }).length / results.length, results.filter(function (d) {
-            return measure.cuts[0] <= d.result && d.result < measure.cuts[1];
-          }).length / results.length, results.filter(function (d) {
-            return d.result < measure.cuts[0];
-          }).length / results.length]]);
-          return pct;
-        }, []);
         draw.call(_this, measure);
       });
       if (!this.settings.paused) this.interval = d3.interval(function () {

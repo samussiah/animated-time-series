@@ -12,4 +12,4 @@ export default function pieText(measure) {
             };
         });
     measure.pieText.select('tspan:last-child').text((d) => d3.format('.1%')(d.data));
-
+}

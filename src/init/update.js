@@ -48,14 +48,14 @@ export default function update(forward = true, step = false) {
         updateLinesAggregate.call(this, measure);
         updatePointsAggregate.call(this, measure);
 
-        measure.participantBreakdown = measure.pct[this.visitIndex][1];
-        const pieData = measure.pieGenerator(measure.participantBreakdown);
-        measure.pieData.forEach((d,i) => {
-            Object.assign(d, pieData[i]);
-        });
+        //measure.participantBreakdown = measure.pct[this.visitIndex][1];
+        //const pieData = measure.pieGenerator(measure.participantBreakdown);
+        //measure.pieData.forEach((d,i) => {
+        //    Object.assign(d, pieData[i]);
+        //});
 
-        updatePieChart.call(this, measure);
-        updatePieText.call(this, measure);
+        //updatePieChart.call(this, measure);
+        //updatePieText.call(this, measure);
     });
 
     if (step === true)

@@ -36,24 +36,24 @@ export default function layout(measure, key) {
     /**//**/timeSeries.pointsAggregate = addElement('points-aggregate', timeSeries.canvas, 'g');
 
     // pie chart
-    const pieChart = addElement('pie-chart', main).classed('atm-svg-container', true);
-    pieChart.header = addElement('pie-chart__header', pieChart).text('Participant Breakdown');
-    pieChart.svg = addElement('pie-chart__svg', pieChart, 'svg')
-        .attr('width', this.settings.widthPieChart)
-        .attr('height', this.settings.height);
-    /**/pieChart.g = addElement('pie-chart__g', pieChart.svg, 'g')
-    /**/    .attr(
-    /**/        'transform',
-    /**/        `translate(${this.settings.widthPieChart / 2},${this.settings.height / 2})`
-    /**/    );
-    /**//**/pieChart.gArcs = addElement('pie-chart__arcs', pieChart.g, 'g');
-    /**//**/pieChart.gText = addElement('pie-chart__text', pieChart.g, 'g');
+    //const pieChart = addElement('pie-chart', main).classed('atm-svg-container', true);
+    //pieChart.header = addElement('pie-chart__header', pieChart).text('Participant Breakdown');
+    //pieChart.svg = addElement('pie-chart__svg', pieChart, 'svg')
+    //    .attr('width', this.settings.widthPieChart)
+    //    .attr('height', this.settings.height);
+    ///**/pieChart.g = addElement('pie-chart__g', pieChart.svg, 'g')
+    ///**/    .attr(
+    ///**/        'transform',
+    ///**/        `translate(${this.settings.widthPieChart / 2},${this.settings.height / 2})`
+    ///**/    );
+    ///**//**/pieChart.gArcs = addElement('pie-chart__arcs', pieChart.g, 'g');
+    ///**//**/pieChart.gText = addElement('pie-chart__text', pieChart.g, 'g');
 
     return {
         main,
         header,
         legend,
         timeSeries,
-        pieChart,
+        //pieChart,
     };
 }
