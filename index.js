@@ -17,7 +17,19 @@
       aggregate: 'mean',
       speed: 2500,
       loop_time: 5000,
-      paused: false
+      paused: false,
+      x_var: 'day',
+      // ['visit', 'day']
+      x_type: 'linear',
+      // ['ordinal', 'linear', 'log']
+      y_var: 'result',
+      // ['result', 'change', 'percent_change']
+      y_type: 'linear',
+      // ['linear', 'log']
+      color_var: 'change',
+      // ['result', 'change', 'percent_change']
+      color_type: 'linear' // ['categorical', 'linear', 'log']
+
     };
 
     function getDatum(arr, key, value) {
@@ -45,9 +57,6 @@
     function getDimensions(main) {
       var container = this.containers ? this.containers.main : main;
       this.settings.width = container.node().clientWidth / 2;
-      this.settings.widthTimeSeries = this.settings.width; //(2 * this.settings.width) / 3 - 10;
-      //this.settings.widthPieChart = (1 * this.settings.width) / 3 - 10;
-
       this.settings.height = this.settings.width / 3;
       this.settings.margin = {
         top: 30,
@@ -69,7 +78,8 @@
         var previousVisits = data[1].slice(0, index);
         var d1 = previousVisits.pop();
         var line = d3.select(this);
-        if (d1 && d2) line.attr('x1', measure.xScale(d1.ADY)).attr('y1', measure.yScale(d1.AVAL)).attr('x2', measure.xScale(d1.ADY)).attr('y2', measure.yScale(d1.AVAL)).attr('stroke', measure.colorScale(d2.AVAL - d1.AVAL)).attr('stroke-opacity', 0.25).transition().ease(d3.easeQuad).duration(2 * main.settings.speed / 5).attr('x2', measure.xScale(d2.ADY)).attr('y2', measure.yScale(d2.AVAL));else line.transition().duration(2 * main.settings.speed / 5).attr('stroke-opacity', 0);
+        if (d1 && d2) line.attr('x1', measure.xScale(d1[main.settings.x_var]) + (main.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0)).attr('y1', measure.yScale(d1[main.settings.y_var])).attr('x2', measure.xScale(d1[main.settings.x_var]) + (main.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0)).attr('y2', measure.yScale(d1[main.settings.y_var])) // TODO: update inter-visit change calculation here
+        .attr('stroke', measure.colorScale(d2[main.settings.y_var] - d1[main.settings.y_var])).attr('stroke-opacity', 0.25).transition().ease(d3.easeQuad).duration(2 * main.settings.speed / 5).attr('x2', measure.xScale(d2[main.settings.x_var]) + (main.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0)).attr('y2', measure.yScale(d2[main.settings.y_var]));else line.transition().duration(2 * main.settings.speed / 5).attr('stroke-opacity', 0);
       });
     }
 
@@ -78,20 +88,21 @@
       measure.points.each(function (data) {
         var d = data[1].find(function (di) {
           return di.visit === main.visit;
-        });
+        }); // TODO: more robust baseline identification
+
         var baseline = data[1].find(function (d) {
           return !!d.result;
         });
-        var point = d3.select(this); // Hide points that are missing
-
+        var point = d3.select(this);
         if (main.visit === 0 && !d) point.style('display', 'none');else if (point.style('display') === 'none' && !!d) point.attr('cx', measure.xScale(d.day)).attr('cy', measure.yScale(d.result));
-        var transition = point.transition().ease(d3.easeQuad).duration(2 * main.settings.speed / 5).delay(1 * main.settings.speed / 5);
-        if (d) transition.attr('cx', measure.xScale(d.day)).attr('cy', measure.yScale(d.result)).attr('fill', measure.colorScale(d.change)).attr('fill-opacity', 0.25).attr('stroke', measure.colorScale(d.change)).style('display', null);else transition.attr('fill-opacity', 0.25).attr('stroke-opacity', 0.5);
+        var transition = point.transition().ease(d3.easeQuad).duration(2 * main.settings.speed / 5).delay(1 * main.settings.speed / 5).attr('fill-opacity', 0.25).attr('stroke-opacity', 0.5);
+        if (d) transition.attr('cx', measure.xScale(d[main.settings.x_var]) + (main.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0)).attr('cy', measure.yScale(d[main.settings.y_var])).attr('fill', measure.colorScale(d[main.settings.color_var])).attr('stroke', measure.colorScale(d[main.settings.color_var]));
       });
     }
 
     function linesAggregate(measure) {
       var _this = this;
+
       measure.linesAggregate.filter(function (d, i) {
         return i === _this.visitIndex - 1;
       }).transition().duration(2 * this.settings.speed / 5).delay(1 * this.settings.speed / 5).attr('x2', function (d, i) {
@@ -115,11 +126,11 @@
     function pointsAggregate(measure) {
       var _this = this;
 
-      if (this.visitIndex > 0) measure.pointsAggregate.transition().ease(d3.easeQuad).duration(2 * this.settings.speed / 5).delay(2 * this.settings.speed / 5).attr('cx', measure.xScale(this.timepoint)).attr('cy', function (d) {
+      if (this.visitIndex > 0) measure.pointsAggregate.transition().ease(d3.easeQuad).duration(2 * this.settings.speed / 5).delay(2 * this.settings.speed / 5).attr('cx', this.settings.x_type === 'ordinal' ? measure.xScale(this.visit) + measure.xScale.bandwidth() / 2 : measure.xScale(this.timepoint)).attr('cy', function (d) {
         return measure.yScale(d[_this.visitIndex][1]);
       }).attr('fill', function (d, i) {
         return measure.colorScale(d[_this.visitIndex][2]);
-      });else measure.pointsAggregate.attr('cx', measure.xScale(this.timepoint)).attr('cy', function (d) {
+      });else measure.pointsAggregate.attr('cx', this.settings.x_type === 'ordinal' ? measure.xScale(this.visit) + measure.xScale.bandwidth() / 2 : measure.xScale(this.timepoint)).attr('cy', function (d) {
         return measure.yScale(d[0][1]);
       }).attr('fill', measure.colorScale(0));
       measure.pointsAggregate.clone().classed('atm-clone', true);
@@ -168,13 +179,7 @@
         updateLines.call(_this, measure);
         updatePoints.call(_this, measure);
         linesAggregate.call(_this, measure);
-        pointsAggregate.call(_this, measure); //measure.participantBreakdown = measure.pct[this.visitIndex][1];
-        //const pieData = measure.pieGenerator(measure.participantBreakdown);
-        //measure.pieData.forEach((d,i) => {
-        //    Object.assign(d, pieData[i]);
-        //});
-        //updatePieChart.call(this, measure);
-        //updatePieText.call(this, measure);
+        pointsAggregate.call(_this, measure);
       });
       if (step === true) this.interval.stop();
     }
@@ -237,15 +242,14 @@
       measure.containers.timeSeries.lines.selectAll('*').remove();
       measure.containers.timeSeries.points.selectAll('*').remove();
       measure.containers.timeSeries.pointsAggregate.selectAll('*').remove();
-      measure.containers.timeSeries.linesAggregate.selectAll('*').remove(); //measure.containers.pieChart.gArcs.selectAll('*').remove();
-      //measure.containers.pieChart.gText.selectAll('*').remove();
+      measure.containers.timeSeries.linesAggregate.selectAll('*').remove();
     }
 
     function xAxis(measure) {
       var _this = this;
 
-      return measure.containers.timeSeries.xAxis.attr('transform', "translate(0,".concat(this.settings.height - this.settings.margin.bottom, ")")).call(d3.axisBottom(measure.xScale).ticks(this.settings.widthTimeSeries / 80)).call(function (g) {
-        return g.append('text').attr('x', (_this.settings.widthTimeSeries - _this.settings.margin.left) / 2).attr('y', _this.settings.margin.bottom / 2 + 4).attr('fill', 'currentColor').attr('text-anchor', 'center').attr('alignment-baseline', 'hanging').text('Study Day');
+      return measure.containers.timeSeries.xAxis.attr('transform', "translate(0,".concat(this.settings.height - this.settings.margin.bottom, ")")).call(d3.axisBottom(measure.xScale).ticks(this.settings.width / 80)).call(function (g) {
+        return g.append('text').attr('x', (_this.settings.width - _this.settings.margin.left) / 2).attr('y', _this.settings.margin.bottom / 2 + 4).attr('fill', 'currentColor').attr('text-anchor', 'center').attr('alignment-baseline', 'hanging').text('Study Day');
       });
     }
 
@@ -259,7 +263,7 @@
           return 0.5 + measure.yScale(d);
         }).attr('y2', function (d) {
           return 0.5 + measure.yScale(d);
-        }).attr('x1', 0).attr('x2', _this.settings.widthTimeSeries - _this.settings.margin.right - _this.settings.margin.left);
+        }).attr('x1', 0).attr('x2', _this.settings.width - _this.settings.margin.right - _this.settings.margin.left);
       });
     }
 
@@ -276,12 +280,11 @@
       var points = measure.containers.timeSeries.points.selectAll('circle').data(measure.ids, function (d) {
         return d[0];
       }).join('circle').attr('cx', function (d) {
-        return measure.xScale(_this.util.getValue(d[1], 'visit', _this.visit, 'day'));
+        return measure.xScale(_this.util.getValue(d[1], 'visit', _this.visit, _this.settings.x_var)) + (_this.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0);
       }).attr('cy', function (d) {
-        return measure.yScale(_this.util.getValue(d[1], 'visit', _this.visit, 'result'));
-      }).attr('r', 1).attr('fill', measure.colorScale(0)).attr('fill-opacity', 0.25).attr('stroke', measure.colorScale(0)).attr('stroke-opacity', 0.5).style('display', function (d) {
-        return _this.util.getDatum(d[1], 'visit', _this.visit) ? null : 'none';
-      });
+        return measure.yScale(_this.util.getValue(d[1], 'visit', _this.visit, _this.settings.y_var));
+      }).attr('r', 1).attr('fill', measure.colorScale(0)).attr('fill-opacity', 0.25).attr('stroke', measure.colorScale(0)).attr('stroke-opacity', 0.5); //.style('display', (d) => (this.util.getDatum(d[1], 'visit', this.visit) ? null : 'none'));
+
       return points;
     }
 
@@ -303,7 +306,7 @@
     }
 
     function pointsAggregate$1(measure) {
-      var points = measure.containers.timeSeries.pointsAggregate.append('circle').datum(measure.aggregate).classed('atm-point-aggregate', true).attr('cx', measure.xScale(this.timepoint)).attr('cy', function (d) {
+      var points = measure.containers.timeSeries.pointsAggregate.append('circle').datum(measure.aggregate).classed('atm-point-aggregate', true).attr('cx', this.settings.x_type === 'ordinal' ? measure.xScale(this.visit) + measure.xScale.bandwidth() / 2 : measure.xScale(this.timepoint)).attr('cy', function (d) {
         return measure.yScale(d[0][1]);
       }).attr('r', 4).attr('fill', measure.colorScale(0)).attr('fill-opacity', 1).attr('stroke', 'black').attr('stroke-opacity', 1);
       return points;
@@ -316,27 +319,7 @@
       measure.lines = drawLines.call(this, measure);
       measure.points = points.call(this, measure);
       measure.linesAggregate = linesAggregate$1.call(this, measure);
-      measure.pointsAggregate = pointsAggregate$1.call(this, measure); //measure.arc = d3
-      //    .arc()
-      //    //.innerRadius(this.settings.widthPieChart/2 - 25)
-      //    .innerRadius(0)
-      //    .outerRadius(this.settings.widthPieChart / 2 - 4);
-      //measure.arcLabel = d3
-      //    .arc()
-      //    .innerRadius((this.settings.widthPieChart / 2 - 4) * 0.7)
-      //    .outerRadius((this.settings.widthPieChart / 2 - 4) * 0.7);
-      //measure.participantBreakdown = measure.pct[0][1];
-      //measure.pieColor = d3
-      //    .scaleOrdinal()
-      //    .domain(measure.participantBreakdown)
-      //    .range(['#bcdf27', '#21918d', '#482575']);
-      //measure.pieGenerator = d3
-      //    .pie()
-      //    .value((d) => d)
-      //    .sort(null);
-      //measure.pieData = measure.pieGenerator(measure.participantBreakdown);
-      //measure.pieChart = drawPieChart.call(this, measure);
-      //measure.pieText = drawPieText.call(this, measure);
+      measure.pointsAggregate = pointsAggregate$1.call(this, measure);
     }
 
     function resize() {
@@ -344,10 +327,8 @@
 
       getDimensions.call(this);
       this.data.groups.measure.forEach(function (measure) {
-        measure.containers.timeSeries.svg.attr('width', _this.settings.widthTimeSeries).attr('height', _this.settings.height);
-        measure.containers.pieChart.svg.attr('width', _this.settings.widthPieChart).attr('height', _this.settings.height);
-        measure.containers.pieChart.g.attr('transform', "translate(".concat(_this.settings.widthPieChart / 2, ",").concat(_this.settings.height / 2, ")"));
-        measure.xScale.rangeRound([_this.settings.margin.left, _this.settings.widthTimeSeries - _this.settings.margin.right]);
+        measure.containers.timeSeries.svg.attr('width', _this.settings.width).attr('height', _this.settings.height);
+        measure.xScale.rangeRound([_this.settings.margin.left, _this.settings.width - _this.settings.margin.right]);
         measure.yScale.rangeRound([_this.settings.height - _this.settings.margin.bottom, _this.settings.margin.top]);
         draw.call(_this, measure);
       });
@@ -482,9 +463,32 @@
     }
 
     function getXScale(data) {
-      return d3.scaleLinear().domain(d3.extent(data, function (d) {
-        return d.day;
-      })).rangeRound([this.settings.margin.left, this.settings.widthTimeSeries - this.settings.margin.right]);
+      var scale;
+
+      switch (this.settings.x_type) {
+        case 'linear':
+          scale = d3.scaleLinear().domain(d3.extent(data, function (d) {
+            return d.day;
+          }));
+          break;
+
+        case 'ordinal':
+          scale = d3.scaleBand().domain(data.visits);
+          break;
+
+        case 'log':
+          d3.scaleLog().domain(d3.extent(data, function (d) {
+            return d.day;
+          }));
+          break;
+
+        default:
+          alert("[ ".concat(this.settings.x_type, " ] is an invalid x-axis type.  Please choose one of [ 'linear', 'ordinal', 'log' ]."));
+          break;
+      }
+
+      scale.rangeRound([this.settings.margin.left, this.settings.width - this.settings.margin.right]);
+      return scale;
     }
 
     function getYScale(data) {
@@ -618,9 +622,7 @@
     function layout$1(measure, key) {
       var keyClass = key.toLowerCase().replace(/[^a-z0-9_]/g, '-'); // container
 
-      var main = addElement('container', this.containers.charts); //.attr('width', this.settings.width)
-      //.attr('height', this.settings.height);
-      // header
+      var main = addElement('container', this.containers.charts); // header
 
       var header = addElement('header', main, 'h3').text(key); // legend
 
@@ -632,7 +634,7 @@
       })); // time series
 
       var timeSeries = addElement('time-series', main).classed('atm-svg-container', true);
-      timeSeries.svg = addElement('time-series__svg', timeSeries, 'svg').attr('width', this.settings.widthTimeSeries).attr('height', this.settings.height);
+      timeSeries.svg = addElement('time-series__svg', timeSeries, 'svg').attr('width', this.settings.width).attr('height', this.settings.height);
       /**/
 
       timeSeries.xAxis = addElement('x-axis', timeSeries.svg, 'g');
@@ -661,26 +663,12 @@
 
       /**/
 
-      timeSeries.pointsAggregate = addElement('points-aggregate', timeSeries.canvas, 'g'); // pie chart
-      //const pieChart = addElement('pie-chart', main).classed('atm-svg-container', true);
-      //pieChart.header = addElement('pie-chart__header', pieChart).text('Participant Breakdown');
-      //pieChart.svg = addElement('pie-chart__svg', pieChart, 'svg')
-      //    .attr('width', this.settings.widthPieChart)
-      //    .attr('height', this.settings.height);
-      ///**/pieChart.g = addElement('pie-chart__g', pieChart.svg, 'g')
-      ///**/    .attr(
-      ///**/        'transform',
-      ///**/        `translate(${this.settings.widthPieChart / 2},${this.settings.height / 2})`
-      ///**/    );
-      ///**//**/pieChart.gArcs = addElement('pie-chart__arcs', pieChart.g, 'g');
-      ///**//**/pieChart.gText = addElement('pie-chart__text', pieChart.g, 'g');
-
+      timeSeries.pointsAggregate = addElement('points-aggregate', timeSeries.canvas, 'g');
       return {
         main: main,
         header: header,
         legend: legend$1,
-        timeSeries: timeSeries //pieChart,
-
+        timeSeries: timeSeries
       };
     }
 
@@ -691,14 +679,8 @@
       this.visit = this.data.visits[this.visitIndex];
       this.timepoint = this.data.timepoints[this.visitIndex];
       this.containers.timepoint.text(this.visit);
-      this.xScale = getXScale.call(this, this.data); // TODO: make cuts dynamic, i.e. allow for additional cuts
-      //this.pieColorScale = d3
-      //    .scaleOrdinal()
-      //    .domain([0,1,2])
-      //    .range(['#bcdf27', '#21918d', '#482575']);
-
+      this.xScale = getXScale.call(this, this.data);
       this.data.groups.measure.forEach(function (measure, key) {
-        // time series
         measure.xScale = _this.xScale;
         measure.yScale = getYScale.call(_this, measure);
         measure.colorScale = getColorScale.call(_this, measure);
@@ -717,32 +699,7 @@
             return d.change;
           })]);
           return aggregate;
-        }, []); // pie chart
-        //measure.pieColorScale = this.pieColorScale;
-        //measure.cuts = [
-        //    d3.quantile(
-        //        measure.map((d) => d.result).sort((a, b) => a - b),
-        //        0.45
-        //    ),
-        //    d3.quantile(
-        //        measure.map((d) => d.result).sort((a, b) => a - b),
-        //        0.55
-        //    ),
-        //];
-        //measure.pct = this.data.visits.reduce((pct, visit) => {
-        //    const results = measure.filter((d) => d.visit === visit);
-        //    pct.push([
-        //        visit,
-        //        [
-        //            results.filter((d) => measure.cuts[1] <= d.result).length / results.length,
-        //            results.filter((d) => measure.cuts[0] <= d.result && d.result < measure.cuts[1])
-        //                .length / results.length,
-        //            results.filter((d) => d.result < measure.cuts[0]).length / results.length,
-        //        ],
-        //    ]);
-        //    return pct;
-        //}, []);
-
+        }, []);
         draw.call(_this, measure);
       });
       if (!this.settings.paused) this.interval = d3.interval(function () {

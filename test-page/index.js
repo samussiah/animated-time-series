@@ -8,6 +8,8 @@ fetch('./adlb-trend.csv')
             {
                 speed: 1000,
                 loop_time: 1000,
+                x_var: 'visit',
+                x_type: 'ordinal',
             }
         );
     });

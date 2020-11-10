@@ -5,12 +5,20 @@ export default function pointsAggregate(measure) {
             .ease(d3.easeQuad)
             .duration((2 * this.settings.speed) / 5)
             .delay((2 * this.settings.speed) / 5)
-            .attr('cx', measure.xScale(this.timepoint))
+            .attr('cx',
+                this.settings.x_type === 'ordinal'
+                    ? measure.xScale(this.visit) + measure.xScale.bandwidth()/2
+                    : measure.xScale(this.timepoint)
+            )
             .attr('cy', (d) => measure.yScale(d[this.visitIndex][1]))
             .attr('fill', (d, i) => measure.colorScale(d[this.visitIndex][2]));
     else
         measure.pointsAggregate
-            .attr('cx', measure.xScale(this.timepoint))
+            .attr('cx',
+                this.settings.x_type === 'ordinal'
+                    ? measure.xScale(this.visit) + measure.xScale.bandwidth()/2
+                    : measure.xScale(this.timepoint)
+            )
             .attr('cy', (d) => measure.yScale(d[0][1]))
             .attr('fill', measure.colorScale(0));
 

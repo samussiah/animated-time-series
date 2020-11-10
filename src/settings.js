@@ -12,6 +12,12 @@ const settings = {
     speed: 2500,
     loop_time: 5000,
     paused: false,
+    x_var: 'day', // ['visit', 'day']
+    x_type: 'linear', // ['ordinal', 'linear', 'log']
+    y_var: 'result', // ['result', 'change', 'percent_change']
+    y_type: 'linear', // ['linear', 'log']
+    color_var: 'change', // ['result', 'change', 'percent_change']
+    color_type: 'linear', // ['categorical', 'linear', 'log']
 };
 
 export default settings;

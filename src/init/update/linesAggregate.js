@@ -1,6 +1,7 @@
 export default function linesAggregate(measure) {
     const main = this;
 
+    // TODO: get aggregate lines working with an ordinal time scale
     measure.linesAggregate
         .filter((d, i) => i === this.visitIndex - 1)
         .transition()

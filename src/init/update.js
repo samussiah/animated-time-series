@@ -2,8 +2,6 @@ import updateLines from './update/lines';
 import updatePoints from './update/points';
 import updateLinesAggregate from './update/linesAggregate';
 import updatePointsAggregate from './update/pointsAggregate';
-import updatePieChart from './update/pieChart';
-import updatePieText from './update/pieText';
 
 export default function update(forward = true, step = false) {
     this.visitIndex = forward === true
@@ -47,15 +45,6 @@ export default function update(forward = true, step = false) {
         updatePoints.call(this, measure);
         updateLinesAggregate.call(this, measure);
         updatePointsAggregate.call(this, measure);
-
-        //measure.participantBreakdown = measure.pct[this.visitIndex][1];
-        //const pieData = measure.pieGenerator(measure.participantBreakdown);
-        //measure.pieData.forEach((d,i) => {
-        //    Object.assign(d, pieData[i]);
-        //});
-
-        //updatePieChart.call(this, measure);
-        //updatePieText.call(this, measure);
     });
 
     if (step === true)
