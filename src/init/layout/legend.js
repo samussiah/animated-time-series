@@ -161,7 +161,7 @@ export default function legend({
                 .attr('text-anchor', 'middle')
                 .attr('font-weight', 'bold')
                 .attr('font-size', fontSize)
-                .text(title);
+                .html(title);
             g.append('text')
                 .attr('x', width - marginRight)
                 .attr('y', marginTop + marginBottom - height - 6)

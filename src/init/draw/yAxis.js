@@ -1,6 +1,5 @@
 export default function yAxis(measure) {
-    measure.containers.yAxis.selectAll('*').remove();
-    return measure.containers.yAxis
+    return measure.containers.timeSeries.yAxis
         .attr('transform', `translate(${this.settings.margin.left},0)`)
         .call(d3.axisLeft(measure.yScale))
         .call((g) => g.select('.domain').remove())
@@ -17,9 +16,7 @@ export default function yAxis(measure) {
                 .attr('x1', 0)
                 .attr(
                     'x2',
-                    this.settings.widthTimeSeries -
-                        this.settings.margin.right -
-                        this.settings.margin.left
+                    this.settings.width - this.settings.margin.right - this.settings.margin.left
                 )
         );
 }

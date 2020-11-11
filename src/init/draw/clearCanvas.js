@@ -1,9 +1,8 @@
 export default function clearCanvas(measure) {
-    measure.containers.xAxis.selectAll('*').remove();
-    measure.containers.yAxis.selectAll('*').remove();
-    measure.containers.lines.selectAll('*').remove();
-    measure.containers.points.selectAll('*').remove();
-    measure.containers.pointsAggregate.selectAll('*').remove();
-    measure.containers.linesAggregate.selectAll('*').remove();
-    measure.containers.pieChart.g.selectAll('*').remove();
+    measure.containers.timeSeries.xAxis.selectAll('*').remove();
+    measure.containers.timeSeries.yAxis.selectAll('*').remove();
+    measure.containers.timeSeries.lines.selectAll('*').remove();
+    measure.containers.timeSeries.points.selectAll('*').remove();
+    measure.containers.timeSeries.pointsAggregate.selectAll('*').remove();
+    measure.containers.timeSeries.linesAggregate.selectAll('*').remove();
 }

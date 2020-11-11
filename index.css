@@ -14,13 +14,21 @@
 
 .atm-controls {
     display: inline-block;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #aaa;
+    width: 100%;
 }
-.atm-play-pause-toggle {
+.atm-controls > * {
     display: inline-block;
+    margin-right: 1rem;
+    float: left;
+    z-index: 1;
 }
-.atm-button__play-pause {
+.atm-button__play-pause,
+.atm-button__step {
     box-sizing: border-box;
-    height: 50px;
+    height: 2rem;
     border-color: transparent transparent transparent #202020;
     transition: 100ms all ease;
     will-change: border-width;
@@ -28,22 +36,34 @@
 
     /* play state */
     border-style: solid;
-    border-width: 25px 0px 25px 40px;
+    border-width: 1rem 0px 1rem 1.6rem;
 }
 
 .atm-button__play-pause.atm-paused {
-    height: 50px;
+    /*height: 1.9rem;*/
     border-style: double;
-    border-width: 0px 0px 0px 40px;
+    border-width: 0px 0px 0px 1.6rem;
+}
+.atm-step-label {
+    margin: 0px 10px;
+}
+.atm-step--backward {
+    border-color: transparent #202020 transparent transparent;
+    border-width: 1rem 1.6rem 1rem 0px;
 }
 
 .atm-timepoint {
     text-align: center;
     font-weight: lighter;
     font-size: 2rem;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #aaa;
+    position: absolute;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    overflow: auto;
+    z-index: -1;
 }
 
 /* time series */
@@ -72,8 +92,11 @@
 .atm-legend {
     position: absolute;
     top: 0;
+    right: 30px;
+    /*
     left: 50%;
     transform: translateX(-50%);
+    */
 }
 
 .atm-header {
@@ -118,4 +141,7 @@
     font-size: 1.25rem;
     left: 50%;
     transform: translateX(-50%);
+}
+.atm-pie-chart__g {
+    text-anchor: middle;
 }

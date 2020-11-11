@@ -8,6 +8,13 @@ fetch('./adlb-trend.csv')
             {
                 speed: 1000,
                 loop_time: 1000,
+                x_var: 'day',
+                x_type: 'linear',
+                y_var: 'result',
+                y_type: 'linear',
+                y_limits: [10,90],
+                color_var: 'percent_change',
+                color_type: 'linear',
             }
         );
     });
