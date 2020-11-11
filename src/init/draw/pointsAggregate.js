@@ -3,9 +3,10 @@ export default function pointsAggregate(measure) {
         .append('circle')
         .datum(measure.aggregate)
         .classed('atm-point-aggregate', true)
-        .attr('cx',
+        .attr(
+            'cx',
             this.settings.x_type === 'ordinal'
-                ? measure.xScale(this.visit) + measure.xScale.bandwidth()/2
+                ? measure.xScale(this.visit) + measure.xScale.bandwidth() / 2
                 : measure.xScale(this.timepoint)
         )
         .attr('cy', (d) => measure.yScale(d[0][1]))

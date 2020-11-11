@@ -10,7 +10,7 @@ export default function playPauseToggle(container) {
         .attr('title', this.settings.paused ? 'Play animation.' : 'Pause animation.');
 
     // Add event listener.
-    playPause.on('click', function() {
+    playPause.on('click', function () {
         this.classList.toggle('atm-paused');
         main.settings.paused = !main.settings.paused;
 

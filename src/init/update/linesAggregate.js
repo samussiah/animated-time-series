@@ -7,7 +7,11 @@ export default function linesAggregate(measure) {
         .transition()
         .duration((2 * this.settings.speed) / 5)
         .delay((1 * this.settings.speed) / 5)
-        .attr('x2', (d, i) => measure.xScale(this.timepoint))
+        .attr('x2', (d, i) =>
+            this.settings.x_type === 'ordinal'
+                ? measure.xScale(this.visit) + measure.xScale.bandwidth() / 2
+                : measure.xScale(this.timepoint)
+        )
         .attr('y2', (d) => measure.yScale(d[1][1]));
 
     if (this.visitIndex === 0) {

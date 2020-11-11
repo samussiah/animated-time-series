@@ -29,6 +29,10 @@ export default function init() {
                     measure.filter((d) => d.visit === visit),
                     (d) => d.change
                 ),
+                d3[this.settings.aggregate](
+                    measure.filter((d) => d.visit === visit),
+                    (d) => d.percent_change
+                ),
             ]);
 
             return aggregate;

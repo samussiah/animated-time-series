@@ -23,7 +23,11 @@ export default function updatePoints(measure) {
 
         if (d)
             transition
-                .attr('cx', measure.xScale(d[main.settings.x_var]) + (main.settings.x_type === 'ordinal' ? measure.xScale.bandwidth()/2 : 0))
+                .attr(
+                    'cx',
+                    measure.xScale(d[main.settings.x_var]) +
+                        (main.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0)
+                )
                 .attr('cy', measure.yScale(d[main.settings.y_var]))
                 .attr('fill', measure.colorScale(d[main.settings.color_var]))
                 .attr('stroke', measure.colorScale(d[main.settings.color_var]));

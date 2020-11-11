@@ -4,12 +4,12 @@ import updateLinesAggregate from './update/linesAggregate';
 import updatePointsAggregate from './update/pointsAggregate';
 
 export default function update(forward = true, step = false) {
-    this.visitIndex = forward === true
-        ? (
-            this.visitIndex >= this.data.visits.length - 1
+    this.visitIndex =
+        forward === true
+            ? this.visitIndex >= this.data.visits.length - 1
                 ? 0
                 : this.visitIndex + 1
-        ) : Math.max(this.visitIndex - 1, 0);
+            : Math.max(this.visitIndex - 1, 0);
 
     // Pause at end before looping.
     if (this.visitIndex === this.data.visits.length - 1) {
@@ -47,6 +47,5 @@ export default function update(forward = true, step = false) {
         updatePointsAggregate.call(this, measure);
     });
 
-    if (step === true)
-        this.interval.stop();
+    if (step === true) this.interval.stop();
 }
