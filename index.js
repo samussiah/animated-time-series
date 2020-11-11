@@ -332,39 +332,10 @@
         });
     }
 
-    function step(container) {
-        var main = this; // Add elements to DOM.
-
-        var backward = addElement('button__step', container, 'button').classed(
-            'atm-step--backward',
-            true
-        );
-        var span = addElement('step-label', container, 'span').text('Step');
-        var forward = addElement('button__step', container, 'button').classed(
-            'atm-step--forward',
-            true
-        ); // Add event listeners.
-
-        backward.on('click', function () {
-            main.settings.paused = true;
-            update.call(main, false, true);
-            main.controls['this'].classList.toggle('atm-paused');
-            main.settings.paused = !main.settings.paused;
-            this.title = 'Play animation.';
-            return false;
-        });
-        forward.on('click', function () {
-            main.settings.paused = true;
-            update.call(main, true, true);
-            return false;
-        });
-    }
-
     function addControls(controls) {
         var playPauseToggle$1 = addElement('play-pause-toggle', controls);
-        playPauseToggle.call(this, playPauseToggle$1);
-        var step$1 = addElement('step', controls);
-        step.call(this, step$1);
+        playPauseToggle.call(this, playPauseToggle$1); //const step = addElement('step', controls);
+        //addStep.call(this, step);
     }
 
     function clearCanvas(measure) {
