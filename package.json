@@ -1,7 +1,7 @@
 {
   "TODO": "add basic stratification via paneling",
   "name": "animated-time-series",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "an animated, paneled time series chart",
   "module": "./src/index.js",
   "main": "index.js",
