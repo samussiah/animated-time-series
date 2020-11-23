@@ -1,48 +1,56 @@
+import timepoint from './init/timepoint';
 import getXScale from './init/getXScale';
 import getYScale from './init/getYScale';
 import getColorScale from './init/getColorScale';
 import layout from './init/layout';
 import draw from './init/draw';
-import update from './init/update';
+import interval from './init/interval';
 
 export default function init() {
-    this.visitIndex = 0;
-    this.visit = this.data.visits[this.visitIndex];
-    this.timepoint = this.data.timepoints[this.visitIndex];
-    this.containers.timepoint.text(this.visit);
+    // Capture the current timepoint (index, visit, median day).
+    this.timepoint = timepoint.call(this);
+
+    // All charts share common x-scale.
     this.xScale = getXScale.call(this, this.data);
 
-    this.data.groups.measure.forEach((measure, key) => {
+    this.group.measure.forEach((measure, key) => {
+        // chart scales
         measure.xScale = this.xScale;
         measure.yScale = getYScale.call(this, measure);
         measure.colorScale = getColorScale.call(this, measure);
-        measure.containers = layout.call(this, measure, key);
-        measure.ids = d3.group(measure, (d) => d.id);
-        measure.aggregate = this.data.visits.reduce((aggregate, visit) => {
+
+        // chart layout
+        measure.layout = layout.call(this, measure, key);
+
+        // chart data: individuals
+        measure.ids = d3.groups(measure, (d) => d.id);
+
+        // chart data: population
+        measure.aggregate = this.set.visit.reduce((aggregate, visit) => {
             aggregate.push([
                 visit,
                 d3[this.settings.aggregate](
                     measure.filter((d) => d.visit === visit),
                     (d) => d.result
-                ),
+                ), // aggregate result
                 d3[this.settings.aggregate](
                     measure.filter((d) => d.visit === visit),
                     (d) => d.change
-                ),
+                ), // aggregate change
                 d3[this.settings.aggregate](
                     measure.filter((d) => d.visit === visit),
                     (d) => d.percent_change
-                ),
+                ), // aggregate percent change
             ]);
 
             return aggregate;
         }, []);
 
+        // Generate chart.
         draw.call(this, measure);
     });
 
-    if (!this.settings.paused)
-        this.interval = d3.interval(() => {
-            update.call(this);
-        }, this.settings.speed);
+    // Start animation.
+    if (this.settings.play)
+        this.interval = interval.call(this);
 }

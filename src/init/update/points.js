@@ -2,14 +2,14 @@ export default function updatePoints(measure) {
     const main = this;
 
     measure.points.each(function (data) {
-        const d = data[1].find((di) => di.visit === main.visit);
+        const d = data[1].find((di) => di.visit === main.timepoint.visit);
 
         // TODO: more robust baseline identification
         const baseline = data[1].find((d) => !!d.result);
 
         const point = d3.select(this);
 
-        if (main.visit === 0 && !d) point.style('display', 'none');
+        if (main.timepoint.index === 0 && !d) point.style('display', 'none');
         else if (point.style('display') === 'none' && !!d)
             point.attr('cx', measure.xScale(d.day)).attr('cy', measure.yScale(d.result));
 

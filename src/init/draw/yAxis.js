@@ -1,5 +1,5 @@
 export default function yAxis(measure) {
-    return measure.containers.timeSeries.yAxis
+    return measure.layout.timeSeries.yAxis
         .attr('transform', `translate(${this.settings.margin.left},0)`)
         .call(d3.axisLeft(measure.yScale))
         .call((g) => g.select('.domain').remove())

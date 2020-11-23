@@ -1,16 +1,17 @@
 import addElement from '../addElement';
 import update from '../../init/update';
 
-export default function step(container) {
+export default function step(controls) {
     const main = this;
 
     // Add elements to DOM.
-    const backward = addElement('button__step', container, 'button').classed(
+    const container = this.util.addElement('step', controls);
+    const backward = this.util.addElement('button__step', container, 'button').classed(
         'atm-step--backward',
         true
     );
-    const span = addElement('step-label', container, 'span').text('Step');
-    const forward = addElement('button__step', container, 'button').classed(
+    const span = this.util.addElement('step-label', container, 'span').text('Step');
+    const forward = this.util.addElement('button__step', container, 'button').classed(
         'atm-step--forward',
         true
     );

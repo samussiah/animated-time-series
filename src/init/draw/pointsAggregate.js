@@ -1,13 +1,13 @@
 export default function pointsAggregate(measure) {
-    const points = measure.containers.timeSeries.pointsAggregate
+    const points = measure.layout.timeSeries.pointsAggregate
         .append('circle')
         .datum(measure.aggregate)
         .classed('atm-point-aggregate', true)
         .attr(
             'cx',
             this.settings.x_type === 'ordinal'
-                ? measure.xScale(this.visit) + measure.xScale.bandwidth() / 2
-                : measure.xScale(this.timepoint)
+                ? measure.xScale(this.timepoint.visit) + measure.xScale.bandwidth() / 2
+                : measure.xScale(this.timepoint.day)
         )
         .attr('cy', (d) => measure.yScale(d[0][1]))
         .attr('r', 4)

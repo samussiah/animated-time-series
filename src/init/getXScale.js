@@ -6,7 +6,7 @@ export default function getXScale(data) {
             scale = d3.scaleLinear().domain(d3.extent(data, (d) => d.day));
             break;
         case 'ordinal':
-            scale = d3.scaleBand().domain(data.visits);
+            scale = d3.scaleBand().domain(this.set.visit);
             break;
         case 'log':
             d3.scaleLog().domain(d3.extent(data, (d) => d.day));

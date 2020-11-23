@@ -3,8 +3,8 @@ import draw from '../init/draw';
 
 export default function resize() {
     getDimensions.call(this);
-    this.data.groups.measure.forEach((measure) => {
-        measure.containers.timeSeries.svg
+    this.group.measure.forEach((measure) => {
+        measure.layout.timeSeries.svg
             .attr('width', this.settings.width)
             .attr('height', this.settings.height);
         measure.xScale.rangeRound([

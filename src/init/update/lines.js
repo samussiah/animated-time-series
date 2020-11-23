@@ -2,8 +2,8 @@ export default function updateLines(measure) {
     const main = this;
 
     measure.lines.each(function (data) {
-        const d2 = data[1].find((di) => di.visit === main.visit);
-        const index = data[1].findIndex((di) => di.visit === main.visit);
+        const d2 = data[1].find((di) => di.visit === main.timepoint.visit);
+        const index = data[1].findIndex((di) => di.visit === main.timepoint.visit);
         const previousVisits = data[1].slice(0, index);
         const d1 = previousVisits.pop();
 

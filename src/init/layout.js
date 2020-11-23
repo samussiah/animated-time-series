@@ -1,17 +1,16 @@
-import addElement from '../layout/addElement';
 import makeLegend from './layout/legend';
 
 export default function layout(measure, key) {
     const keyClass = key.toLowerCase().replace(/[^a-z0-9_]/g, '-');
 
     // container
-    const main = addElement('container', this.containers.charts);
+    const main = this.util.addElement('container', this.layout.charts);
 
     // header
-    const header = addElement('header', main, 'h3').text(key);
+    const header = this.util.addElement('header', main, 'h3').text(key);
 
     // legend
-    const legend = addElement('legend', main);
+    const legend = this.util.addElement('legend', main);
     legend.node().appendChild(
         makeLegend({
             color: measure.colorScale,
@@ -24,15 +23,15 @@ export default function layout(measure, key) {
     );
 
     // time series
-    const timeSeries = addElement('time-series', main).classed('atm-svg-container', true);
-    timeSeries.svg = addElement('time-series__svg', timeSeries, 'svg')
+    const timeSeries = this.util.addElement('time-series', main).classed('atm-svg-container', true);
+    timeSeries.svg = this.util.addElement('time-series__svg', timeSeries, 'svg')
         .attr('width', this.settings.width)
         .attr('height', this.settings.height);
-    /**/ timeSeries.xAxis = addElement('x-axis', timeSeries.svg, 'g');
-    /**/ timeSeries.yAxis = addElement('y-axis', timeSeries.svg, 'g');
-    /**/ timeSeries.canvas = addElement('canvas', timeSeries.svg, 'g');
+    /**/ timeSeries.xAxis = this.util.addElement('x-axis', timeSeries.svg, 'g');
+    /**/ timeSeries.yAxis = this.util.addElement('y-axis', timeSeries.svg, 'g');
+    /**/ timeSeries.canvas = this.util.addElement('canvas', timeSeries.svg, 'g');
     const margin = 6;
-    /**/ /**/ timeSeries.clipPath = addElement('clip-path', timeSeries.canvas, 'clipPath')
+    /**/ /**/ timeSeries.clipPath = this.util.addElement('clip-path', timeSeries.canvas, 'clipPath')
         .attr('id', keyClass)
         .append('rect')
         .attr('x', this.settings.margin.left - margin)
@@ -48,20 +47,20 @@ export default function layout(measure, key) {
             'height',
             this.settings.height - this.settings.margin.top - this.settings.margin.bottom
         );
-    /**/ /**/ timeSeries.lines = addElement('lines', timeSeries.canvas, 'g').attr(
+    /**/ /**/ timeSeries.lines = this.util.addElement('lines', timeSeries.canvas, 'g').attr(
         'clip-path',
         `url(#${keyClass})`
     );
-    /**/ /**/ timeSeries.points = addElement('points', timeSeries.canvas, 'g').attr(
+    /**/ /**/ timeSeries.points = this.util.addElement('points', timeSeries.canvas, 'g').attr(
         'clip-path',
         `url(#${keyClass})`
     );
-    /**/ /**/ timeSeries.linesAggregate = addElement(
+    /**/ /**/ timeSeries.linesAggregate = this.util.addElement(
         'lines-aggregate',
         timeSeries.canvas,
         'g'
     ).attr('clip-path', `url(#${keyClass})`);
-    /**/ /**/ timeSeries.pointsAggregate = addElement(
+    /**/ /**/ timeSeries.pointsAggregate = this.util.addElement(
         'points-aggregate',
         timeSeries.canvas,
         'g'

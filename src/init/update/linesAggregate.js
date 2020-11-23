@@ -3,19 +3,19 @@ export default function linesAggregate(measure) {
 
     // TODO: get aggregate lines working with an ordinal time scale
     measure.linesAggregate
-        .filter((d, i) => i === this.visitIndex - 1)
+        .filter((d, i) => i === this.timepoint.index - 1)
         .transition()
         .duration((2 * this.settings.speed) / 5)
         .delay((1 * this.settings.speed) / 5)
         .attr('x2', (d, i) =>
             this.settings.x_type === 'ordinal'
-                ? measure.xScale(this.visit) + measure.xScale.bandwidth() / 2
-                : measure.xScale(this.timepoint)
+                ? measure.xScale(this.timepoint.visit) + measure.xScale.bandwidth() / 2
+                : measure.xScale(this.timepoint.day)
         )
         .attr('y2', (d) => measure.yScale(d[1][1]));
 
-    if (this.visitIndex === 0) {
-        const delay = this.settings.speed / this.data.visits.length;
+    if (this.timepoint.index === 0) {
+        const delay = this.settings.speed / this.set.visit.length;
         measure.linesAggregate
             .transition()
             .duration(delay)

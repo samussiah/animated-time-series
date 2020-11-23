@@ -1,5 +1,5 @@
 {
-  "TODO": "add basic stratification via paneling",
+  "TODO": "update timepoint module",
   "name": "animated-time-series",
   "version": "0.2.0",
   "description": "an animated, paneled time series chart",

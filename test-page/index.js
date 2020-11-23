@@ -6,6 +6,20 @@ fetch('./adlb-trend.csv')
             data.filter(d => !(d.AVISITN%1) && /count/.test(d.PARAM)),
             '#container',
             {
+                filters: [
+                    {
+                        var: 'SEX',
+                        label: 'Sex',
+                    },
+                    {
+                        var: 'ARM',
+                        label: 'Treatment Group',
+                    },
+                    {
+                        var: 'RACE',
+                        label: 'Race',
+                    },
+                ],
                 speed: 1000,
                 loop_time: 1000,
                 x_var: 'day',
@@ -13,8 +27,8 @@ fetch('./adlb-trend.csv')
                 y_var: 'result',
                 y_type: 'linear',
                 y_limits: [10,90],
-                color_var: 'percent_change',
-                color_type: 'linear',
+                //color_var: 'percent_change',
+                //color_type: 'linear',
             }
         );
     });
