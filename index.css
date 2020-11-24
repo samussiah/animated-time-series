@@ -12,47 +12,31 @@
 .atm-main > * {
 }
 
+/* controls */
+
 .atm-controls {
-    display: inline-block;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #aaa;
     width: 100%;
+    margin-bottom: 1rem;
 }
-.atm-controls > * {
+.atm-controls div {
     display: inline-block;
-    margin-right: 1rem;
-    float: left;
-    z-index: 1;
+    margin-right: 8px;
 }
-.atm-button__play-pause,
-.atm-button__step {
-    box-sizing: border-box;
-    height: 2rem;
-    border-color: transparent transparent transparent #202020;
-    transition: 100ms all ease;
-    will-change: border-width;
+.atm-button {
+    min-width: 64px;
+    padding: 4px 8px;
     cursor: pointer;
-
-    /* play state */
-    border-style: solid;
-    border-width: 1rem 0px 1rem 1.6rem;
 }
-
-.atm-button__play-pause.atm-paused {
-    /*height: 1.9rem;*/
-    border-style: double;
-    border-width: 0px 0px 0px 1.6rem;
-}
-.atm-step-label {
-    margin: 0px 10px;
-}
-.atm-step--backward {
-    border-color: transparent #202020 transparent transparent;
-    border-width: 1rem 1.6rem 1rem 0px;
+.atm-button.atm-active {
+    font-weight: bold;
+    color: green;
 }
 
 .atm-timepoint {
+    border-radius: 5px;
+    font-size: 1.75rem;
+    text-shadow: black 0px 0px 10px;
+    font-weight: 600;
     text-align: center;
     font-weight: lighter;
     font-size: 2rem;

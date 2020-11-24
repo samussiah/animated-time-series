@@ -15,5 +15,10 @@ export default function set() {
         )
     );
 
+    if (this.settings.filters)
+        this.settings.filters.forEach(filter => {
+            set[filter.var] = createSet.call(this, filter.var);
+        });
+
     return set;
 }

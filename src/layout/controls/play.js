@@ -2,20 +2,23 @@ import interval from '../../init/interval';
 
 export default function play(controls) {
     const main = this;
-    const div = this.util.addElement('play', controls);
-    const button = this.util
-        .addElement('button', div, 'button')
-        .text(this.settings.play ? 'pause' : 'play');
+    const container = this.util.addElement('play', controls);
+    const input = this.util
+        .addElement('button', container, 'input')
+        .attr('type', 'button')
+        .property('value', this.settings.play ? 'pause' : 'play');
 
-    button.on('click', function (event, d) {
+    input.on('click', function (event, d) {
         main.settings.play = !main.settings.play;
-        d3.select(this).text(main.settings.play ? 'pause' : 'play');
+        d3.select(this)
+            .property('value', main.settings.play ? 'pause' : 'play');
+        main.layout.timepoint.transition().style('opacity', 1);
         if (main.settings.play) main.interval = interval.call(main);
         else main.interval.stop();
     });
 
     return {
-        div,
-        button,
+        container,
+        input,
     };
 }

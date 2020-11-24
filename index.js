@@ -34,6 +34,17 @@
     function update() {
       var _this = this;
 
+      // Check filters.
+      this.settings.filters = Array.isArray(this.settings.filters) && this.settings.filters.length > 0 ? this.settings.filters.map(function (filter) {
+        var obj = {};
+        obj["var"] = typeof filter === 'string' ? filter : filter["var"];
+        obj.label = filter.label || filter["var"];
+        obj.value = filter.value || 'All';
+        return obj;
+      }).filter(function (filter) {
+        return filter.hasOwnProperty('var') && typeof filter["var"] === 'string';
+      }) : []; // Update footnotes.
+
       this.settings.footnotes = this.settings.footnotes.map(function (text) {
         return text.replace('[color]', _this.settings.color_var.replace('_', ' '));
       });
@@ -199,6 +210,18 @@
       };
     }
 
+    function fadeOut(main) {
+      // Transition text from full opacity to zero opacity to create fade-out effect.
+      d3.select(this).transition().duration(main.settings.speed / 8).delay(main.settings.speed - main.settings.speed / 8 * 2).style('opacity', 0);
+    }
+
+    function fadeIn(selection, main) {
+      // Transition text from zero opacity to full opacity to create fade-in effect.
+      selection.style('opacity', 0).transition().duration(main.settings.speed / 8).style('opacity', 1).on('end', function () {
+        fadeOut.call(this, main);
+      });
+    }
+
     function timepoint() {
       var timepoint = {
         index: this.settings.timepoint,
@@ -206,19 +229,7 @@
         day: this.set.timepoint[this.settings.timepoint]
       }; // Update visit text.
 
-      this.layout.timepoint.text(timepoint.visit).call(fadeIn, this.settings.speed); // Transition text from zero opacity to full opacity to create fade-in effect.
-
-      function fadeIn(selection, speed) {
-        selection.style('opacity', 0).transition().duration(speed / 8).style('opacity', 1).on('end', function () {
-          fadeOut.call(this, speed);
-        });
-      } // Transition text from full opacity to zero opacity to create fade-out effect.
-
-
-      function fadeOut(speed) {
-        d3.select(this).transition().duration(speed / 8).delay(speed - speed / 8 * 2).style('opacity', 0);
-      }
-
+      this.layout.timepoint.text(timepoint.visit).call(fadeIn, this);
       return timepoint;
     }
 
@@ -324,49 +335,98 @@
 
     function play(controls) {
       var main = this;
-      var div = this.util.addElement('play', controls);
-      var button = this.util.addElement('button', div, 'button').text(this.settings.play ? 'pause' : 'play');
-      button.on('click', function (event, d) {
+      var container = this.util.addElement('play', controls);
+      var input = this.util.addElement('button', container, 'input').attr('type', 'button').property('value', this.settings.play ? 'pause' : 'play');
+      input.on('click', function (event, d) {
         main.settings.play = !main.settings.play;
-        d3.select(this).text(main.settings.play ? 'pause' : 'play');
+        d3.select(this).property('value', main.settings.play ? 'pause' : 'play');
+        main.layout.timepoint.transition().style('opacity', 1);
         if (main.settings.play) main.interval = interval.call(main);else main.interval.stop();
       });
       return {
-        div: div,
-        button: button
+        container: container,
+        input: input
       };
     }
 
     function step(controls) {
       var main = this;
-      var div = this.util.addElement('step', controls);
-      var buttons = this.util.addElement('button', div, 'button', ['<', '>']).text(function (d) {
+      var container = this.util.addElement('step', controls);
+      var input = this.util.addElement('button', container, 'input', ['<', '>']).attr('type', 'button').property('value', function (d) {
         return d;
       });
-      buttons.on('click', function (event, d) {
-        //main.settings.paused = true;
-        //update.call(main, false, true);
-        //main.controls.this.classList.toggle('atm-paused');
-        //main.settings.paused = !main.settings.paused;
-        //this.title = 'Play animation.';
-        //main.settings.paused = true;
-        //update.call(main, true, true);
+      input.on('click', function (event, d) {
         main.settings.play = false;
-        main.controls.play.button.text('play');
+        main.controls.play.input.property('value', 'play');
         if (main.interval) main.interval.stop();
-        var direction = this.textContent;
+        var direction = this.value;
         if (direction === '<') main.settings.timepoint = main.settings.timepoint === 0 ? main.set.visit.length - 2 // displays the last timepoint
         : main.settings.timepoint - 2; // displays the previous timepoint
 
         iterate.call(main);
+        main.layout.timepoint.transition().style('opacity', 1);
       });
       return {
-        div: div,
-        buttons: buttons
+        container: container,
+        input: input
       };
     }
 
-    function filters(controls) {}
+    function filters(controls) {
+      var main = this;
+      var container = this.util.addElement('filters', controls);
+      var containers = this.util.addElement('filter', container, 'div', this.settings.filters);
+      var labels = this.util.addElement('filter__label', containers, 'span').text(function (d) {
+        return d.label;
+      });
+      var input = this.util.addElement('filter__dropdown', containers, 'select');
+      input.on('change', function (event, d) {
+        d.value = this.value;
+        main.data.filtered = main.data;
+        main.settings.filters.forEach(function (filter) {
+          if (filter.value !== 'All') main.data.filtered = main.data.filtered.filter(function (di) {
+            return di[filter["var"]] === filter.value;
+          });
+        }); // TODO: update measure-level data
+        //main.group.measure.forEach((measure, key) => {
+        //    // chart scales
+        //    measure.xScale = this.xScale;
+        //    measure.yScale = getYScale.call(this, measure);
+        //    measure.colorScale = getColorScale.call(this, measure);
+        //    // chart layout
+        //    measure.layout = layout.call(this, measure, key);
+        //    // chart data: individuals
+        //    measure.ids = d3.groups(measure, (d) => d.id);
+        //    // chart data: population
+        //    measure.aggregate = this.set.visit.reduce((aggregate, visit) => {
+        //        aggregate.push([
+        //            visit,
+        //            d3[this.settings.aggregate](
+        //                measure.filter((d) => d.visit === visit),
+        //                (d) => d.result
+        //            ), // aggregate result
+        //            d3[this.settings.aggregate](
+        //                measure.filter((d) => d.visit === visit),
+        //                (d) => d.change
+        //            ), // aggregate change
+        //            d3[this.settings.aggregate](
+        //                measure.filter((d) => d.visit === visit),
+        //                (d) => d.percent_change
+        //            ), // aggregate percent change
+        //        ]);
+        //        return aggregate;
+        //    }, []);
+        //    // Generate chart.
+        //    draw.call(this, measure);
+        //});
+      });
+      return {
+        container: container,
+        containers: containers,
+        labels: labels,
+        input: input
+      };
+    }
 
     function controls(main) {
       var controls = this.util.addElement('controls', main);
@@ -568,6 +628,9 @@
           return d.day;
         });
       });
+      if (this.settings.filters) this.settings.filters.forEach(function (filter) {
+        set[filter["var"]] = create.call(_this, filter["var"]);
+      });
       return set;
     }
 
@@ -602,19 +665,22 @@
       return group;
     }
 
-    function data() {
-      var _this = this;
+    function updateFilters() {
+      if (this.settings.filters) {
+        var main = this;
+        this.controls.filters.input.each(function (d) {
+          main.util.addElement('filter__option', d3.select(this), 'option', ['All'].concat(_toConsumableArray(main.set[d["var"]]))).text(function (d) {
+            return d;
+          });
+        });
+      }
+    }
 
+    function data() {
       mutate.call(this);
       this.set = set.call(this);
-      this.set.timepoints = this.set.visit.map(function (visit) {
-        return d3.median(_this.data.filter(function (d) {
-          return d.visit === visit;
-        }), function (d) {
-          return d.day;
-        });
-      });
       this.group = group.call(this);
+      updateFilters.call(this); // filter options depend on set
     }
 
     function getXScale(data) {
