@@ -1,3 +1,1 @@
-export default function timepoint(controls) {
-
-}
+export default function timepoint(parent) {}

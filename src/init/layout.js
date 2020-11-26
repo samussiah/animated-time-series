@@ -24,14 +24,16 @@ export default function layout(measure, key) {
 
     // time series
     const timeSeries = this.util.addElement('time-series', main).classed('atm-svg-container', true);
-    timeSeries.svg = this.util.addElement('time-series__svg', timeSeries, 'svg')
+    timeSeries.svg = this.util
+        .addElement('time-series__svg', timeSeries, 'svg')
         .attr('width', this.settings.width)
         .attr('height', this.settings.height);
     /**/ timeSeries.xAxis = this.util.addElement('x-axis', timeSeries.svg, 'g');
     /**/ timeSeries.yAxis = this.util.addElement('y-axis', timeSeries.svg, 'g');
     /**/ timeSeries.canvas = this.util.addElement('canvas', timeSeries.svg, 'g');
     const margin = 6;
-    /**/ /**/ timeSeries.clipPath = this.util.addElement('clip-path', timeSeries.canvas, 'clipPath')
+    /**/ /**/ timeSeries.clipPath = this.util
+        .addElement('clip-path', timeSeries.canvas, 'clipPath')
         .attr('id', keyClass)
         .append('rect')
         .attr('x', this.settings.margin.left - margin)
@@ -47,24 +49,18 @@ export default function layout(measure, key) {
             'height',
             this.settings.height - this.settings.margin.top - this.settings.margin.bottom
         );
-    /**/ /**/ timeSeries.lines = this.util.addElement('lines', timeSeries.canvas, 'g').attr(
-        'clip-path',
-        `url(#${keyClass})`
-    );
-    /**/ /**/ timeSeries.points = this.util.addElement('points', timeSeries.canvas, 'g').attr(
-        'clip-path',
-        `url(#${keyClass})`
-    );
-    /**/ /**/ timeSeries.linesAggregate = this.util.addElement(
-        'lines-aggregate',
-        timeSeries.canvas,
-        'g'
-    ).attr('clip-path', `url(#${keyClass})`);
-    /**/ /**/ timeSeries.pointsAggregate = this.util.addElement(
-        'points-aggregate',
-        timeSeries.canvas,
-        'g'
-    ).attr('clip-path', `url(#${keyClass})`);
+    /**/ /**/ timeSeries.lines = this.util
+        .addElement('lines', timeSeries.canvas, 'g')
+        .attr('clip-path', `url(#${keyClass})`);
+    /**/ /**/ timeSeries.points = this.util
+        .addElement('points', timeSeries.canvas, 'g')
+        .attr('clip-path', `url(#${keyClass})`);
+    /**/ /**/ timeSeries.linesAggregate = this.util
+        .addElement('lines-aggregate', timeSeries.canvas, 'g')
+        .attr('clip-path', `url(#${keyClass})`);
+    /**/ /**/ timeSeries.pointsAggregate = this.util
+        .addElement('points-aggregate', timeSeries.canvas, 'g')
+        .attr('clip-path', `url(#${keyClass})`);
 
     return {
         main,

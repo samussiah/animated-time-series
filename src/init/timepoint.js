@@ -8,9 +8,7 @@ export default function timepoint() {
     };
 
     // Update visit text.
-    this.layout.timepoint
-        .text(timepoint.visit)
-        .call(fadeIn, this);
+    this.layout.timepoint.text(timepoint.visit).call(fadeIn, this);
 
     return timepoint;
 }

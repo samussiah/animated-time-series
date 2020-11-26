@@ -4,6 +4,8 @@ export default function mutate() {
     );
 
     this.data.forEach((d) => {
+        d.include = true;
+
         // Rename data variables.
         Object.keys(this.settings)
             .filter((setting) => /_var$/.test(setting))

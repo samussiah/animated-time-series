@@ -13,7 +13,9 @@ export default function pointsAggregate(measure) {
             )
             .attr('cy', (d) => measure.yScale(d[this.timepoint.index][1]))
             .attr('fill', (d, i) =>
-                measure.colorScale(d[this.timepoint.index][this.settings.color_var === 'change' ? 2 : 3])
+                measure.colorScale(
+                    d[this.timepoint.index][this.settings.color_var === 'change' ? 2 : 3]
+                )
             );
     else
         measure.pointsAggregate

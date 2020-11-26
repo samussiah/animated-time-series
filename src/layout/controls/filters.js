@@ -1,58 +1,65 @@
-export default function filters(controls) {
+import SlimSelect from 'slim-select';
+import createGroup from '../../data/group/create';
+import draw from '../../init/draw';
+
+export default function filters(parent) {
     const main = this;
-    const container = this.util.addElement('filters', controls);
-    const containers = this.util
-        .addElement('filter', container, 'div', this.settings.filters);
-    const labels = this.util.addElement('filter__label', containers, 'span')
-        .text(d => d.label);
-    const input = this.util.addElement('filter__dropdown', containers, 'select');
+    const container = this.util.addElement('filters', parent).classed('atm-controls-spacing', true);
+    const header = this.util.addElement('filters__header', container, 'span').text('Filters');
+    const containers = this.util.addElement('filter', container, 'div', this.settings.filters);
+    const labels = this.util.addElement('filter__label', containers, 'span').text((d) => d.label);
+    const input = this.util
+        .addElement('filter__dropdown', containers, 'select')
+        .property('multiple', true);
+    input.each(function (d, i, selection) {
+        d.select = new SlimSelect({
+            select: this,
+        });
+    });
 
     input.on('change', function (event, d) {
-        d.value = this.value;
-        main.data.filtered = main.data;
-        main.settings.filters.forEach(filter => {
-            if (filter.value !== 'All')
-                main.data.filtered = main.data.filtered
-                    .filter(di => di[filter.var] === filter.value);
+        // Update filter object with current selection.
+        d.value = d.select.selected();
+
+        // Flag records in the data that should be excluded.
+        main.data.forEach((d) => {
+            d.include = main.settings.filters.every((filter) => {
+                return filter.value.includes(d[filter.var]);
+            });
         });
 
-        // TODO: update measure-level data
-        //main.group.measure.forEach((measure, key) => {
-        //    // chart scales
-        //    measure.xScale = this.xScale;
-        //    measure.yScale = getYScale.call(this, measure);
-        //    measure.colorScale = getColorScale.call(this, measure);
+        // Update each chart.
+        main.group.measure.forEach((measure, key) => {
+            // chart data: individuals
+            measure.ids = d3.groups(
+                measure.filter((d) => d.include),
+                (d) => d.id
+            );
 
-        //    // chart layout
-        //    measure.layout = layout.call(this, measure, key);
+            // chart data: population
+            measure.aggregate = main.set.visit.reduce((aggregate, visit) => {
+                aggregate.push([
+                    visit,
+                    d3[main.settings.aggregate](
+                        measure.filter((d) => d.visit === visit),
+                        (d) => d.result
+                    ), // aggregate result
+                    d3[main.settings.aggregate](
+                        measure.filter((d) => d.visit === visit),
+                        (d) => d.change
+                    ), // aggregate change
+                    d3[main.settings.aggregate](
+                        measure.filter((d) => d.visit === visit),
+                        (d) => d.percent_change
+                    ), // aggregate percent change
+                ]);
 
-        //    // chart data: individuals
-        //    measure.ids = d3.groups(measure, (d) => d.id);
+                return aggregate;
+            }, []);
 
-        //    // chart data: population
-        //    measure.aggregate = this.set.visit.reduce((aggregate, visit) => {
-        //        aggregate.push([
-        //            visit,
-        //            d3[this.settings.aggregate](
-        //                measure.filter((d) => d.visit === visit),
-        //                (d) => d.result
-        //            ), // aggregate result
-        //            d3[this.settings.aggregate](
-        //                measure.filter((d) => d.visit === visit),
-        //                (d) => d.change
-        //            ), // aggregate change
-        //            d3[this.settings.aggregate](
-        //                measure.filter((d) => d.visit === visit),
-        //                (d) => d.percent_change
-        //            ), // aggregate percent change
-        //        ]);
-
-        //        return aggregate;
-        //    }, []);
-
-        //    // Generate chart.
-        //    draw.call(this, measure);
-        //});
+            // Generate chart.
+            draw.call(main, measure);
+        });
     });
 
     return {

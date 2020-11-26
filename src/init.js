@@ -14,6 +14,8 @@ export default function init() {
     this.xScale = getXScale.call(this, this.data);
 
     this.group.measure.forEach((measure, key) => {
+        measure.data = measure;
+
         // chart scales
         measure.xScale = this.xScale;
         measure.yScale = getYScale.call(this, measure);
@@ -23,7 +25,10 @@ export default function init() {
         measure.layout = layout.call(this, measure, key);
 
         // chart data: individuals
-        measure.ids = d3.groups(measure, (d) => d.id);
+        measure.ids = d3.groups(
+            measure.filter((d) => d.include),
+            (d) => d.id
+        );
 
         // chart data: population
         measure.aggregate = this.set.visit.reduce((aggregate, visit) => {
@@ -51,6 +56,5 @@ export default function init() {
     });
 
     // Start animation.
-    if (this.settings.play)
-        this.interval = interval.call(this);
+    if (this.settings.play) this.interval = interval.call(this);
 }

@@ -6,8 +6,7 @@ import updatePointsAggregate from './update/pointsAggregate';
 
 export function iterate() {
     this.settings.timepoint++;
-    if (this.settings.timepoint >= this.set.visit.length)
-        this.settings.timepoint = 0;
+    if (this.settings.timepoint >= this.set.visit.length) this.settings.timepoint = 0;
     this.timepoint = timepoint.call(this);
 
     // Update each measure.

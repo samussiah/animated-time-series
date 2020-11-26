@@ -6,11 +6,14 @@ export default function points(measure) {
         .attr(
             'cx',
             (d) =>
-                measure.xScale(this.util.getValue(d[1], 'visit', this.timepoint.visit, this.settings.x_var)) +
-                (this.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0)
+                measure.xScale(
+                    this.util.getValue(d[1], 'visit', this.timepoint.visit, this.settings.x_var)
+                ) + (this.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0)
         )
         .attr('cy', (d) =>
-            measure.yScale(this.util.getValue(d[1], 'visit', this.timepoint.visit, this.settings.y_var))
+            measure.yScale(
+                this.util.getValue(d[1], 'visit', this.timepoint.visit, this.settings.y_var)
+            )
         )
         .attr('r', 1)
         .attr('fill', measure.colorScale(0))

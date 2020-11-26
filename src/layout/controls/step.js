@@ -1,9 +1,10 @@
 import { iterate } from '../../init/interval';
 
-export default function step(controls) {
+export default function step(parent) {
     const main = this;
-    const container = this.util.addElement('step', controls);
-    const input = this.util.addElement('button', container, 'input', ['<', '>'])
+    const container = this.util.addElement('step', parent);
+    const input = this.util
+        .addElement('button', container, 'input', ['<', '>'])
         .attr('type', 'button')
         .property('value', (d) => d);
 
