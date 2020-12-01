@@ -1,5 +1,5 @@
 export default function linesAggregate(measure) {
-    const lines = measure.layout.timeSeries.linesAggregate
+    const lines = measure.layout.linesAggregate
         .datum(measure.aggregate)
         .selectAll('line.atm-line-aggregate')
         .data(d3.pairs(measure.aggregate))

@@ -1,8 +1,8 @@
 export default function clearCanvas(measure) {
-    measure.layout.timeSeries.xAxis.selectAll('*').remove();
-    measure.layout.timeSeries.yAxis.selectAll('*').remove();
-    measure.layout.timeSeries.lines.selectAll('*').remove();
-    measure.layout.timeSeries.points.selectAll('*').remove();
-    measure.layout.timeSeries.pointsAggregate.selectAll('*').remove();
-    measure.layout.timeSeries.linesAggregate.selectAll('*').remove();
+    measure.layout.xAxis.selectAll('*').remove();
+    measure.layout.yAxis.selectAll('*').remove();
+    measure.layout.lines.selectAll('*').remove();
+    measure.layout.points.selectAll('*').remove();
+    measure.layout.pointsAggregate.selectAll('*').remove();
+    measure.layout.linesAggregate.selectAll('*').remove();
 }

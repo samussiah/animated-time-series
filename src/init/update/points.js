@@ -1,35 +1,46 @@
 export default function updatePoints(measure) {
     const main = this;
 
-    measure.points.each(function (data) {
-        const d = data[1].find((di) => di.visit === main.timepoint.visit);
+    measure.points.each(function (data,i,j) {
+        const g = d3.select(this);
 
-        // TODO: more robust baseline identification
-        const baseline = data[1].find((d) => !!d.result);
+        // Display all points
+        //const points = g.selectAll('circle.atm-circle')
+        //    .filter(d => d.visit_order <= main.timepoint.visit_order)
+        //    //.transition()
+        //    //.delay(3*main.settings.speed/5)
+        //    .style('display', null);
 
-        const point = d3.select(this);
+        // Capture data points at previous and current timepoint.
+        const pair = data[1]
+            .filter(d => [main.timepoint.visit, main.timepoint.previous.visit].includes(d.visit));
 
-        if (main.timepoint.index === 0 && !d) point.style('display', 'none');
-        else if (point.style('display') === 'none' && !!d)
-            point.attr('cx', measure.xScale(d.day)).attr('cy', measure.yScale(d.result));
+        // Animate from previous timepoint to current timepoint.
+        if (pair.length === 2) {
+            const origin = pair.find(d => d.visit === main.timepoint.previous.visit);
+            console.log(origin.visit);
+            const destination = pair.find(d => d.visit === main.timepoint.visit);
+            console.log(destination.visit);
 
-        const transition = point
-            .transition()
-            .ease(d3.easeQuad)
-            .duration((2 * main.settings.speed) / 5)
-            .delay((1 * main.settings.speed) / 5)
-            .attr('fill-opacity', 0.25)
-            .attr('stroke-opacity', 0.5);
-
-        if (d)
-            transition
-                .attr(
-                    'cx',
-                    measure.xScale(d[main.settings.x_var]) +
-                        (main.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0)
-                )
-                .attr('cy', measure.yScale(d[main.settings.y_var]))
-                .attr('fill', measure.colorScale(d[main.settings.color_var]))
-                .attr('stroke', measure.colorScale(d[main.settings.color_var]));
+            // Define transition.
+            const point = g.append('circle').classed('atm-circle--transition', true)
+                .attr('cx', measure.xScale(origin[main.settings.x_var]))
+                .attr('cy', measure.yScale(origin[main.settings.y_var]))
+                .attr('r', 1)
+                .attr('fill', measure.colorScale(origin[main.settings.color_var]))
+                .attr('fill-opacity', .25)
+                .attr('stroke', measure.colorScale(origin[main.settings.color_var]))
+                .attr('stroke-opacity', .5)
+            console.log(point);
+            const transition = point
+                .transition()
+                .duration(1000)
+                .attr('cx', measure.xScale(destination[main.settings.x_var]))
+                .attr('cy', measure.yScale(destination[main.settings.y_var]))
+                .attr('r', 2)
+                .attr('fill', measure.colorScale(destination[main.settings.color_var]))
+                .attr('stroke', measure.colorScale(destination[main.settings.color_var]))
+                //.on('end', () => point.remove());
+        }
     });
 }

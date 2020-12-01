@@ -32,7 +32,7 @@ export default function pointsAggregate(measure) {
 
     if (this.timepoint.index === 0) {
         const delay = this.settings.speed / this.set.visit.length;
-        const clones = measure.layout.timeSeries.canvas.selectAll('.atm-clone');
+        const clones = measure.layout.canvas.selectAll('.atm-clone');
         clones
             .transition()
             .duration(delay)

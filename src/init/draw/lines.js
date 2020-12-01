@@ -1,5 +1,5 @@
 export default function drawLines(measure) {
-    const lines = measure.layout.timeSeries.lines
+    const lines = measure.layout.lines
         .selectAll('line')
         .data(measure.ids, (d) => d[0])
         .join('line')

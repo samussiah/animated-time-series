@@ -1,5 +1,5 @@
 export default function xAxis(measure) {
-    return measure.layout.timeSeries.xAxis
+    return measure.layout.xAxis
         .attr('transform', `translate(0,${this.settings.height - this.settings.margin.bottom})`)
         .call(d3.axisBottom(measure.xScale).ticks(this.settings.width / 80))
         .call((g) =>

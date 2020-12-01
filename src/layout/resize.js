@@ -4,7 +4,7 @@ import draw from '../init/draw';
 export default function resize() {
     getDimensions.call(this);
     this.group.measure.forEach((measure) => {
-        measure.layout.timeSeries.svg
+        measure.layout.svg
             .attr('width', this.settings.width)
             .attr('height', this.settings.height);
         measure.xScale.rangeRound([

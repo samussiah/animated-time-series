@@ -5,6 +5,7 @@ export default function set() {
 
     set.id = createSet.call(this, 'id');
     set.visit = createSet.call(this, 'visit');
+    set.visit_order = createSet.call(this, 'visit_order');
     set.day = createSet.call(this, 'day');
     set.measure = createSet.call(this, 'measure');
 

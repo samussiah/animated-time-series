@@ -6,6 +6,9 @@ fetch('./adlb-trend.csv')
             data.filter(d => !(d.AVISITN%1) && /count/.test(d.PARAM)),
             '#container',
             {
+                play: false,
+                speed: 1000,
+                loop_time: 1000,
                 filters: [
                     {
                         var: 'SEX',
@@ -20,8 +23,6 @@ fetch('./adlb-trend.csv')
                         label: 'Race',
                     },
                 ],
-                speed: 1000,
-                loop_time: 1000,
                 x_var: 'day',
                 x_type: 'linear',
                 y_var: 'result',

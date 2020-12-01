@@ -1,5 +1,5 @@
 {
-  "TODO": "update timepoint module",
+  "TODO": "finalize point transitions then make sure step control works as expected",
   "name": "animated-time-series",
   "version": "0.2.0",
   "description": "an animated, paneled time series chart",

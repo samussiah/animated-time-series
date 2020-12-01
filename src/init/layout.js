@@ -23,17 +23,17 @@ export default function layout(measure, key) {
     );
 
     // time series
-    const timeSeries = this.util.addElement('time-series', main).classed('atm-svg-container', true);
-    timeSeries.svg = this.util
-        .addElement('time-series__svg', timeSeries, 'svg')
+    const svg = this.util
+        .addElement('time-series__svg', main, 'svg')
         .attr('width', this.settings.width)
         .attr('height', this.settings.height);
-    /**/ timeSeries.xAxis = this.util.addElement('x-axis', timeSeries.svg, 'g');
-    /**/ timeSeries.yAxis = this.util.addElement('y-axis', timeSeries.svg, 'g');
-    /**/ timeSeries.canvas = this.util.addElement('canvas', timeSeries.svg, 'g');
+    /**/ const xAxis = this.util.addElement('x-axis', svg, 'g');
+    /**/ const yAxis = this.util.addElement('y-axis', svg, 'g');
+    /**/ const canvas = this.util.addElement('canvas', svg, 'g');
+    // TODO: figure out why this margin variable is necessary... so the points aren't cut off at the edges of the clip-path?
     const margin = 6;
-    /**/ /**/ timeSeries.clipPath = this.util
-        .addElement('clip-path', timeSeries.canvas, 'clipPath')
+    /**/ /**/ const clipPath = this.util
+        .addElement('clip-path', canvas, 'clipPath')
         .attr('id', keyClass)
         .append('rect')
         .attr('x', this.settings.margin.left - margin)
@@ -49,23 +49,31 @@ export default function layout(measure, key) {
             'height',
             this.settings.height - this.settings.margin.top - this.settings.margin.bottom
         );
-    /**/ /**/ timeSeries.lines = this.util
-        .addElement('lines', timeSeries.canvas, 'g')
+    /**/ /**/ const lines = this.util
+        .addElement('lines', canvas, 'g')
         .attr('clip-path', `url(#${keyClass})`);
-    /**/ /**/ timeSeries.points = this.util
-        .addElement('points', timeSeries.canvas, 'g')
+    /**/ /**/ const points = this.util
+        .addElement('points', canvas, 'g')
         .attr('clip-path', `url(#${keyClass})`);
-    /**/ /**/ timeSeries.linesAggregate = this.util
-        .addElement('lines-aggregate', timeSeries.canvas, 'g')
+    /**/ /**/ const linesAggregate = this.util
+        .addElement('lines-aggregate', canvas, 'g')
         .attr('clip-path', `url(#${keyClass})`);
-    /**/ /**/ timeSeries.pointsAggregate = this.util
-        .addElement('points-aggregate', timeSeries.canvas, 'g')
+    /**/ /**/ const pointsAggregate = this.util
+        .addElement('points-aggregate', canvas, 'g')
         .attr('clip-path', `url(#${keyClass})`);
 
     return {
         main,
         header,
         legend,
-        timeSeries,
+        svg,
+        xAxis,
+        yAxis,
+        canvas,
+        clipPath,
+        lines,
+        points,
+        linesAggregate,
+        pointsAggregate,
     };
 }
