@@ -27,12 +27,12 @@ export default function layout(measure, key) {
         .addElement('time-series__svg', main, 'svg')
         .attr('width', this.settings.width)
         .attr('height', this.settings.height);
-    /**/ const xAxis = this.util.addElement('x-axis', svg, 'g');
-    /**/ const yAxis = this.util.addElement('y-axis', svg, 'g');
-    /**/ const canvas = this.util.addElement('canvas', svg, 'g');
+    const xAxis = this.util.addElement('x-axis', svg, 'g');
+    const yAxis = this.util.addElement('y-axis', svg, 'g');
+    const canvas = this.util.addElement('canvas', svg, 'g');
     // TODO: figure out why this margin variable is necessary... so the points aren't cut off at the edges of the clip-path?
     const margin = 6;
-    /**/ /**/ const clipPath = this.util
+    const clipPath = this.util
         .addElement('clip-path', canvas, 'clipPath')
         .attr('id', keyClass)
         .append('rect')
@@ -49,16 +49,16 @@ export default function layout(measure, key) {
             'height',
             this.settings.height - this.settings.margin.top - this.settings.margin.bottom
         );
-    /**/ /**/ const lines = this.util
+    const lines = this.util
         .addElement('lines', canvas, 'g')
         .attr('clip-path', `url(#${keyClass})`);
-    /**/ /**/ const points = this.util
+    const points = this.util
         .addElement('points', canvas, 'g')
         .attr('clip-path', `url(#${keyClass})`);
-    /**/ /**/ const linesAggregate = this.util
+    const linesAggregate = this.util
         .addElement('lines-aggregate', canvas, 'g')
         .attr('clip-path', `url(#${keyClass})`);
-    /**/ /**/ const pointsAggregate = this.util
+    const pointsAggregate = this.util
         .addElement('points-aggregate', canvas, 'g')
         .attr('clip-path', `url(#${keyClass})`);
 

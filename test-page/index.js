@@ -8,7 +8,7 @@ fetch('./adlb-trend.csv')
             {
                 play: false,
                 speed: 1000,
-                loop_time: 1000,
+                loop_time: 5000,
                 filters: [
                     {
                         var: 'SEX',

@@ -13,6 +13,7 @@ export default function init() {
     // All charts share common x-scale.
     this.xScale = getXScale.call(this, this.data);
 
+    // Add one chart per measure.
     this.group.measure.forEach((measure, key) => {
         measure.data = measure;
 

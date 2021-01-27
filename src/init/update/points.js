@@ -18,12 +18,11 @@ export default function updatePoints(measure) {
         // Animate from previous timepoint to current timepoint.
         if (pair.length === 2) {
             const origin = pair.find(d => d.visit === main.timepoint.previous.visit);
-            console.log(origin.visit);
             const destination = pair.find(d => d.visit === main.timepoint.visit);
-            console.log(destination.visit);
+            const point = g.selectAll('.atm-circle').filter(d => d === destination);
 
             // Define transition.
-            const point = g.append('circle').classed('atm-circle--transition', true)
+            const pointTemporary = g.append('circle').classed('atm-circle--transition', true)
                 .attr('cx', measure.xScale(origin[main.settings.x_var]))
                 .attr('cy', measure.yScale(origin[main.settings.y_var]))
                 .attr('r', 1)
@@ -31,8 +30,7 @@ export default function updatePoints(measure) {
                 .attr('fill-opacity', .25)
                 .attr('stroke', measure.colorScale(origin[main.settings.color_var]))
                 .attr('stroke-opacity', .5)
-            console.log(point);
-            const transition = point
+            const transition = pointTemporary
                 .transition()
                 .duration(1000)
                 .attr('cx', measure.xScale(destination[main.settings.x_var]))
@@ -40,7 +38,29 @@ export default function updatePoints(measure) {
                 .attr('r', 2)
                 .attr('fill', measure.colorScale(destination[main.settings.color_var]))
                 .attr('stroke', measure.colorScale(destination[main.settings.color_var]))
-                //.on('end', () => point.remove());
+                .on('end', () => {
+                    pointTemporary.remove();
+                    point.style('display', null);
+                });
         }
     });
+
+    // TODO: figure out how to transition points back to the origin visit by visit.
+    if (this.timepoint.index === 0) {
+        const delay = this.settings.speed / this.set.visit.length;
+        measure.points
+            .transition()
+            .duration(delay)
+            //.delay((d,i) => delay * (this.set.visit.length - this.set.visit.indexOf(d.
+            .delay((d,i) => console.log(d))
+        //    .attr('fill-opacity'
+        //const clones = measure.layout.canvas.selectAll('.atm-clone');
+        //clones
+        //    .transition()
+        //    .duration(delay)
+        //    .delay((d, i) => delay * i)
+        //    .attr('fill-opacity', 0)
+        //    .attr('stroke-opacity', 0)
+        //    .remove();
+    }
 }

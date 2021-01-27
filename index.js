@@ -216,7 +216,7 @@
 
     function fadeOut(main) {
       // Transition text from full opacity to zero opacity to create fade-out effect.
-      d3.select(this).transition().duration(main.settings.speed / 8).delay(main.settings.speed - main.settings.speed / 8 * 2).style('opacity', 0);
+      d3.select(this).transition().duration(main.settings.speed / 8).delay([0, main.set.visit.length - 1].includes(main.settings.timepoint) ? main.settings.loop_delay - main.settings.speed / 8 * 2 : main.settings.speed - main.settings.speed / 8 * 2).style('opacity', 0);
     }
 
     function fadeIn(selection, main) {
@@ -274,17 +274,36 @@
           var origin = pair.find(function (d) {
             return d.visit === main.timepoint.previous.visit;
           });
-          console.log(origin.visit);
           var destination = pair.find(function (d) {
             return d.visit === main.timepoint.visit;
           });
-          console.log(destination.visit); // Define transition.
+          var point = g.selectAll('.atm-circle').filter(function (d) {
+            return d === destination;
+          }); // Define transition.
 
-          var point = g.append('circle').classed('atm-circle--transition', true).attr('cx', measure.xScale(origin[main.settings.x_var])).attr('cy', measure.yScale(origin[main.settings.y_var])).attr('r', 1).attr('fill', measure.colorScale(origin[main.settings.color_var])).attr('fill-opacity', .25).attr('stroke', measure.colorScale(origin[main.settings.color_var])).attr('stroke-opacity', .5);
-          console.log(point);
-          var transition = point.transition().duration(1000).attr('cx', measure.xScale(destination[main.settings.x_var])).attr('cy', measure.yScale(destination[main.settings.y_var])).attr('r', 2).attr('fill', measure.colorScale(destination[main.settings.color_var])).attr('stroke', measure.colorScale(destination[main.settings.color_var])); //.on('end', () => point.remove());
+          var pointTemporary = g.append('circle').classed('atm-circle--transition', true).attr('cx', measure.xScale(origin[main.settings.x_var])).attr('cy', measure.yScale(origin[main.settings.y_var])).attr('r', 1).attr('fill', measure.colorScale(origin[main.settings.color_var])).attr('fill-opacity', .25).attr('stroke', measure.colorScale(origin[main.settings.color_var])).attr('stroke-opacity', .5);
+          var transition = pointTemporary.transition().duration(1000).attr('cx', measure.xScale(destination[main.settings.x_var])).attr('cy', measure.yScale(destination[main.settings.y_var])).attr('r', 2).attr('fill', measure.colorScale(destination[main.settings.color_var])).attr('stroke', measure.colorScale(destination[main.settings.color_var])).on('end', function () {
+            pointTemporary.remove();
+            point.style('display', null);
+          });
         }
-      });
+      }); // TODO: figure out how to transition points back to the origin visit by visit.
+
+      if (this.timepoint.index === 0) {
+        var delay = this.settings.speed / this.set.visit.length;
+        measure.points.transition().duration(delay) //.delay((d,i) => delay * (this.set.visit.length - this.set.visit.indexOf(d.
+        .delay(function (d, i) {
+          return console.log(d);
+        }); //    .attr('fill-opacity'
+        //const clones = measure.layout.canvas.selectAll('.atm-clone');
+        //clones
+        //    .transition()
+        //    .duration(delay)
+        //    .delay((d, i) => delay * i)
+        //    .attr('fill-opacity', 0)
+        //    .attr('stroke-opacity', 0)
+        //    .remove();
+      }
     }
 
     function linesAggregate(measure) {
@@ -331,19 +350,42 @@
       }
     }
 
-    function iterate() {
+    function update$1() {
       var _this = this;
 
-      this.settings.timepoint++;
-      if (this.settings.timepoint >= this.set.visit.length) this.settings.timepoint = 0;
-      this.timepoint = timepoint.call(this); // Update each measure.
-
+      this.timepoint = timepoint.call(this);
       this.group.measure.forEach(function (measure, key) {
         updateLines.call(_this, measure);
         updatePoints.call(_this, measure);
         linesAggregate.call(_this, measure);
         pointsAggregate.call(_this, measure);
       });
+    }
+
+    function iterate() {
+      var _this = this;
+
+      this.settings.timepoint++;
+      if (this.settings.timepoint >= this.set.visit.length) this.settings.timepoint = 0; // Restart animation.
+
+      if (this.settings.timepoint === 0) {
+        var _this$interval, _this$timeout;
+
+        (_this$interval = this.interval) === null || _this$interval === void 0 ? void 0 : _this$interval.stop();
+        (_this$timeout = this.timeout) === null || _this$timeout === void 0 ? void 0 : _this$timeout.stop();
+        this.timeout = d3.timeout(function () {
+          update$1.call(_this);
+
+          _this.timeout.stop();
+
+          _this.timeout = d3.timeout(function () {
+            _this.interval = interval.call(_this);
+          }, _this.settings.loop_delay);
+        }, this.settings.loop_delay);
+      } // Update each measure.
+      else {
+          update$1.call(this);
+        }
     }
     function interval() {
       var _this2 = this;
@@ -359,10 +401,18 @@
       var container = this.util.addElement('play', parent);
       var input = this.util.addElement('button', container, 'input').attr('type', 'button').property('value', this.settings.play ? 'pause' : 'play');
       input.on('click', function (event, d) {
-        main.settings.play = !main.settings.play;
-        d3.select(this).property('value', main.settings.play ? 'pause' : 'play');
+        var _main$timeout, _main$interval;
+
+        // Toggle setting.
+        main.settings.play = !main.settings.play; // Toggle control.
+
+        d3.select(this).property('value', main.settings.play ? 'pause' : 'play'); // Stop current timeout and/or interval.
+
+        (_main$timeout = main.timeout) === null || _main$timeout === void 0 ? void 0 : _main$timeout.stop();
+        (_main$interval = main.interval) === null || _main$interval === void 0 ? void 0 : _main$interval.stop(); // Ensure timepoint is displayed.
+
         main.layout.timepoint.transition().style('opacity', 1);
-        if (main.settings.play) main.interval = interval.call(main);else main.interval.stop();
+        if (main.settings.play) main.interval = interval.call(main);
       });
       return {
         container: container,
@@ -911,41 +961,15 @@
       })); // time series
 
       var svg = this.util.addElement('time-series__svg', main, 'svg').attr('width', this.settings.width).attr('height', this.settings.height);
-      /**/
-
       var xAxis = this.util.addElement('x-axis', svg, 'g');
-      /**/
-
       var yAxis = this.util.addElement('y-axis', svg, 'g');
-      /**/
-
       var canvas = this.util.addElement('canvas', svg, 'g'); // TODO: figure out why this margin variable is necessary... so the points aren't cut off at the edges of the clip-path?
 
       var margin = 6;
-      /**/
-
-      /**/
-
       var clipPath = this.util.addElement('clip-path', canvas, 'clipPath').attr('id', keyClass).append('rect').attr('x', this.settings.margin.left - margin).attr('y', this.settings.margin.top).attr('width', this.settings.width - this.settings.margin.left - this.settings.margin.right + margin * 2).attr('height', this.settings.height - this.settings.margin.top - this.settings.margin.bottom);
-      /**/
-
-      /**/
-
       var lines = this.util.addElement('lines', canvas, 'g').attr('clip-path', "url(#".concat(keyClass, ")"));
-      /**/
-
-      /**/
-
       var points = this.util.addElement('points', canvas, 'g').attr('clip-path', "url(#".concat(keyClass, ")"));
-      /**/
-
-      /**/
-
       var linesAggregate = this.util.addElement('lines-aggregate', canvas, 'g').attr('clip-path', "url(#".concat(keyClass, ")"));
-      /**/
-
-      /**/
-
       var pointsAggregate = this.util.addElement('points-aggregate', canvas, 'g').attr('clip-path', "url(#".concat(keyClass, ")"));
       return {
         main: main,
@@ -969,7 +993,8 @@
       // Capture the current timepoint (index, visit, median day).
       this.timepoint = timepoint.call(this); // All charts share common x-scale.
 
-      this.xScale = getXScale.call(this, this.data);
+      this.xScale = getXScale.call(this, this.data); // Add one chart per measure.
+
       this.group.measure.forEach(function (measure, key) {
         measure.data = measure; // chart scales
 

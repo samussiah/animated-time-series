@@ -1,21 +1,27 @@
-import timepoint from './timepoint';
-import updateLines from './update/lines';
-import updatePoints from './update/points';
-import updateLinesAggregate from './update/linesAggregate';
-import updatePointsAggregate from './update/pointsAggregate';
+import update from './update';
 
 export function iterate() {
     this.settings.timepoint++;
-    if (this.settings.timepoint >= this.set.visit.length) this.settings.timepoint = 0;
-    this.timepoint = timepoint.call(this);
 
+    if (this.settings.timepoint >= this.set.visit.length)
+        this.settings.timepoint = 0;
+
+    // Restart animation.
+    if (this.settings.timepoint === 0) {
+        this.interval?.stop();
+        this.timeout?.stop();
+        this.timeout = d3.timeout(() => {
+            update.call(this);
+            this.timeout.stop();
+            this.timeout = d3.timeout(() => {
+                this.interval = interval.call(this);
+            }, this.settings.loop_delay);
+        }, this.settings.loop_delay);
+    }
     // Update each measure.
-    this.group.measure.forEach((measure, key) => {
-        updateLines.call(this, measure);
-        updatePoints.call(this, measure);
-        updateLinesAggregate.call(this, measure);
-        updatePointsAggregate.call(this, measure);
-    });
+    else {
+        update.call(this);
+    }
 }
 
 export default function interval() {
