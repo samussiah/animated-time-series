@@ -21,6 +21,9 @@ export default function init() {
         measure.xScale = this.xScale;
         measure.yScale = getYScale.call(this, measure);
         measure.colorScale = getColorScale.call(this, measure);
+        measure.lineGenerator = d3.line()
+            .x(d => measure.xScale(d[this.settings.x_var]))
+            .y(d => measure.yScale(d[this.settings.y_var]));
 
         // chart layout
         measure.layout = layout.call(this, measure, key);

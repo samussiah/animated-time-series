@@ -1,10 +1,10 @@
 export default function points(measure) {
-    const ids = measure.layout.points
+    const groups = measure.layout.points
         .selectAll('g')
         .data(measure.ids, (d) => d[0])
         .join('g');
 
-    const results = ids
+    const points = groups
         .selectAll('.atm-circle')
         .data(d => d[1])
         .join('circle')
@@ -21,12 +21,14 @@ export default function points(measure) {
                 //this.util.getValue(d[1], 'visit', this.timepoint.visit, this.settings.y_var)
             )
         )
-        .attr('r', 1)
+        .attr('r', d => d.visit === this.timepoint.visit ? 2 : 0)
         .attr('fill', d => measure.colorScale(d[this.settings.color_var]))
         .attr('fill-opacity', 0.25)
         .attr('stroke', d => measure.colorScale(d[this.settings.color_var]))
-        .attr('stroke-opacity', 0.5)
-        .style('display', d => d.visit === this.timepoint.visit ? null : 'none');
+        .attr('stroke-opacity', 0.5);
 
-    return ids;
+    return {
+        groups,
+        points,
+    };
 }

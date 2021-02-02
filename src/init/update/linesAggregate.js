@@ -14,6 +14,7 @@ export default function linesAggregate(measure) {
         )
         .attr('y2', (d) => measure.yScale(d[1][1]));
 
+    // Transition lines back to origin.
     if (this.timepoint.index === 0) {
         const delay = this.settings.speed / this.set.visit.length;
         measure.linesAggregate

@@ -1,7 +1,7 @@
 export default function updatePoints(measure) {
     const main = this;
 
-    measure.points.each(function (data,i,j) {
+    measure.groups.each(function (data,i,j) {
         const g = d3.select(this);
 
         // Display all points
@@ -17,31 +17,42 @@ export default function updatePoints(measure) {
 
         // Animate from previous timepoint to current timepoint.
         if (pair.length === 2) {
-            const origin = pair.find(d => d.visit === main.timepoint.previous.visit);
-            const destination = pair.find(d => d.visit === main.timepoint.visit);
-            const point = g.selectAll('.atm-circle').filter(d => d === destination);
+            const datum1 = pair.find(d => d.visit === main.timepoint.previous.visit);
+            const point1 = g.selectAll('.atm-circle').filter(d => d === datum1);
+            const datum2 = pair.find(d => d.visit === main.timepoint.visit);
+            const point2 = g.selectAll('.atm-circle').filter(d => d === datum2);
 
-            // Define transition.
-            const pointTemporary = g.append('circle').classed('atm-circle--transition', true)
-                .attr('cx', measure.xScale(origin[main.settings.x_var]))
-                .attr('cy', measure.yScale(origin[main.settings.y_var]))
-                .attr('r', 1)
-                .attr('fill', measure.colorScale(origin[main.settings.color_var]))
-                .attr('fill-opacity', .25)
-                .attr('stroke', measure.colorScale(origin[main.settings.color_var]))
-                .attr('stroke-opacity', .5)
-            const transition = pointTemporary
-                .transition()
-                .duration(1000)
-                .attr('cx', measure.xScale(destination[main.settings.x_var]))
-                .attr('cy', measure.yScale(destination[main.settings.y_var]))
+            // Define temporary point.
+            const pointTransition = g
+                .append('circle')
+                .classed('atm-circle--transition', true)
+                .attr('cx', measure.xScale(datum1[main.settings.x_var]))
+                .attr('cy', measure.yScale(datum1[main.settings.y_var]))
                 .attr('r', 2)
-                .attr('fill', measure.colorScale(destination[main.settings.color_var]))
-                .attr('stroke', measure.colorScale(destination[main.settings.color_var]))
+                .attr('fill', measure.colorScale(datum1[main.settings.color_var]))
+                .attr('fill-opacity', .25)
+                .attr('stroke', measure.colorScale(datum1[main.settings.color_var]))
+                .attr('stroke-opacity', .5);
+
+            // Define transition from point 1 to point 2.
+            pointTransition
+                .transition()
+                .duration(2*main.settings.speed/5)
+                .attr('cx', measure.xScale(datum2[main.settings.x_var]))
+                .attr('cy', measure.yScale(datum2[main.settings.y_var]))
+                .attr('r', 2)
+                .attr('fill', measure.colorScale(datum2[main.settings.color_var]))
+                .attr('stroke', measure.colorScale(datum2[main.settings.color_var]))
                 .on('end', () => {
-                    pointTemporary.remove();
-                    point.style('display', null);
+                    point2.attr('r', 2);
+                    pointTransition.remove();
                 });
+
+            // Transition point 1 radius to 1.
+            //point1
+            //    .transition()
+            //    .duration(2*main.settings.speed/5)
+            //    .attr('r', 1);
         }
     });
 
@@ -51,16 +62,7 @@ export default function updatePoints(measure) {
         measure.points
             .transition()
             .duration(delay)
-            //.delay((d,i) => delay * (this.set.visit.length - this.set.visit.indexOf(d.
-            .delay((d,i) => console.log(d))
-        //    .attr('fill-opacity'
-        //const clones = measure.layout.canvas.selectAll('.atm-clone');
-        //clones
-        //    .transition()
-        //    .duration(delay)
-        //    .delay((d, i) => delay * i)
-        //    .attr('fill-opacity', 0)
-        //    .attr('stroke-opacity', 0)
-        //    .remove();
+            .delay((d,i) => delay * (this.set.visit.length - this.set.visit.indexOf(d.visit)))
+            .attr('r', 0);
     }
 }

@@ -11,7 +11,9 @@ export default function draw(measure) {
     measure.xAxis = drawXAxis.call(this, measure);
     measure.yAxis = drawYAxis.call(this, measure);
     measure.lines = drawLines.call(this, measure);
-    measure.points = drawPoints.call(this, measure);
+    const {groups, points} = drawPoints.call(this, measure);
+    measure.groups = groups;
+    measure.points = points;
     measure.linesAggregate = drawLinesAggregate.call(this, measure);
     measure.pointsAggregate = drawPointsAggregate.call(this, measure);
 }
