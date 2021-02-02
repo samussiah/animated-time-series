@@ -1,5 +1,5 @@
 {
-  "TODO": "finalize point transitions (transition a temporary circle and remove it on end; make the points at the current timepoint larger) then make sure step control works as expected",
+  "TODO": "finalize line transitions then make sure step control works as expected",
   "name": "animated-time-series",
   "version": "0.2.0",
   "description": "an animated, paneled time series chart",

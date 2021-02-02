@@ -243,17 +243,51 @@
       var _this = this;
 
       measure.lines.transition().duration(2 * this.settings.speed / 5).attr('d', function (data) {
-        // Get latest timepoint.
-        var latestVisit = data.map(function (d) {
-          return d.visit_order;
-        }).lastIndexOf(_this.timepoint.visit_order); // Set timepoint past latest timepoint to latest timepoint. This way the path has as
-        // many points of inflection at the first timepoint as at the last timepoint.
+        // Each path needs as many data points as unique timepoints in the data,
+        // regardless of missing or expected visits. Generate a set of coordinates with
+        // as many elements as timepoints in the data. For future timepoints past the
+        // current timepoint of the animation set the coordinates to the most recent
+        // data point on or prior to the current timepoint. For missing data points set
+        // the coordinates to the most recent past timepoint.
+        // 1. Sort the data in reverse chronological order.
+        data.sort(function (a, b) {
+          return b.visit_order - a.visit_order;
+        }); // 2. Capture the latest data point on or before the current timepoint.
 
-        var d = data.map(function (d) {
-          return d.visit_order <= _this.timepoint.visit_order ? _objectSpread2({}, d) : _objectSpread2({}, data[latestVisit]);
+        var latestVisit = data.find(function (d) {
+          return d.visit_order <= _this.timepoint.visit_order;
+        }); // Set timepoint past latest timepoint to latest timepoint. This way the path has as
+        // many points of inflection at the first timepoint as at the last timepoint.
+        //
+        // 3. Generate a new set of data by mapping the visit set.
+
+        var lineData = _this.set.visit_order.map(function (visit_order, i) {
+          var datum; // 4. For future timepoints set the data point to the latest data point.
+
+          if (i >= _this.timepoint.index) datum = _objectSpread2({}, latestVisit); // 5. For missing timepoints set the data point the closest earlier data point.
+          else datum = data.find(function (d) {
+              return d.visit_order <= visit_order;
+            });
+          return datum;
         });
-        return measure.lineGenerator(d);
-      }); // old approach with individual lines
+
+        return measure.lineGenerator(lineData);
+      }); //.attr('d', data => {
+      //    // Get latest timepoint.
+      //    const latestVisit = data
+      //        .map(d => d.visit_order)
+      //        .lastIndexOf(this.timepoint.visit_order);
+      //    // Set timepoint past latest timepoint to latest timepoint. This way the path has as
+      //    // many points of inflection at the first timepoint as at the last timepoint.
+      //    const d = data
+      //        .map(d => {
+      //            return d.visit_order <= this.timepoint.visit_order
+      //                ? {...d}
+      //                : {...data[latestVisit]};
+      //        });
+      //    return measure.lineGenerator(d);
+      //});
+      // old approach with individual lines
       //measure.lines.each(function (data) {
       //    const d2 = data[1].find((di) => di.visit === main.timepoint.visit);
       //    const index = data[1].findIndex((di) => di.visit === main.timepoint.visit);
@@ -542,38 +576,53 @@
       });
     }
 
+    // TODO: check out d3-interpolate-path:
+    //
+    // var line = d3.line()
+    //   .curve(d3.curveLinear)
+    //   .x(function (d) { return x(d.x); })
+    //   .y(function (d) { return y(d.y); });
+    // 
+    // d3.select('path.my-path')
+    //   .transition()
+    //   .duration(2000)
+    //   .attrTween('d', function (d) {
+    //     var previous = d3.select(this).attr('d');
+    //     var current = line(d);
+    //     return d3.interpolatePath(previous, current);
+    //   });
     function drawLines(measure) {
       var _this = this;
 
       var lines = measure.layout.lines.selectAll('path').data(measure.ids.map(function (d) {
         return d[1];
       })).join('path').attr('d', function (data) {
-        // Each path needs as many data points as inflection points, i.e. one data point per
-        // visit, regardless of missing or future visits.  Generate a set of coordinates with
-        // as many elements as timepoints in the data.  For future timepoints set the
-        // coordiantes to the most recent timepoint prior to the current timepoint.  For
-        // missing data points set the coordinates to the most recent past timepoint.
-        //
+        // Each path needs as many data points as unique timepoints in the data,
+        // regardless of missing or expected visits. Generate a set of coordinates with
+        // as many elements as timepoints in the data. For future timepoints past the
+        // current timepoint of the animation set the coordinates to the most recent
+        // data point on or prior to the current timepoint. For missing data points set
+        // the coordinates to the most recent past timepoint.
         // 1. Sort the data in reverse chronological order.
-        // 2. Capture the latest data point on or before the current timepoint.
-        // 3. Generate a new set of data by mapping the visit set.
-        // 4. For future timepoints set the data point to the latest data point.
-        // 5. For missing timepoints set the data point the closest earlier data point.
         data.sort(function (a, b) {
           return b.visit_order - a.visit_order;
-        }); // Get latest timepoint.
+        }); // 2. Capture the latest data point on or before the current timepoint.
 
         var latestVisit = data.find(function (d) {
           return d.visit_order <= _this.timepoint.visit_order;
         }); // Set timepoint past latest timepoint to latest timepoint. This way the path has as
         // many points of inflection at the first timepoint as at the last timepoint.
+        //
+        // 3. Generate a new set of data by mapping the visit set.
 
         var lineData = _this.set.visit_order.map(function (visit_order, i) {
-          // Get most recent timepoint on or before current visit.
-          var datum = data.find(function (d) {
-            return d.visit_order <= visit_order;
-          });
-          return i <= datum !== undefined ? datum : latestVisit;
+          var datum; // 4. For future timepoints set the data point to the latest data point.
+
+          if (i >= _this.timepoint.index) datum = _objectSpread2({}, latestVisit); // 5. For missing timepoints set the data point the closest earlier data point.
+          else datum = data.find(function (d) {
+              return d.visit_order <= visit_order;
+            });
+          return datum;
         });
 
         return measure.lineGenerator(lineData);

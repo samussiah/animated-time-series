@@ -7,7 +7,7 @@ fetch('./adlb-trend.csv')
             '#container',
             {
                 play: false,
-                speed: 1000,
+                speed: 5000,
                 loop_time: 5000,
                 filters: [
                     {
