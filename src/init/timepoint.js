@@ -10,6 +10,9 @@ export default function timepoint() {
     timepoint.previous = this.timepoint !== undefined
         ? this.timepoint
         : timepoint;
+    timepoint.direction = timepoint.index >= timepoint.previous.index
+        ? '>'
+        : '<';
 
     // Update visit text.
     this.layout.timepoint.text(timepoint.visit).call(fadeIn, this);

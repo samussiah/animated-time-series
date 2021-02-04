@@ -233,105 +233,66 @@
         visit_order: this.set.visit_order[this.settings.timepoint],
         day: this.set.timepoint[this.settings.timepoint]
       };
-      timepoint.previous = this.timepoint !== undefined ? this.timepoint : timepoint; // Update visit text.
+      timepoint.previous = this.timepoint !== undefined ? this.timepoint : timepoint;
+      timepoint.direction = timepoint.index >= timepoint.previous.index ? '>' : '<'; // Update visit text.
 
       this.layout.timepoint.text(timepoint.visit).call(fadeIn, this);
       return timepoint;
     }
 
-    function updateLines(measure) {
+    // Each path needs as many data points as unique timepoints in the data, regardless of
+    // missing or expected visits. Generate a set of coordinates with as many elements as
+    // timepoints in the data. For future timepoints past the current timepoint of the animation
+    // set the coordinates to the most recent data point on or prior to the current timepoint.
+    // For missing data points set the coordinates to the most recent past timepoint.
+    function d(data) {
       var _this = this;
 
+      // 1. Sort the data in reverse chronological order.
+      data.sort(function (a, b) {
+        return b.visit_order - a.visit_order;
+      }); // 2. Capture the latest data point on or before the current timepoint.
+
+      var latestVisit = data.find(function (d) {
+        return d.visit_order <= _this.timepoint.visit_order;
+      }); // Set timepoint past latest timepoint to latest timepoint. This way the path has as
+      // many points of inflection at the first timepoint as at the last timepoint.
+      //
+      // 3. Generate a new set of data by mapping the visit set.
+
+      var lineData = this.set.visit_order.map(function (visit_order, i) {
+        var datum; // 4. For future timepoints set the data point to the latest data point.
+
+        if (visit_order >= _this.timepoint.visit_order) datum = _objectSpread2({}, latestVisit); // 5. For missing timepoints set the data point the closest earlier data point.
+        else datum = data.find(function (d) {
+            return d.visit_order <= visit_order;
+          });
+        return datum;
+      });
+      return lineData;
+    }
+
+    function updateLines(measure) {
+      var _this = this;
       measure.lines.transition().duration(2 * this.settings.speed / 5).attr('d', function (data) {
-        // Each path needs as many data points as unique timepoints in the data,
-        // regardless of missing or expected visits. Generate a set of coordinates with
-        // as many elements as timepoints in the data. For future timepoints past the
-        // current timepoint of the animation set the coordinates to the most recent
-        // data point on or prior to the current timepoint. For missing data points set
-        // the coordinates to the most recent past timepoint.
-        // 1. Sort the data in reverse chronological order.
-        data.sort(function (a, b) {
-          return b.visit_order - a.visit_order;
-        }); // 2. Capture the latest data point on or before the current timepoint.
+        return measure.lineGenerator(d.call(_this, data));
+      });
+    }
 
-        var latestVisit = data.find(function (d) {
-          return d.visit_order <= _this.timepoint.visit_order;
-        }); // Set timepoint past latest timepoint to latest timepoint. This way the path has as
-        // many points of inflection at the first timepoint as at the last timepoint.
-        //
-        // 3. Generate a new set of data by mapping the visit set.
+    function attr(measure, points) {
+      var _this = this;
 
-        var lineData = _this.set.visit_order.map(function (visit_order, i) {
-          var datum; // 4. For future timepoints set the data point to the latest data point.
-
-          if (i >= _this.timepoint.index) datum = _objectSpread2({}, latestVisit); // 5. For missing timepoints set the data point the closest earlier data point.
-          else datum = data.find(function (d) {
-              return d.visit_order <= visit_order;
-            });
-          return datum;
-        });
-
-        return measure.lineGenerator(lineData);
-      }); //.attr('d', data => {
-      //    // Get latest timepoint.
-      //    const latestVisit = data
-      //        .map(d => d.visit_order)
-      //        .lastIndexOf(this.timepoint.visit_order);
-      //    // Set timepoint past latest timepoint to latest timepoint. This way the path has as
-      //    // many points of inflection at the first timepoint as at the last timepoint.
-      //    const d = data
-      //        .map(d => {
-      //            return d.visit_order <= this.timepoint.visit_order
-      //                ? {...d}
-      //                : {...data[latestVisit]};
-      //        });
-      //    return measure.lineGenerator(d);
-      //});
-      // old approach with individual lines
-      //measure.lines.each(function (data) {
-      //    const d2 = data[1].find((di) => di.visit === main.timepoint.visit);
-      //    const index = data[1].findIndex((di) => di.visit === main.timepoint.visit);
-      //    const previousVisits = data[1].slice(0, index);
-      //    const d1 = previousVisits.pop();
-      //    const line = d3.select(this);
-      //    if (d1 && d2)
-      //        line.attr(
-      //            'x1',
-      //            measure.xScale(d1[main.settings.x_var]) +
-      //                (main.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0)
-      //        )
-      //            .attr('y1', measure.yScale(d1[main.settings.y_var]))
-      //            .attr(
-      //                'x2',
-      //                measure.xScale(d1[main.settings.x_var]) +
-      //                    (main.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0)
-      //            )
-      //            .attr('y2', measure.yScale(d1[main.settings.y_var]))
-      //            .attr(
-      //                'stroke',
-      //                main.settings.color_var === 'percent_change'
-      //                    ? measure.colorScale(
-      //                          ((d2[main.settings.y_var] - d1[main.settings.y_var]) /
-      //                              d1[main.settings.y_var]) *
-      //                              100
-      //                      )
-      //                    : measure.colorScale(d2[main.settings.y_var] - d1[main.settings.y_var])
-      //            )
-      //            .attr('stroke-opacity', 0.25)
-      //            .transition()
-      //            .ease(d3.easeQuad)
-      //            .duration((2 * main.settings.speed) / 5)
-      //            .attr(
-      //                'x2',
-      //                measure.xScale(d2[main.settings.x_var]) +
-      //                    (main.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0)
-      //            )
-      //            .attr('y2', measure.yScale(d2[main.settings.y_var]));
-      //    else
-      //        line.transition()
-      //            .duration((2 * main.settings.speed) / 5)
-      //            .attr('stroke-opacity', 0);
-      //});
+      points.attr('cx', function (d) {
+        return measure.xScale(d[_this.settings.x_var]) + (_this.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0);
+      }).attr('cy', function (d) {
+        return measure.yScale(d[_this.settings.y_var]);
+      }).attr('r', function (d) {
+        return d.visit_order <= _this.timepoint.visit_order ? 2 : 0;
+      }).attr('fill', function (d) {
+        return measure.colorScale(d[_this.settings.color_var]);
+      }).attr('fill-opacity', 0.25).attr('stroke', function (d) {
+        return measure.colorScale(d[_this.settings.color_var]);
+      }).attr('stroke-opacity', 0.5);
     }
 
     function updatePoints(measure) {
@@ -339,13 +300,7 @@
 
       var main = this;
       measure.groups.each(function (data, i, j) {
-        var g = d3.select(this); // Display all points
-        //const points = g.selectAll('circle.atm-circle')
-        //    .filter(d => d.visit_order <= main.timepoint.visit_order)
-        //    //.transition()
-        //    //.delay(3*main.settings.speed/5)
-        //    .style('display', null);
-        // Capture data points at previous and current timepoint.
+        var g = d3.select(this); // Capture data points at previous and current timepoint.
 
         var pair = data[1].filter(function (d) {
           return [main.timepoint.visit, main.timepoint.previous.visit].includes(d.visit);
@@ -363,13 +318,30 @@
           });
           var point2 = g.selectAll('.atm-circle').filter(function (d) {
             return d === datum2;
-          }); // Define temporary point.
+          });
+          if (main.timepoint.direction === '<') point1.attr('r', 0); // Define temporary point.
 
-          var pointTransition = g.append('circle').classed('atm-circle--transition', true).attr('cx', measure.xScale(datum1[main.settings.x_var])).attr('cy', measure.yScale(datum1[main.settings.y_var])).attr('r', 2).attr('fill', measure.colorScale(datum1[main.settings.color_var])).attr('fill-opacity', .25).attr('stroke', measure.colorScale(datum1[main.settings.color_var])).attr('stroke-opacity', .5); // Define transition from point 1 to point 2.
+          var point = g.append('circle').classed('atm-circle--transition', true).datum(datum1);
+          attr.call(main, measure, point); //.attr('cx', measure.xScale(datum1[main.settings.x_var]))
+          //.attr('cy', measure.yScale(datum1[main.settings.y_var]))
+          //.attr('r', 2)
+          //.attr('fill', measure.colorScale(datum1[main.settings.color_var]))
+          //.attr('fill-opacity', .25)
+          //.attr('stroke', measure.colorScale(datum1[main.settings.color_var]))
+          //.attr('stroke-opacity', .5);
+          // Define transition from point 1 to point 2.
 
-          pointTransition.transition().duration(2 * main.settings.speed / 5).attr('cx', measure.xScale(datum2[main.settings.x_var])).attr('cy', measure.yScale(datum2[main.settings.y_var])).attr('r', 2).attr('fill', measure.colorScale(datum2[main.settings.color_var])).attr('stroke', measure.colorScale(datum2[main.settings.color_var])).on('end', function () {
-            point2.attr('r', 2);
-            pointTransition.remove();
+          var transition = point.datum(datum2).transition().duration(2 * main.settings.speed / 5);
+          attr.call(main, measure, transition); //.attr('cx', measure.xScale(datum2[main.settings.x_var]))
+          //.attr('cy', measure.yScale(datum2[main.settings.y_var]))
+          //.attr('r', 2)
+          //.attr('fill', measure.colorScale(datum2[main.settings.color_var]))
+          //.attr('stroke', measure.colorScale(datum2[main.settings.color_var]))
+
+          transition.on('end', function () {
+            // Display next point if current timepoint is after previous timepoint.
+            if (main.timepoint.direction === '>') point2.attr('r', 2);
+            point.remove();
           }); // Transition point 1 radius to 1.
           //point1
           //    .transition()
@@ -577,80 +549,27 @@
     }
 
     // TODO: check out d3-interpolate-path:
-    //
-    // var line = d3.line()
-    //   .curve(d3.curveLinear)
-    //   .x(function (d) { return x(d.x); })
-    //   .y(function (d) { return y(d.y); });
-    // 
-    // d3.select('path.my-path')
-    //   .transition()
-    //   .duration(2000)
-    //   .attrTween('d', function (d) {
-    //     var previous = d3.select(this).attr('d');
-    //     var current = line(d);
-    //     return d3.interpolatePath(previous, current);
-    //   });
     function drawLines(measure) {
       var _this = this;
 
       var lines = measure.layout.lines.selectAll('path').data(measure.ids.map(function (d) {
         return d[1];
       })).join('path').attr('d', function (data) {
-        // Each path needs as many data points as unique timepoints in the data,
-        // regardless of missing or expected visits. Generate a set of coordinates with
-        // as many elements as timepoints in the data. For future timepoints past the
-        // current timepoint of the animation set the coordinates to the most recent
-        // data point on or prior to the current timepoint. For missing data points set
-        // the coordinates to the most recent past timepoint.
-        // 1. Sort the data in reverse chronological order.
-        data.sort(function (a, b) {
-          return b.visit_order - a.visit_order;
-        }); // 2. Capture the latest data point on or before the current timepoint.
-
-        var latestVisit = data.find(function (d) {
-          return d.visit_order <= _this.timepoint.visit_order;
-        }); // Set timepoint past latest timepoint to latest timepoint. This way the path has as
-        // many points of inflection at the first timepoint as at the last timepoint.
-        //
-        // 3. Generate a new set of data by mapping the visit set.
-
-        var lineData = _this.set.visit_order.map(function (visit_order, i) {
-          var datum; // 4. For future timepoints set the data point to the latest data point.
-
-          if (i >= _this.timepoint.index) datum = _objectSpread2({}, latestVisit); // 5. For missing timepoints set the data point the closest earlier data point.
-          else datum = data.find(function (d) {
-              return d.visit_order <= visit_order;
-            });
-          return datum;
-        });
-
-        return measure.lineGenerator(lineData);
-      }).attr('fill-opacity', 0).attr('stroke', '#aaaaaa').attr('stroke-width', .5);
+        return measure.lineGenerator(d.call(_this, data));
+      }).attr('fill-opacity', 0).attr('stroke', '#aaaaaa').attr('stroke-width', .5).attr('stroke-opacity', .5);
       return lines;
     }
 
     function points(measure) {
-      var _this = this;
-
+      // Create one container per ID.
       var groups = measure.layout.points.selectAll('g').data(measure.ids, function (d) {
         return d[0];
-      }).join('g');
+      }).join('g'); // Create one point per ID per result.
+
       var points = groups.selectAll('.atm-circle').data(function (d) {
         return d[1];
-      }).join('circle').classed('atm-circle', true).attr('cx', function (d) {
-        return measure.xScale(d[_this.settings.x_var] //this.util.getValue(d[1], 'visit', this.timepoint.visit, this.settings.x_var)
-        ) + (_this.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0);
-      }).attr('cy', function (d) {
-        return measure.yScale(d[_this.settings.y_var] //this.util.getValue(d[1], 'visit', this.timepoint.visit, this.settings.y_var)
-        );
-      }).attr('r', function (d) {
-        return d.visit === _this.timepoint.visit ? 2 : 0;
-      }).attr('fill', function (d) {
-        return measure.colorScale(d[_this.settings.color_var]);
-      }).attr('fill-opacity', 0.25).attr('stroke', function (d) {
-        return measure.colorScale(d[_this.settings.color_var]);
-      }).attr('stroke-opacity', 0.5);
+      }).join('circle').classed('atm-circle', true);
+      attr.call(this, measure, points);
       return {
         groups: groups,
         points: points
@@ -821,10 +740,8 @@
     function mutate() {
       var _this = this;
 
-      var numericId = this.data.every(function (d) {
-        return /^-?\d+\.?\d*$/.test(d.id) || /^-?\d*\.?\d+$/.test(d.id);
-      });
       this.data.forEach(function (d) {
+        // Add a property to identify filtered records.
         d.include = true; // Rename data variables.
 
         Object.keys(_this.settings).filter(function (setting) {
