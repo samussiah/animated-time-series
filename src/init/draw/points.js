@@ -10,7 +10,7 @@ export default function points(measure) {
     // Create one point per ID per result.
     const points = groups
         .selectAll('.atm-circle')
-        .data(d => d[1])
+        .data((d) => d[1])
         .join('circle')
         .classed('atm-circle', true);
 

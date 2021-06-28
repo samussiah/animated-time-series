@@ -49,9 +49,7 @@ export default function layout(measure, key) {
             'height',
             this.settings.height - this.settings.margin.top - this.settings.margin.bottom
         );
-    const lines = this.util
-        .addElement('lines', canvas, 'g')
-        .attr('clip-path', `url(#${keyClass})`);
+    const lines = this.util.addElement('lines', canvas, 'g').attr('clip-path', `url(#${keyClass})`);
     const points = this.util
         .addElement('points', canvas, 'g')
         .attr('clip-path', `url(#${keyClass})`);

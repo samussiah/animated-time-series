@@ -13,20 +13,16 @@ export default function play(parent) {
         main.settings.play = !main.settings.play;
 
         // Toggle control.
-        d3.select(this)
-            .property('value', main.settings.play ? 'pause' : 'play');
+        d3.select(this).property('value', main.settings.play ? 'pause' : 'play');
 
         // Stop current timeout and/or interval.
         main.timeout?.stop();
         main.interval?.stop();
 
         // Ensure timepoint is displayed.
-        main.layout.timepoint
-            .transition()
-            .style('opacity', 1);
+        main.layout.timepoint.transition().style('opacity', 1);
 
-        if (main.settings.play)
-            main.interval = interval.call(main);
+        if (main.settings.play) main.interval = interval.call(main);
     });
 
     return {

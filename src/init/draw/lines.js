@@ -4,7 +4,7 @@
 //   .curve(d3.curveLinear)
 //   .x(function (d) { return x(d.x); })
 //   .y(function (d) { return y(d.y); });
-// 
+//
 // d3.select('path.my-path')
 //   .transition()
 //   .duration(2000)
@@ -19,13 +19,13 @@ import d from './lines/d';
 export default function drawLines(measure) {
     const lines = measure.layout.lines
         .selectAll('path')
-        .data(measure.ids.map(d => d[1]))
+        .data(measure.ids.map((d) => d[1]))
         .join('path')
-        .attr('d', data => measure.lineGenerator(d.call(this, data)))
+        .attr('d', (data) => measure.lineGenerator(d.call(this, data)))
         .attr('fill-opacity', 0)
         .attr('stroke', '#aaaaaa')
-        .attr('stroke-width', .5)
-        .attr('stroke-opacity', .5);
+        .attr('stroke-width', 0.5)
+        .attr('stroke-opacity', 0.5);
 
     return lines;
 }

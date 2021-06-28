@@ -3,8 +3,7 @@ import update from './update';
 export function iterate() {
     this.settings.timepoint++;
 
-    if (this.settings.timepoint >= this.set.visit.length)
-        this.settings.timepoint = 0;
+    if (this.settings.timepoint >= this.set.visit.length) this.settings.timepoint = 0;
 
     // Restart animation.
     if (this.settings.timepoint === 0) {

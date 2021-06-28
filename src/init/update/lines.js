@@ -5,6 +5,6 @@ export default function updateLines(measure) {
 
     measure.lines
         .transition()
-        .duration(2 * this.settings.speed / 5)
-        .attr('d', data => measure.lineGenerator(d.call(this, data)));
+        .duration((2 * this.settings.speed) / 5)
+        .attr('d', (data) => measure.lineGenerator(d.call(this, data)));
 }
