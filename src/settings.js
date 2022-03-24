@@ -1,20 +1,23 @@
 import update from './settings/update';
+
 export default function settings() {
     return {
         update,
 
         // variable mapping
+        stratification_var: null,
         id_var: 'USUBJID',
         visit_var: 'AVISIT',
         visit_order_var: 'AVISITN',
         day_var: 'ADY',
         measure_var: 'PARAM',
         result_var: 'AVAL',
-        baseline_var: 'BASE',
         change_var: 'CHG',
         percent_change_var: 'PCHG',
         outcome: 'result',
+
         var_labels: {
+            stratification: null,
             id: 'Participant ID',
             visit: 'Visit',
             visit_order: 'Visit Order',
@@ -36,7 +39,7 @@ export default function settings() {
         play: true,
         timepoint: 0,
         speed: 2500,
-        loop_delay: 5000,
+        loop_delay: 10000,
 
         // x
         x_var: 'day', // ['visit', 'day']

@@ -4,13 +4,13 @@ export default function create(variable) {
     switch (variable) {
         case 'measure,id':
             group = d3.groups(
-                this.data.filtered,
+                this.data,
                 (d) => d.measure,
                 (d) => d.id
             );
             break;
         default:
-            group = d3.group(this.data.filtered, (d) => d[variable]);
+            group = d3.group(this.data, (d) => d[variable]);
             break;
     }
 

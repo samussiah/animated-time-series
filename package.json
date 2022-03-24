@@ -40,8 +40,7 @@
   },
   "homepage": "https://github.com/samussiah/animated-time-series#readme",
   "dependencies": {
-    "d3": "^6.1.1",
-    "slim-select": "^1.26.1"
+    "d3": "^6.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.10.4",

@@ -1,6 +1,5 @@
 import play from './controls/play';
 import step from './controls/step';
-import filters from './controls/filters';
 import layoutFootnotes from './footnotes';
 
 export default function controls(main) {
@@ -15,8 +14,7 @@ export default function controls(main) {
 
     this.controls = {
         play: play.call(this, animation),
-        step: step.call(this, animation),
-        filters: filters.call(this, controls),
+        step: step.call(this, animation)
     };
 
     const footnotes = layoutFootnotes.call(this, controls);

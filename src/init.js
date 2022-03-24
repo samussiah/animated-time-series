@@ -31,7 +31,7 @@ export default function init() {
 
         // chart data: individuals
         measure.ids = d3.groups(
-            measure.filter((d) => d.include),
+            measure,
             (d) => d.id
         );
 

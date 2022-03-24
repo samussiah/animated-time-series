@@ -1,20 +1,6 @@
 export default function update() {
-    // Check filters.
-    this.settings.filters =
-        Array.isArray(this.settings.filters) && this.settings.filters.length > 0
-            ? this.settings.filters
-                  .map((filter) => {
-                      const obj = {};
-                      obj.var = typeof filter === 'string' ? filter : filter.var;
-                      obj.label = filter.label || filter.var;
-                      obj.value = filter.value || 'All';
-
-                      return obj;
-                  })
-                  .filter(
-                      (filter) => filter.hasOwnProperty('var') && typeof filter.var === 'string'
-                  )
-            : [];
+    if (this.settings.var_labels.stratification === null)
+        this.settings.var_labels.stratification = this.settings.stratification_var;
 
     // Update footnotes.
     this.settings.footnotes = this.settings.footnotes.map((text) =>
