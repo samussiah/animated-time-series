@@ -38,7 +38,7 @@ export default function settings() {
         // animation
         play: true,
         timepoint: 0,
-        speed: 2500,
+        speed: 1000,
         loop_delay: 10000,
 
         // x

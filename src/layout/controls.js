@@ -14,7 +14,7 @@ export default function controls(main) {
 
     this.controls = {
         play: play.call(this, animation),
-        step: step.call(this, animation)
+        step: step.call(this, animation),
     };
 
     const footnotes = layoutFootnotes.call(this, controls);

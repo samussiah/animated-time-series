@@ -30,10 +30,7 @@ export default function init() {
         measure.layout = layout.call(this, measure, key);
 
         // chart data: individuals
-        measure.ids = d3.groups(
-            measure,
-            (d) => d.id
-        );
+        measure.ids = d3.groups(measure, (d) => d.id);
 
         // chart data: population
         measure.aggregate = this.set.visit.reduce((aggregate, visit) => {
