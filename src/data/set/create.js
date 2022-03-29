@@ -1,10 +1,10 @@
-export default function create(variable) {
+export default function create(variable, data) {
     let set, array;
 
     switch (variable) {
         case 'visit':
             set = new Set(
-                this.data
+                data
                     .filter((d) => !(d.visit_order % 1))
                     .map((d) => d.visit + '|' + d.visit_order)
             );
@@ -14,7 +14,7 @@ export default function create(variable) {
                 .map((value) => value.replace(/\|.*$/, ''));
             break;
         default:
-            set = new Set(this.data.map((d) => d[variable]));
+            set = new Set(data.map((d) => d[variable]));
             array = [...set.values()].sort();
             break;
     }

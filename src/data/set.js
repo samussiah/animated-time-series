@@ -1,18 +1,18 @@
 import createSet from './set/create';
 
-export default function set() {
+export default function set(data) {
     const set = {};
 
-    set.stratification = createSet.call(this, 'stratification');
-    set.id = createSet.call(this, 'id');
-    set.visit = createSet.call(this, 'visit');
-    set.visit_order = createSet.call(this, 'visit_order');
-    set.day = createSet.call(this, 'day');
-    set.measure = createSet.call(this, 'measure');
+    set.stratification = createSet('stratification', data);
+    set.id = createSet('id', data);
+    set.visit = createSet('visit', data);
+    set.visit_order = createSet('visit_order', data);
+    set.day = createSet('day', data);
+    set.measure = createSet('measure', data);
 
     set.timepoint = set.visit.map((visit) =>
         d3.median(
-            this.data.filter((d) => d.visit === visit),
+            data.filter((d) => d.visit === visit),
             (d) => d.day
         )
     );

@@ -1,14 +1,14 @@
 import createGroup from './group/create';
 
-export default function group() {
+export default function group(data) {
     const group = {};
 
-    group.stratification = createGroup.call(this, 'stratification');
-    group.stratification_visit = createGroup.call(this, 'stratification,visit');
-    group.id = createGroup.call(this, 'id');
-    group.visit = createGroup.call(this, 'visit');
-    group.measure = createGroup.call(this, 'measure');
-    group.measure_id = createGroup.call(this, 'measure,id');
+    group.stratification = createGroup('stratification', data);
+    group.stratification_visit = createGroup('stratification,visit', data);
+    group.id = createGroup('id', data);
+    group.visit = createGroup('visit', data);
+    group.measure = createGroup('measure', data);
+    group.measure_id = createGroup('measure,id', data);
 
     return group;
 }

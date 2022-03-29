@@ -61,8 +61,7 @@ export default function settings() {
 
         // miscellaneous
         footnotes: [
-            `<sup>1</sup> The color of points represents [color] from baseline.`,
-            `<sup>2</sup> The color of lines represents [color] from the previous timepoint.`,
-        ],
+            //`<sup>1</sup> Displaying [aggregate] [outcome].`,
+        ]
     };
 }

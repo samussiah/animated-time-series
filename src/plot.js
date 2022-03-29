@@ -14,26 +14,37 @@ import updatePoints from './plot/updatePoints';
 import updateAnnotations from './plot/updateAnnotations';
 
 export default function plot() {
-    console.log(this.settings.timepoint);
-    this.summary.forEach((stratum) => {
-        stratum.subset = stratum[1].slice(0, this.settings.timepoint + 1);
-    });
+    //this.summary.forEach((stratum) => {
+    //    stratum.subset = stratum[1].slice(0, this.settings.timepoint + 1);
+    //});
 
-    // layout
     const dimensions = getDimensions();
-    const svg = getSvg(this.layout.charts, dimensions);
 
-    // scales
-    this.scales = {
-        x: getXScale(this.set.visit, dimensions, svg),
-        y: getYScale([0, d3.max(this.summary.tabular, (d) => d.value)], dimensions, svg),
-        color: getColorScale(this.set.stratification),
-    };
+    for (const measure of this.summary) {
+        const data = measure[1];
 
-    // graphical objects
-    const lines = plotLines.call(this, svg, this.summary, this.scales);
-    const points = plotPoints.call(this, svg, this.summary, this.scales);
-    const annotations = plotAnnotations.call(this, svg, this.summary, this.scales);
+        // layout
+        const svg = getSvg(this.layout.charts, dimensions);
+        measure.svg = svg;
+
+        // scales
+        const scales = {
+            x: getXScale(this.set.visit, dimensions, svg),
+            y: getYScale([0, d3.max(measure.tabular, (d) => d.value)], dimensions, svg),
+            color: getColorScale(this.set.stratification),
+        };
+        measure.scales = scales;
+
+        // graphical objects
+        const lines = plotLines.call(this, svg, data, scales);
+        const points = plotPoints.call(this, svg, data, scales);
+        const annotations = plotAnnotations.call(this, svg, data, scales);
+
+        measure.lines = lines;
+        measure.points = points;
+        measure.annotations = annotations;
+    }
+
 
     // increment timepoint and update plot accordingly
     const iterate = function () {
@@ -42,12 +53,12 @@ export default function plot() {
         if (this.settings.timepoint >= this.set.visit.length) {
             this.interval.stop();
             this.settings.timepoint = 0;
-            console.log(this.settings.timepoint);
         } else {
-            console.log(this.settings.timepoint);
-            updateLines.call(this, lines, this.scales);
-            updatePoints.call(this, points, this.scales);
-            updateAnnotations.call(this, annotations, this.scales);
+            for (const measure of this.summary) {
+                updateLines.call(this, measure.lines, measure.scales);
+                updatePoints.call(this, measure.points, measure.scales);
+                updateAnnotations.call(this, measure.annotations, measure.scales);
+            }
         }
     };
 
