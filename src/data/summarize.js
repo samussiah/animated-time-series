@@ -9,7 +9,7 @@ export default function summarize(data, set) {
 
     nested.forEach((measure, i) => {
         const tabular = Array(
-            set.measure.length * set.stratification.length * set.visit.length
+            set.stratification.length * set.visit.length
         );
 
         measure[1].forEach((stratum, i) => {
@@ -31,7 +31,6 @@ export default function summarize(data, set) {
         });
 
         measure.tabular = tabular;
-        console.log(measure.tabular);
     });
 
     return nested;

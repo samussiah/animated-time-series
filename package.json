@@ -1,5 +1,5 @@
 {
-  "TODO": "finalize line transitions then make sure step control works as expected",
+  "TODO": "",
   "name": "animated-time-series",
   "version": "0.2.0",
   "description": "an animated, paneled time series chart",

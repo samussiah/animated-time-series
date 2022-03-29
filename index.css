@@ -153,20 +153,3 @@
 .atm-cells :hover circle {
     fill: red;
 }
-
-/* pie chart */
-
-.atm-pie-chart {
-    position: relative;
-}
-.atm-pie-chart__header {
-    position: absolute;
-    top: -2rem;
-    white-space: nowrap;
-    font-size: 1.25rem;
-    left: 50%;
-    transform: translateX(-50%);
-}
-.atm-pie-chart__g {
-    text-anchor: middle;
-}

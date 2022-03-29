@@ -8,5 +8,4 @@ export default function data() {
     this.set = set(this.data);
     this.group = group(this.data);
     this.summary = summarize(this.data, this.set);
-    console.log(this.summary);
 }

@@ -709,7 +709,7 @@
         return d.visit;
       });
       nested.forEach(function (measure, i) {
-        var tabular = Array(set.measure.length * set.stratification.length * set.visit.length);
+        var tabular = Array(set.stratification.length * set.visit.length);
         measure[1].forEach(function (stratum, i) {
           stratum[1].sort(function (a, b) {
             return set.visit.indexOf(a[0]) - set.visit.indexOf(b[0]);
@@ -726,7 +726,6 @@
           });
         });
         measure.tabular = tabular;
-        console.log(measure.tabular);
       });
       return nested;
     }
@@ -736,18 +735,17 @@
       this.set = set(this.data);
       this.group = group(this.data);
       this.summary = summarize(this.data, this.set);
-      console.log(this.summary);
     }
 
     function getDimensions$1() {
       var margin = {
         top: 25,
-        right: 70,
+        right: 100,
         bottom: 25,
         left: 50
       };
-      var width = 800 - margin.left - margin.right;
-      var height = 400 - margin.top - margin.bottom;
+      var width = 550 - margin.left - margin.right;
+      var height = 200 - margin.top - margin.bottom;
       return {
         margin: margin,
         width: width,
@@ -755,11 +753,16 @@
       };
     }
 
-    function getSvg(container, dimensions) {
-      // append the svg object to the body of the page
-      var svg = container.append('svg').attr('width', dimensions.width + dimensions.margin.left + dimensions.margin.right).attr('height', dimensions.height + dimensions.margin.top + dimensions.margin.bottom);
+    function getLayout(key, dimensions) {
+      var main = this.util.addElement('container', this.layout.charts);
+      var header = this.util.addElement('header', main, 'h3').text(key);
+      var svg = this.util.addElement('time-series__svg', main, 'svg').attr('width', dimensions.width + dimensions.margin.left + dimensions.margin.right).attr('height', dimensions.height + dimensions.margin.top + dimensions.margin.bottom);
       var g = svg.append('g').attr('transform', 'translate(' + dimensions.margin.left + ',' + dimensions.margin.top + ')');
-      return g;
+      return {
+        main: main,
+        header: header,
+        svg: g
+      };
     }
 
     function getXScale(domain, dimensions, svg) {
@@ -907,21 +910,20 @@
           var measure = _step.value;
           var data = measure[1]; // layout
 
-          var svg = getSvg(this.layout.charts, dimensions);
-          measure.svg = svg; // scales
+          var layout = getLayout.call(this, measure[0], dimensions); // scales
 
           var scales = {
-            x: getXScale(this.set.visit, dimensions, svg),
+            x: getXScale(this.set.visit, dimensions, layout.svg),
             y: getYScale([0, d3.max(measure.tabular, function (d) {
               return d.value;
-            })], dimensions, svg),
+            })], dimensions, layout.svg),
             color: getColorScale(this.set.stratification)
           };
           measure.scales = scales; // graphical objects
 
-          var lines = plotLines.call(this, svg, data, scales);
-          var points = plotPoints.call(this, svg, data, scales);
-          var annotations = plotAnnotations.call(this, svg, data, scales);
+          var lines = plotLines.call(this, layout.svg, data, scales);
+          var points = plotPoints.call(this, layout.svg, data, scales);
+          var annotations = plotAnnotations.call(this, layout.svg, data, scales);
           measure.lines = lines;
           measure.points = points;
           measure.annotations = annotations;

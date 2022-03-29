@@ -1,5 +1,5 @@
 import getDimensions from './plot/getDimensions';
-import getSvg from './plot/getSvg';
+import getLayout from './plot/getLayout';
 
 import getXScale from './plot/getXScale';
 import getYScale from './plot/getYScale';
@@ -24,21 +24,20 @@ export default function plot() {
         const data = measure[1];
 
         // layout
-        const svg = getSvg(this.layout.charts, dimensions);
-        measure.svg = svg;
+        const layout = getLayout.call(this, measure[0], dimensions);
 
         // scales
         const scales = {
-            x: getXScale(this.set.visit, dimensions, svg),
-            y: getYScale([0, d3.max(measure.tabular, (d) => d.value)], dimensions, svg),
+            x: getXScale(this.set.visit, dimensions, layout.svg),
+            y: getYScale([0, d3.max(measure.tabular, (d) => d.value)], dimensions, layout.svg),
             color: getColorScale(this.set.stratification),
         };
         measure.scales = scales;
 
         // graphical objects
-        const lines = plotLines.call(this, svg, data, scales);
-        const points = plotPoints.call(this, svg, data, scales);
-        const annotations = plotAnnotations.call(this, svg, data, scales);
+        const lines = plotLines.call(this, layout.svg, data, scales);
+        const points = plotPoints.call(this, layout.svg, data, scales);
+        const annotations = plotAnnotations.call(this, layout.svg, data, scales);
 
         measure.lines = lines;
         measure.points = points;
