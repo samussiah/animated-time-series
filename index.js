@@ -106,53 +106,16 @@
       };
     }
 
-    function _defineProperty(obj, key, value) {
-      if (key in obj) {
-        Object.defineProperty(obj, key, {
-          value: value,
-          enumerable: true,
-          configurable: true,
-          writable: true
-        });
-      } else {
-        obj[key] = value;
-      }
-
-      return obj;
-    }
-
-    function ownKeys(object, enumerableOnly) {
-      var keys = Object.keys(object);
-
-      if (Object.getOwnPropertySymbols) {
-        var symbols = Object.getOwnPropertySymbols(object);
-        if (enumerableOnly) symbols = symbols.filter(function (sym) {
-          return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-        });
-        keys.push.apply(keys, symbols);
-      }
-
-      return keys;
-    }
-
-    function _objectSpread2(target) {
-      for (var i = 1; i < arguments.length; i++) {
-        var source = arguments[i] != null ? arguments[i] : {};
-
-        if (i % 2) {
-          ownKeys(Object(source), true).forEach(function (key) {
-            _defineProperty(target, key, source[key]);
-          });
-        } else if (Object.getOwnPropertyDescriptors) {
-          Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-        } else {
-          ownKeys(Object(source)).forEach(function (key) {
-            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-          });
-        }
-      }
-
-      return target;
+    function getDimensions(parent) {
+      var container = this.layout ? this.layout.charts : parent;
+      this.settings.width = container.node().clientWidth / 1;
+      this.settings.height = this.settings.width / 3;
+      this.settings.margin = {
+        top: 30,
+        right: 30,
+        bottom: 40,
+        left: 40
+      };
     }
 
     function _toConsumableArray(arr) {
@@ -245,322 +208,6 @@
       };
     }
 
-    function getDimensions(parent) {
-      var container = this.layout ? this.layout.charts : parent;
-      this.settings.width = container.node().clientWidth / 1;
-      this.settings.height = this.settings.width / 3;
-      this.settings.margin = {
-        top: 30,
-        right: 30,
-        bottom: 40,
-        left: 40
-      };
-    }
-
-    function fadeOut(main) {
-      // Transition text from full opacity to zero opacity to create fade-out effect.
-      d3.select(this).transition().duration(main.settings.speed / 8).delay([0, main.set.visit.length - 1].includes(main.settings.timepoint) ? main.settings.loop_delay - main.settings.speed / 8 * 2 : main.settings.speed - main.settings.speed / 8 * 2).style('opacity', 0);
-    }
-
-    function fadeIn(selection, main) {
-      // Transition text from zero opacity to full opacity to create fade-in effect.
-      selection.style('opacity', 0).transition().duration(main.settings.speed / 8).style('opacity', 1).on('end', function () {
-        fadeOut.call(this, main);
-      });
-    }
-
-    function timepoint() {
-      var timepoint = {
-        index: this.settings.timepoint,
-        visit: this.set.visit[this.settings.timepoint],
-        visit_order: this.set.visit_order[this.settings.timepoint],
-        day: this.set.timepoint[this.settings.timepoint]
-      };
-      timepoint.previous = this.timepoint !== undefined ? this.timepoint : timepoint;
-      timepoint.direction = timepoint.index >= timepoint.previous.index ? '>' : '<'; // Update visit text.
-
-      this.layout.timepoint.text(timepoint.visit).call(fadeIn, this);
-      return timepoint;
-    }
-
-    // Each path needs as many data points as unique timepoints in the data, regardless of
-    // missing or expected visits. Generate a set of coordinates with as many elements as
-    // timepoints in the data. For future timepoints past the current timepoint of the animation
-    // set the coordinates to the most recent data point on or prior to the current timepoint.
-    // For missing data points set the coordinates to the most recent past timepoint.
-    function d(data) {
-      var _this = this;
-
-      // 1. Sort the data in reverse chronological order.
-      data.sort(function (a, b) {
-        return b.visit_order - a.visit_order;
-      }); // 2. Capture the latest data point on or before the current timepoint.
-
-      var latestVisit = data.find(function (d) {
-        return d.visit_order <= _this.timepoint.visit_order;
-      }); // Set timepoint past latest timepoint to latest timepoint. This way the path has as
-      // many points of inflection at the first timepoint as at the last timepoint.
-      //
-      // 3. Generate a new set of data by mapping the visit set.
-
-      var lineData = this.set.visit_order.map(function (visit_order, i) {
-        var datum; // 4. For future timepoints set the data point to the latest data point.
-
-        if (visit_order >= _this.timepoint.visit_order) datum = _objectSpread2({}, latestVisit); // 5. For missing timepoints set the data point the closest earlier data point.
-        else datum = data.find(function (d) {
-            return d.visit_order <= visit_order;
-          });
-        return datum;
-      });
-      return lineData;
-    }
-
-    function updateLines(measure) {
-      var _this = this;
-      measure.lines.transition().duration(2 * this.settings.speed / 5).attr('d', function (data) {
-        return measure.lineGenerator(d.call(_this, data));
-      });
-    }
-
-    function attr(measure, points) {
-      var _this = this;
-
-      points.attr('cx', function (d) {
-        return measure.xScale(d[_this.settings.x_var]) + (_this.settings.x_type === 'ordinal' ? measure.xScale.bandwidth() / 2 : 0);
-      }).attr('cy', function (d) {
-        return measure.yScale(d[_this.settings.y_var]);
-      }).attr('r', function (d) {
-        return d.visit_order <= _this.timepoint.visit_order ? 2 : 0;
-      }).attr('fill', function (d) {
-        return measure.colorScale(d[_this.settings.color_var]);
-      }).attr('fill-opacity', 0.25).attr('stroke', function (d) {
-        return measure.colorScale(d[_this.settings.color_var]);
-      }).attr('stroke-opacity', 0.5);
-    }
-
-    function updatePoints(measure) {
-      var _this = this;
-
-      var main = this;
-      measure.groups.each(function (data, i, j) {
-        var g = d3.select(this); // Capture data points at previous and current timepoint.
-
-        var pair = data[1].filter(function (d) {
-          return [main.timepoint.visit, main.timepoint.previous.visit].includes(d.visit);
-        }); // Animate from previous timepoint to current timepoint.
-
-        if (pair.length === 2) {
-          var datum1 = pair.find(function (d) {
-            return d.visit === main.timepoint.previous.visit;
-          });
-          var point1 = g.selectAll('.atm-circle').filter(function (d) {
-            return d === datum1;
-          });
-          var datum2 = pair.find(function (d) {
-            return d.visit === main.timepoint.visit;
-          });
-          var point2 = g.selectAll('.atm-circle').filter(function (d) {
-            return d === datum2;
-          });
-          if (main.timepoint.direction === '<') point1.attr('r', 0); // Define temporary point.
-
-          var point = g.append('circle').classed('atm-circle--transition', true).datum(datum1);
-          attr.call(main, measure, point); //.attr('cx', measure.xScale(datum1[main.settings.x_var]))
-          //.attr('cy', measure.yScale(datum1[main.settings.y_var]))
-          //.attr('r', 2)
-          //.attr('fill', measure.colorScale(datum1[main.settings.color_var]))
-          //.attr('fill-opacity', .25)
-          //.attr('stroke', measure.colorScale(datum1[main.settings.color_var]))
-          //.attr('stroke-opacity', .5);
-          // Define transition from point 1 to point 2.
-
-          var transition = point.datum(datum2).transition().duration(2 * main.settings.speed / 5);
-          attr.call(main, measure, transition); //.attr('cx', measure.xScale(datum2[main.settings.x_var]))
-          //.attr('cy', measure.yScale(datum2[main.settings.y_var]))
-          //.attr('r', 2)
-          //.attr('fill', measure.colorScale(datum2[main.settings.color_var]))
-          //.attr('stroke', measure.colorScale(datum2[main.settings.color_var]))
-
-          transition.on('end', function () {
-            // Display next point if current timepoint is after previous timepoint.
-            if (main.timepoint.direction === '>') point2.attr('r', 2);
-            point.remove();
-          }); // Transition point 1 radius to 1.
-          //point1
-          //    .transition()
-          //    .duration(2*main.settings.speed/5)
-          //    .attr('r', 1);
-        }
-      }); // TODO: figure out how to transition points back to the origin visit by visit.
-
-      if (this.timepoint.index === 0) {
-        var delay = this.settings.speed / this.set.visit.length;
-        measure.points.transition().duration(delay).delay(function (d, i) {
-          return delay * (_this.set.visit.length - _this.set.visit.indexOf(d.visit));
-        }).attr('r', 0);
-      }
-    }
-
-    function linesAggregate(measure) {
-      var _this = this;
-
-      measure.linesAggregate.filter(function (d, i) {
-        return i === _this.timepoint.index - 1;
-      }).transition().duration(2 * this.settings.speed / 5).delay(1 * this.settings.speed / 5).attr('x2', function (d, i) {
-        return _this.settings.x_type === 'ordinal' ? measure.xScale(_this.timepoint.visit) + measure.xScale.bandwidth() / 2 : measure.xScale(_this.timepoint.day);
-      }).attr('y2', function (d) {
-        return measure.yScale(d[1][1]);
-      }); // Transition lines back to origin.
-
-      if (this.timepoint.index === 0) {
-        var delay = this.settings.speed / this.set.visit.length;
-        measure.linesAggregate.transition().duration(delay).delay(function (d, i) {
-          return _this.settings.speed - delay * i;
-        }).attr('x2', function () {
-          return this.getAttribute('x1');
-        }).attr('y2', function () {
-          return this.getAttribute('y1');
-        });
-      }
-    }
-
-    function pointsAggregate(measure) {
-      var _this = this;
-
-      if (this.timepoint.index > 0) measure.pointsAggregate.transition().ease(d3.easeQuad).duration(2 * this.settings.speed / 5).delay(2 * this.settings.speed / 5).attr('cx', this.settings.x_type === 'ordinal' ? measure.xScale(this.timepoint.visit) + measure.xScale.bandwidth() / 2 : measure.xScale(this.timepoint.day)).attr('cy', function (d) {
-        return measure.yScale(d[_this.timepoint.index][1]);
-      }).attr('fill', function (d, i) {
-        return measure.colorScale(d[_this.timepoint.index][_this.settings.color_var === 'change' ? 2 : 3]);
-      });else measure.pointsAggregate.attr('cx', this.settings.x_type === 'ordinal' ? measure.xScale(this.timepoint.visit) + measure.xScale.bandwidth() / 2 : measure.xScale(this.timepoint.day)).attr('cy', function (d) {
-        return measure.yScale(d[0][1]);
-      }).attr('fill', measure.colorScale(0));
-      measure.pointsAggregate.clone().classed('atm-clone', true);
-
-      if (this.timepoint.index === 0) {
-        var delay = this.settings.speed / this.set.visit.length;
-        var clones = measure.layout.canvas.selectAll('.atm-clone');
-        clones.transition().duration(delay).delay(function (d, i) {
-          return delay * i;
-        }).attr('fill-opacity', 0).attr('stroke-opacity', 0).remove();
-      }
-    }
-
-    function update$1() {
-      var _this = this;
-
-      this.timepoint = timepoint.call(this);
-      this.group.measure.forEach(function (measure, key) {
-        updateLines.call(_this, measure);
-        updatePoints.call(_this, measure);
-        linesAggregate.call(_this, measure);
-        pointsAggregate.call(_this, measure);
-      });
-    }
-
-    function iterate() {
-      var _this = this;
-
-      this.settings.timepoint++;
-      if (this.settings.timepoint >= this.set.visit.length) this.settings.timepoint = 0; // Restart animation.
-
-      if (this.settings.timepoint === 0) {
-        var _this$interval, _this$timeout;
-
-        (_this$interval = this.interval) === null || _this$interval === void 0 ? void 0 : _this$interval.stop();
-        (_this$timeout = this.timeout) === null || _this$timeout === void 0 ? void 0 : _this$timeout.stop();
-        this.timeout = d3.timeout(function () {
-          update$1.call(_this);
-
-          _this.timeout.stop();
-
-          _this.timeout = d3.timeout(function () {
-            _this.interval = interval.call(_this);
-          }, _this.settings.loop_delay);
-        }, this.settings.loop_delay);
-      } // Update each measure.
-      else {
-          update$1.call(this);
-        }
-    }
-    function interval() {
-      var _this2 = this;
-
-      var interval = d3.interval(function () {
-        iterate.call(_this2);
-      }, this.settings.speed);
-      return interval;
-    }
-
-    function play(parent) {
-      var main = this;
-      var container = this.util.addElement('play', parent);
-      var input = this.util.addElement('button', container, 'input').attr('type', 'button').property('value', this.settings.play ? 'pause' : 'play');
-      input.on('click', function (event, d) {
-        var _main$timeout, _main$interval;
-
-        // Toggle setting.
-        main.settings.play = !main.settings.play; // Toggle control.
-
-        d3.select(this).property('value', main.settings.play ? 'pause' : 'play'); // Stop current timeout and/or interval.
-
-        (_main$timeout = main.timeout) === null || _main$timeout === void 0 ? void 0 : _main$timeout.stop();
-        (_main$interval = main.interval) === null || _main$interval === void 0 ? void 0 : _main$interval.stop(); // Ensure timepoint is displayed.
-
-        main.layout.timepoint.transition().style('opacity', 1);
-        if (main.settings.play) main.interval = interval.call(main);
-      });
-      return {
-        container: container,
-        input: input
-      };
-    }
-
-    function step(parent) {
-      var main = this;
-      var container = this.util.addElement('step', parent);
-      var input = this.util.addElement('button', container, 'input', ['<', '>']).attr('type', 'button').property('value', function (d) {
-        return d;
-      });
-      input.on('click', function (event, d) {
-        main.settings.play = false;
-        main.controls.play.input.property('value', 'play');
-        if (main.interval) main.interval.stop();
-        var direction = this.value;
-        if (direction === '<') main.settings.timepoint = main.settings.timepoint === 0 ? main.set.visit.length - 2 // displays the last timepoint
-        : main.settings.timepoint - 2; // displays the previous timepoint
-
-        iterate.call(main);
-        main.layout.timepoint.transition().style('opacity', 1);
-      });
-      return {
-        container: container,
-        input: input
-      };
-    }
-
-    function footnotes(main) {
-      var footnotes = this.util.addElement('footnotes', main, 'small');
-      footnotes.html(this.settings.footnotes.join('<br>'));
-      return footnotes;
-    }
-
-    function controls(main) {
-      var controls = this.util.addElement('controls', main);
-      var timepoint = this.util.addElement('timepoint', controls).classed('atm-controls-spacing', true).append('span');
-      var animation = this.util.addElement('animation', controls).classed('atm-controls-spacing', true);
-      this.controls = {
-        play: play.call(this, animation),
-        step: step.call(this, animation)
-      };
-      var footnotes$1 = footnotes.call(this, controls);
-      return {
-        controls: controls,
-        timepoint: timepoint,
-        animation: animation,
-        footnotes: footnotes$1
-      };
-    }
-
     function charts(main) {
       var charts = this.util.addElement('charts', main);
       return charts;
@@ -582,18 +229,17 @@
     }
 
     function layout() {
-      var main = this.util.addElement('main', d3.select(this.element));
-      var controls$1 = controls.call(this, main); //this.util.addElement('controls', main);
+      var main = this.util.addElement('main', d3.select(this.element)); //const controls = layoutControls.call(this, main); //this.util.addElement('controls', main);
 
       var charts$1 = charts.call(this, main);
       getDimensions.call(this, charts$1); // determine widths of DOM elements based on width of main container
 
       window.addEventListener('resize', resize.bind(this));
-      return _objectSpread2(_objectSpread2({
-        main: main
-      }, controls$1), {}, {
+      return {
+        main: main,
+        //...controls,
         charts: charts$1
-      });
+      };
     }
 
     function mutate() {
@@ -762,7 +408,7 @@
       return nested;
     }
 
-    function timepoint$1(index, set) {
+    function timepoint(index, set) {
       var timepoint = {
         index: index,
         visit: set.visit[index],
@@ -776,7 +422,7 @@
       this.set = set(this.data);
       this.group = group(this.data);
       this.summary = summarize(this.data, this.set);
-      this.timepoint = timepoint$1(this.settings.timepoint, this.set);
+      this.timepoint = timepoint(this.settings.timepoint, this.set);
     }
 
     function getDimensions$1() {
@@ -786,7 +432,7 @@
         bottom: 25,
         left: 50
       };
-      var width = 550 - margin.left - margin.right;
+      var width = 500 - margin.left - margin.right;
       var height = 200 - margin.top - margin.bottom;
       return {
         margin: margin,
@@ -809,13 +455,25 @@
 
     function getXScale(domain, dimensions, svg) {
       var xScale = d3.scalePoint().domain(domain).range([0, dimensions.width]).padding([0.5]);
-      svg.append('g').attr('transform', 'translate(0,' + dimensions.height + ')').call(d3.axisBottom(xScale));
+      svg.append('g').classed('atm-axis', true).attr('transform', 'translate(0,' + dimensions.height + ')').call(d3.axisBottom(xScale));
       return xScale;
     }
 
     function getYScale(domain, dimensions, svg) {
-      var yScale = d3.scaleLinear().domain(domain).range([dimensions.height, 0]);
-      svg.append('g').call(d3.axisLeft(yScale));
+      var yScale = d3.scaleLinear().domain(domain).nice().range([dimensions.height, 0]);
+      svg.append('g').classed('atm-axis', true).call(d3.axisLeft(yScale));
+
+      var yGrid = function yGrid(g) {
+        return g.attr('class', 'grid-lines').selectAll('line').data(yScale.ticks()).join('line').attr('x1', 0) //dimensions.margin.left)
+        .attr('x2', dimensions.width) // - dimensions.margin.right)
+        .attr('y1', function (d) {
+          return yScale(d);
+        }).attr('y2', function (d) {
+          return yScale(d);
+        });
+      };
+
+      svg.append('g').call(yGrid);
       return yScale;
     }
 
@@ -885,7 +543,7 @@
       return annotations;
     }
 
-    function updateLines$1(lines, scales) {
+    function updateLines(lines, scales) {
       var _this = this;
 
       lines.transition().duration(this.settings.speed).attr('d', function (d) {
@@ -898,7 +556,7 @@
       });
     }
 
-    function updatePoints$1(points, scales) {
+    function updatePoints(points, scales) {
       var _this = this;
 
       points.selectAll('circle.point').data(function (d) {
@@ -957,7 +615,9 @@
 
           var scales = {
             x: getXScale(this.set.visit, dimensions, layout.svg),
-            y: getYScale([0, d3.max(measure.tabular, function (d) {
+            y: getYScale([d3.min(measure.tabular, function (d) {
+              return d.value;
+            }), d3.max(measure.tabular, function (d) {
               return d.value;
             })], dimensions, layout.svg),
             color: getColorScale(this.set.stratification)
@@ -985,7 +645,7 @@
           this.interval.stop();
           this.settings.timepoint = 0;
         } else {
-          this.timepoint = timepoint$1(this.settings.timepoint, this.set);
+          this.timepoint = timepoint(this.settings.timepoint, this.set);
           console.log(this.timepoint); // TODO: handle measures with missing data at certain visits.
           //   - use actual timepoint / visit value rather than index
 
@@ -996,8 +656,8 @@
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
               var measure = _step2.value;
               //if (measure.tabular.map(d => d.visit).includes(this.timepoint.visit)) {
-              updateLines$1.call(this, measure.lines, measure.scales);
-              updatePoints$1.call(this, measure.points, measure.scales);
+              updateLines.call(this, measure.lines, measure.scales);
+              updatePoints.call(this, measure.points, measure.scales);
               updateAnnotations.call(this, measure.annotations, measure.scales); //}
             }
           } catch (err) {

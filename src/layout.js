@@ -5,7 +5,7 @@ import resize from './layout/resize';
 
 export default function layout() {
     const main = this.util.addElement('main', d3.select(this.element));
-    const controls = layoutControls.call(this, main); //this.util.addElement('controls', main);
+    //const controls = layoutControls.call(this, main); //this.util.addElement('controls', main);
     const charts = layoutCharts.call(this, main);
     getDimensions.call(this, charts); // determine widths of DOM elements based on width of main container
 
@@ -13,7 +13,7 @@ export default function layout() {
 
     return {
         main,
-        ...controls,
+        //...controls,
         charts,
     };
 }

@@ -90,11 +90,11 @@
 /** time series **/
 
 .atm-charts {
-    width: 75%;
+    width: 100%;
     float: right;
 }
 .atm-container {
-    width: 50%;
+    width: 33%;
     display: inline-block;
     position: relative;
     margin-bottom: 2rem;
@@ -133,11 +133,17 @@
     display: inline-block;
 }
 
-.atm-axis path,
+.atm-axis path {
+    display: none;
+}
 .atm-axis line {
-    fill: none;
+    /*fill: none;
     stroke: #000;
-    shape-rendering: crispEdges;
+    shape-rendering: crispEdges;*/
+}
+.grid-lines line {
+  stroke: gray;
+  stroke-opacity: 0.2;
 }
 
 .atm-axis text {
