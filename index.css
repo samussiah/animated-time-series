@@ -9,6 +9,9 @@
 .atm-invisible {
     visibility: hidden !important;
 }
+.atm-missing {
+    color: lightgray;
+}
 .atm-main > * {
 }
 

@@ -5,7 +5,7 @@ export default function updatePoints(points, scales) {
             (d) => {
                 return d[1].slice(0, this.settings.timepoint + 1);
             },
-            (d) => [d.stratum[0], d[0]].join('|')
+            (d,i) => [d.stratum[0], i].join('|')
         )
         .join((enter) =>
             enter

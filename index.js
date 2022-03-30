@@ -358,45 +358,38 @@
 
       nested.forEach(function (measure, i) {
         // Create array with as many elements as stratification and visit values combined.
-        var tabular = Array(set.stratification.length * set.visit.length); // Iterate over strata within measure.
-        //set.stratification.forEach((stratum,i) => {
-        //    const stratumDatum = measure[1].find(d => d[0] === stratum);
-        //    if (stratumDatum)
-        //        stratumDatum[1]
-        //            .sort((a, b) => (
-        //                set.visit.indexOf(a[0]) - set.visit.indexOf(b[0])
-        //            ));
-        //    // Iterate over visits within strata.
-        //    set.visit.forEach((visit,j) => {
-        //        // Return data for given measure / stratum / visit.
-        //        const visitDatum = stratumDatum[1]
-        //            .find(d => d[0] === visit);
-        //        console.log(visitDatum);
-        //        if (visitDatum)
-        //            visitDatum.stratum = stratum;
-        //        // Define "row" in tabular summary.
-        //        const datum = {
-        //            measure: measure[0],
-        //            stratum: stratumDatum[0],
-        //            visit: visit,
-        //            // Set value to null if this combination of measure / stratum / visit does not exist.
-        //            value: visitDatum ? visitDatum[1] : null // 
-        //        };
-        //        tabular[i * set.visit.length + j] = datum;
-        //    });
-        //});
+        var tabular = Array(set.stratification.length * set.visit.length); // TODO: handle missing strata for given measure
+        // Iterate over strata within measure.
 
-        measure[1].forEach(function (stratum, i) {
-          stratum[1].sort(function (a, b) {
+        set.stratification.forEach(function (stratum, i) {
+          var stratumDatum = measure[1].find(function (d) {
+            return d[0] === stratum;
+          }); // Sort visit-level summary.
+
+          if (stratumDatum) stratumDatum[1].sort(function (a, b) {
             return set.visit.indexOf(a[0]) - set.visit.indexOf(b[0]);
-          });
-          stratum[1].forEach(function (visit, j) {
-            visit.stratum = stratum;
+          }); // Iterate over visits within strata.
+
+          set.visit.forEach(function (visit, j) {
+            // Return data for given measure / stratum / visit.
+            var visitDatum = stratumDatum[1].find(function (d) {
+              return d[0] === visit;
+            }); // TODO: what if measure is not captured at first visit?  Use next visit?
+            // If measure is not captured at given visit, use previous visit.
+
+            if (visitDatum === undefined) {
+              visitDatum = _toConsumableArray(stratumDatum[1][j - 1]);
+              stratumDatum[1].splice(j, 0, visitDatum);
+            } // Attach stratum-level data to visit.
+
+
+            visitDatum.stratum = stratumDatum; // Define "row" in tabular summary.
+
             var datum = {
               measure: measure[0],
-              stratum: stratum[0],
-              visit: visit[0],
-              value: visit[1]
+              stratum: stratumDatum[0],
+              visit: visitDatum[0],
+              value: visitDatum[0] === visit ? visitDatum[1] : null
             };
             tabular[i * set.visit.length + j] = datum;
           });
@@ -404,6 +397,11 @@
         measure.tabular = tabular.filter(function (d) {
           return true;
         }); // remove empty elements
+
+        measure.visits = _toConsumableArray(new Set(measure.tabular.map(function (d) {
+          return d.visit;
+        })).values());
+        console.log(measure.visits);
       });
       return nested;
     }
@@ -453,9 +451,12 @@
       };
     }
 
-    function getXScale(domain, dimensions, svg) {
+    function getXScale(domain, dimensions, svg, visits) {
       var xScale = d3.scalePoint().domain(domain).range([0, dimensions.width]).padding([0.5]);
-      svg.append('g').classed('atm-axis', true).attr('transform', 'translate(0,' + dimensions.height + ')').call(d3.axisBottom(xScale));
+      var xAxis = svg.append('g').classed('atm-axis', true).attr('transform', 'translate(0,' + dimensions.height + ')').call(d3.axisBottom(xScale));
+      xAxis.selectAll('.tick').classed('atm-missing', function (d) {
+        return visits.includes(d) === false;
+      });
       return xScale;
     }
 
@@ -514,8 +515,8 @@
       });
       points.selectAll('circle.point').data(function (d) {
         return d[1].slice(0, _this.settings.timepoint + 1);
-      }, function (d) {
-        return [d.stratum[0], d[0]].join('|');
+      }, function (d, i) {
+        return [d.stratum[0], i].join('|');
       }).join('circle').classed('point', true).attr('cx', function (d) {
         return scales.x(d[0]);
       }).attr('cy', function (d) {
@@ -547,7 +548,6 @@
       var _this = this;
 
       lines.transition().duration(this.settings.speed).attr('d', function (d) {
-        console.log(d);
         var currentTimepoint = d[1][_this.settings.timepoint];
         var pathData = d[1].map(function (d, i) {
           return i >= _this.settings.timepoint ? currentTimepoint : d;
@@ -561,8 +561,8 @@
 
       points.selectAll('circle.point').data(function (d) {
         return d[1].slice(0, _this.settings.timepoint + 1);
-      }, function (d) {
-        return [d.stratum[0], d[0]].join('|');
+      }, function (d, i) {
+        return [d.stratum[0], i].join('|');
       }).join(function (enter) {
         return enter.append('circle').classed('point', true).attr('r', 5).attr('stroke', 'white').attr('cx', function (d) {
           var datum = d.stratum[1][_this.settings.timepoint - 1];
@@ -614,7 +614,7 @@
           var layout = getLayout.call(this, measure[0], dimensions); // scales
 
           var scales = {
-            x: getXScale(this.set.visit, dimensions, layout.svg),
+            x: getXScale(this.set.visit, dimensions, layout.svg, measure.visits),
             y: getYScale([d3.min(measure.tabular, function (d) {
               return d.value;
             }), d3.max(measure.tabular, function (d) {
