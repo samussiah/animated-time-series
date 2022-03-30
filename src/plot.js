@@ -9,6 +9,7 @@ import plotLines from './plot/plotLines';
 import plotPoints from './plot/plotPoints';
 import plotAnnotations from './plot/plotAnnotations';
 
+import timepoint from './data/timepoint';
 import updateLines from './plot/updateLines';
 import updatePoints from './plot/updatePoints';
 import updateAnnotations from './plot/updateAnnotations';
@@ -20,6 +21,7 @@ export default function plot() {
 
     const dimensions = getDimensions();
 
+    // Iterate through measures.
     for (const measure of this.summary) {
         const data = measure[1];
 
@@ -53,10 +55,17 @@ export default function plot() {
             this.interval.stop();
             this.settings.timepoint = 0;
         } else {
+            this.timepoint = timepoint(this.settings.timepoint, this.set);
+            console.log(this.timepoint);
+
+            // TODO: handle measures with missing data at certain visits.
+            //   - use actual timepoint / visit value rather than index
             for (const measure of this.summary) {
-                updateLines.call(this, measure.lines, measure.scales);
-                updatePoints.call(this, measure.points, measure.scales);
-                updateAnnotations.call(this, measure.annotations, measure.scales);
+                //if (measure.tabular.map(d => d.visit).includes(this.timepoint.visit)) {
+                    updateLines.call(this, measure.lines, measure.scales);
+                    updatePoints.call(this, measure.points, measure.scales);
+                    updateAnnotations.call(this, measure.annotations, measure.scales);
+                //}
             }
         }
     };

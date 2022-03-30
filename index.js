@@ -697,8 +697,9 @@
     }
 
     function summarize(data, set) {
+      // Nest data by measure, stratification, and visit and average results.
       var nested = d3.rollups(data, function (group) {
-        return d3.sum(group, function (d) {
+        return d3.mean(group, function (d) {
           return d.result;
         });
       }, function (d) {
@@ -707,9 +708,38 @@
         return d.stratification;
       }, function (d) {
         return d.visit;
-      });
+      }); // Iterate over measures to generate tabular summary.
+
       nested.forEach(function (measure, i) {
-        var tabular = Array(set.stratification.length * set.visit.length);
+        // Create array with as many elements as stratification and visit values combined.
+        var tabular = Array(set.stratification.length * set.visit.length); // Iterate over strata within measure.
+        //set.stratification.forEach((stratum,i) => {
+        //    const stratumDatum = measure[1].find(d => d[0] === stratum);
+        //    if (stratumDatum)
+        //        stratumDatum[1]
+        //            .sort((a, b) => (
+        //                set.visit.indexOf(a[0]) - set.visit.indexOf(b[0])
+        //            ));
+        //    // Iterate over visits within strata.
+        //    set.visit.forEach((visit,j) => {
+        //        // Return data for given measure / stratum / visit.
+        //        const visitDatum = stratumDatum[1]
+        //            .find(d => d[0] === visit);
+        //        console.log(visitDatum);
+        //        if (visitDatum)
+        //            visitDatum.stratum = stratum;
+        //        // Define "row" in tabular summary.
+        //        const datum = {
+        //            measure: measure[0],
+        //            stratum: stratumDatum[0],
+        //            visit: visit,
+        //            // Set value to null if this combination of measure / stratum / visit does not exist.
+        //            value: visitDatum ? visitDatum[1] : null // 
+        //        };
+        //        tabular[i * set.visit.length + j] = datum;
+        //    });
+        //});
+
         measure[1].forEach(function (stratum, i) {
           stratum[1].sort(function (a, b) {
             return set.visit.indexOf(a[0]) - set.visit.indexOf(b[0]);
@@ -725,9 +755,20 @@
             tabular[i * set.visit.length + j] = datum;
           });
         });
-        measure.tabular = tabular;
+        measure.tabular = tabular.filter(function (d) {
+          return true;
+        }); // remove empty elements
       });
       return nested;
+    }
+
+    function timepoint$1(index, set) {
+      var timepoint = {
+        index: index,
+        visit: set.visit[index],
+        visit_order: set.visit_order[index]
+      };
+      return timepoint;
     }
 
     function data() {
@@ -735,6 +776,7 @@
       this.set = set(this.data);
       this.group = group(this.data);
       this.summary = summarize(this.data, this.set);
+      this.timepoint = timepoint$1(this.settings.timepoint, this.set);
     }
 
     function getDimensions$1() {
@@ -847,6 +889,7 @@
       var _this = this;
 
       lines.transition().duration(this.settings.speed).attr('d', function (d) {
+        console.log(d);
         var currentTimepoint = d[1][_this.settings.timepoint];
         var pathData = d[1].map(function (d, i) {
           return i >= _this.settings.timepoint ? currentTimepoint : d;
@@ -900,7 +943,7 @@
       //this.summary.forEach((stratum) => {
       //    stratum.subset = stratum[1].slice(0, this.settings.timepoint + 1);
       //});
-      var dimensions = getDimensions$1();
+      var dimensions = getDimensions$1(); // Iterate through measures.
 
       var _iterator = _createForOfIteratorHelper(this.summary),
           _step;
@@ -942,15 +985,20 @@
           this.interval.stop();
           this.settings.timepoint = 0;
         } else {
+          this.timepoint = timepoint$1(this.settings.timepoint, this.set);
+          console.log(this.timepoint); // TODO: handle measures with missing data at certain visits.
+          //   - use actual timepoint / visit value rather than index
+
           var _iterator2 = _createForOfIteratorHelper(this.summary),
               _step2;
 
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
               var measure = _step2.value;
+              //if (measure.tabular.map(d => d.visit).includes(this.timepoint.visit)) {
               updateLines$1.call(this, measure.lines, measure.scales);
               updatePoints$1.call(this, measure.points, measure.scales);
-              updateAnnotations.call(this, measure.annotations, measure.scales);
+              updateAnnotations.call(this, measure.annotations, measure.scales); //}
             }
           } catch (err) {
             _iterator2.e(err);
