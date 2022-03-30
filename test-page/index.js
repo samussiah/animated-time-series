@@ -4,9 +4,9 @@ fetch('./adlb-trend.csv')
     .then(data => {
         const main = animatedTimeSeries(
             data.filter(d => (
-                !(+d.AVISITN%1) &&
-                !(+d.AVISITN === 3 && /Platelet/.test(d.PARAM)) &&
-                /count/.test(d.PARAM)
+                !(+d.AVISITN%1)// &&
+                //!(+d.AVISITN === 3 && /Platelet/.test(d.PARAM)) &&
+                ///count/.test(d.PARAM)
             )),
             '#container',
             {
