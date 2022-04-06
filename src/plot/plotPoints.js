@@ -4,7 +4,10 @@ export default function plotPoints(svg, data, scales) {
         .data(data, (d) => d[0])
         .join('g')
         .classed('point-group', true)
-        .attr('fill', (d) => scales.color(d[0]));
+        //.attr('fill-opacity', .75)
+        .attr('fill', (d) => {
+            return scales.color(d.color_value);
+        });
 
     points
         .selectAll('circle.point')
@@ -16,8 +19,12 @@ export default function plotPoints(svg, data, scales) {
         )
         .join('circle')
         .classed('point', true)
-        .attr('cx', (d) => scales.x(d[0]))
-        .attr('cy', (d) => scales.y(d[1]))
+        .attr('cx', (d) => {
+            return scales.x(d[0]);
+        })
+        .attr('cy', (d) => {
+            return scales.y(d[1].value);
+        })
         .attr('r', 5)
         .attr('stroke', 'white');
 

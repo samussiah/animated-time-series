@@ -1,4 +1,4 @@
-fetch('./adlb-trend.csv')
+fetch('../adlb-trend.csv')
     .then(response => response.text())
     .then(text => d3.csvParse(text))
     .then(data => {
@@ -10,7 +10,9 @@ fetch('./adlb-trend.csv')
             )),
             '#container',
             {
-                stratification_var: 'ARMCD'
+                stratification_var: 'USUBJID',
+                annotate: false,
+                color_var: 'ARMCD'
             }
         );
     });

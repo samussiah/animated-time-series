@@ -32,20 +32,16 @@ export default function plot() {
         const scales = {
             x: getXScale(this.set.visit, dimensions, layout.svg, measure.visits),
             y: getYScale([d3.min(measure.tabular, (d) => d.value), d3.max(measure.tabular, (d) => d.value)], dimensions, layout.svg),
-            color: getColorScale(this.set.stratification),
+            color: getColorScale(this.set.color),
         };
         measure.scales = scales;
 
         // graphical objects
-        const lines = plotLines.call(this, layout.svg, data, scales);
-        const points = plotPoints.call(this, layout.svg, data, scales);
-        const annotations = plotAnnotations.call(this, layout.svg, data, scales);
-
-        measure.lines = lines;
-        measure.points = points;
-        measure.annotations = annotations;
+        measure.lines = plotLines.call(this, layout.svg, data, scales);
+        measure.points = plotPoints.call(this, layout.svg, data, scales);
+        if (this.settings.annotate)
+            measure.annotations = plotAnnotations.call(this, layout.svg, data, scales);
     }
-
 
     // increment timepoint and update plot accordingly
     const iterate = function () {
@@ -56,7 +52,6 @@ export default function plot() {
             this.settings.timepoint = 0;
         } else {
             this.timepoint = timepoint(this.settings.timepoint, this.set);
-            console.log(this.timepoint);
 
             // TODO: handle measures with missing data at certain visits.
             //   - use actual timepoint / visit value rather than index
@@ -64,7 +59,8 @@ export default function plot() {
                 //if (measure.tabular.map(d => d.visit).includes(this.timepoint.visit)) {
                     updateLines.call(this, measure.lines, measure.scales);
                     updatePoints.call(this, measure.points, measure.scales);
-                    updateAnnotations.call(this, measure.annotations, measure.scales);
+                    if (this.settings.annotate)
+                        updateAnnotations.call(this, measure.annotations, measure.scales);
                 //}
             }
         }

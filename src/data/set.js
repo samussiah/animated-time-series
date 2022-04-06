@@ -4,6 +4,7 @@ export default function set(data) {
     const set = {};
 
     set.stratification = createSet('stratification', data);
+    set.color = createSet('color', data);
     set.id = createSet('id', data);
     set.visit = createSet('visit', data);
     set.visit_order = createSet('visit_order', data);

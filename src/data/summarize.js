@@ -1,13 +1,21 @@
-export default function summarize(data, set) {
+export default function summarize(data, set, settings) {
     // Nest data by measure, stratification, and visit and average results.
     const nested = d3.rollups(
         data,
-        (group) => d3.mean(group, (d) => d.result),
-        (d) => d.measure,
-        (d) => d.stratification,
-        (d) => d.visit
+        (group) => {
+            return {
+                data: group,
+                value: d3[settings.aggregate](group, (d) => d.result)
+            };
+        },
+        (d) => d.measure, // facet
+        (d) => d.stratification, // color
+        (d) => d.visit // x,y
     );
 
+    // TODO: define a more complex nested value that includes the data, the summarized value, and
+    // the color of the stratification variable, and anything else needed.
+console.log(settings.color_var);
     // Iterate over measures to generate tabular summary.
     nested.forEach((measure, i) => {
         // Create array with as many elements as stratification and visit values combined.
@@ -26,6 +34,9 @@ export default function summarize(data, set) {
                     .sort((a, b) => (
                         set.visit.indexOf(a[0]) - set.visit.indexOf(b[0])
                     ));
+
+            stratumDatum.color_value = stratumDatum[1][0][1].data[0][settings.color_var];
+            console.log(stratumDatum.color_value);
 
             // Iterate over visits within strata.
             set.visit.forEach((visit,j) => {
@@ -49,7 +60,7 @@ export default function summarize(data, set) {
                     stratum: stratumDatum[0],
                     visit: visitDatum[0],
                     value: visitDatum[0] === visit
-                        ? visitDatum[1]
+                        ? visitDatum[1].value
                         : null
                 };
 
@@ -61,7 +72,6 @@ export default function summarize(data, set) {
         measure.visits = [
             ...new Set(measure.tabular.map(d => d.visit)).values()
         ];
-        console.log(measure.visits);
     });
 
     return nested;

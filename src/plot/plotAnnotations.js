@@ -10,7 +10,9 @@ export default function plotAnnotations(svg, data, scales) {
         })
         .attr(
             'transform',
-            (d) => 'translate(' + scales.x(d.value[0]) + ',' + scales.y(d.value[1]) + ')'
+            (d) => {
+                return 'translate(' + scales.x(d.value[0]) + ',' + scales.y(d.value[1].value) + ')';
+            }
         )
         .attr('x', 12)
         .text((d) => d.name)

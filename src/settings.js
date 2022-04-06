@@ -6,6 +6,7 @@ export default function settings() {
 
         // variable mapping
         stratification_var: null,
+        color_var: null,
         id_var: 'USUBJID',
         visit_var: 'AVISIT',
         visit_order_var: 'AVISITN',
@@ -33,7 +34,7 @@ export default function settings() {
         },
 
         // statistics
-        aggregate: 'mean',
+        aggregate: 'median',
 
         // animation
         play: true,
@@ -51,7 +52,7 @@ export default function settings() {
         y_limits: null, // [25,75]
 
         // color
-        color_var: 'change', // ['result', 'change', 'percent_change']
+        //color_var: 'change', // ['result', 'change', 'percent_change']
         color_type: 'linear', // ['categorical', 'linear', 'log']
 
         // dimensions
@@ -60,6 +61,7 @@ export default function settings() {
         margin: {},
 
         // miscellaneous
+        annotate: true,
         footnotes: [
             //`<sup>1</sup> Displaying [aggregate] [outcome].`,
         ]

@@ -5,6 +5,7 @@ export default function group(data) {
 
     group.stratification = createGroup('stratification', data);
     group.stratification_visit = createGroup('stratification,visit', data);
+    group.color = createGroup('color', data);
     group.id = createGroup('id', data);
     group.visit = createGroup('visit', data);
     group.measure = createGroup('measure', data);

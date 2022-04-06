@@ -8,6 +8,6 @@ export default function updateAnnotations(annotations, scales) {
         .duration(this.settings.speed)
         .attr(
             'transform',
-            (d) => 'translate(' + scales.x(d.value[0]) + ',' + scales.y(d.value[1]) + ')'
+            (d) => 'translate(' + scales.x(d.value[0]) + ',' + scales.y(d.value[1].value) + ')'
         );
 }

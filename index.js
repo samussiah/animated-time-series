@@ -31,14 +31,19 @@
       getValue: getValue
     };
 
-    function update() {
-      var _this = this;
+    function update(settings) {
+      // Set stratification variable to whatever.
+      //if (settings.stratification_var === null)
+      //    settings.stratificaton_var = '?';//settings.stratification_var;
+      // Set color variable to stratification variable if null.
+      if (settings.color_var === null) settings.color_var = settings.stratification_var; // 
 
-      if (this.settings.var_labels.stratification === null) this.settings.var_labels.stratification = this.settings.stratification_var; // Update footnotes.
+      if (settings.var_labels.stratification === null) settings.var_labels.stratification = settings.stratification_var; // Update footnotes.
 
-      this.settings.footnotes = this.settings.footnotes.map(function (text) {
-        return text.replace('[aggregate]', _this.settings.aggregate).replace('[outcome]', _this.settings.outcome);
+      settings.footnotes = settings.footnotes.map(function (text) {
+        return text.replace('[aggregate]', settings.aggregate).replace('[outcome]', settings.outcome);
       });
+      return settings;
     }
 
     function settings() {
@@ -46,6 +51,7 @@
         update: update,
         // variable mapping
         stratification_var: null,
+        color_var: null,
         id_var: 'USUBJID',
         visit_var: 'AVISIT',
         visit_order_var: 'AVISITN',
@@ -71,7 +77,7 @@
           fchg: 'Fold Change'
         },
         // statistics
-        aggregate: 'mean',
+        aggregate: 'median',
         // animation
         play: true,
         timepoint: 0,
@@ -90,8 +96,7 @@
         y_limits: null,
         // [25,75]
         // color
-        color_var: 'change',
-        // ['result', 'change', 'percent_change']
+        //color_var: 'change', // ['result', 'change', 'percent_change']
         color_type: 'linear',
         // ['categorical', 'linear', 'log']
         // dimensions
@@ -101,6 +106,7 @@
         // defined in ./layout/getDimensions
         margin: {},
         // miscellaneous
+        annotate: true,
         footnotes: [//`<sup>1</sup> Displaying [aggregate] [outcome].`,
         ]
       };
@@ -286,6 +292,7 @@
     function set(data) {
       var set = {};
       set.stratification = create('stratification', data);
+      set.color = create('color', data);
       set.id = create('id', data);
       set.visit = create('visit', data);
       set.visit_order = create('visit_order', data);
@@ -335,6 +342,7 @@
       var group = {};
       group.stratification = create$1('stratification', data);
       group.stratification_visit = create$1('stratification,visit', data);
+      group.color = create$1('color', data);
       group.id = create$1('id', data);
       group.visit = create$1('visit', data);
       group.measure = create$1('measure', data);
@@ -342,19 +350,28 @@
       return group;
     }
 
-    function summarize(data, set) {
+    function summarize(data, set, settings) {
       // Nest data by measure, stratification, and visit and average results.
       var nested = d3.rollups(data, function (group) {
-        return d3.mean(group, function (d) {
-          return d.result;
-        });
+        return {
+          data: group,
+          value: d3[settings.aggregate](group, function (d) {
+            return d.result;
+          })
+        };
       }, function (d) {
         return d.measure;
-      }, function (d) {
+      }, // facet
+      function (d) {
         return d.stratification;
-      }, function (d) {
+      }, // color
+      function (d) {
         return d.visit;
-      }); // Iterate over measures to generate tabular summary.
+      } // x,y
+      ); // TODO: define a more complex nested value that includes the data, the summarized value, and
+      // the color of the stratification variable, and anything else needed.
+
+      console.log(settings.color_var); // Iterate over measures to generate tabular summary.
 
       nested.forEach(function (measure, i) {
         // Create array with as many elements as stratification and visit values combined.
@@ -368,7 +385,9 @@
 
           if (stratumDatum) stratumDatum[1].sort(function (a, b) {
             return set.visit.indexOf(a[0]) - set.visit.indexOf(b[0]);
-          }); // Iterate over visits within strata.
+          });
+          stratumDatum.color_value = stratumDatum[1][0][1].data[0][settings.color_var];
+          console.log(stratumDatum.color_value); // Iterate over visits within strata.
 
           set.visit.forEach(function (visit, j) {
             // Return data for given measure / stratum / visit.
@@ -389,7 +408,7 @@
               measure: measure[0],
               stratum: stratumDatum[0],
               visit: visitDatum[0],
-              value: visitDatum[0] === visit ? visitDatum[1] : null
+              value: visitDatum[0] === visit ? visitDatum[1].value : null
             };
             tabular[i * set.visit.length + j] = datum;
           });
@@ -401,7 +420,6 @@
         measure.visits = _toConsumableArray(new Set(measure.tabular.map(function (d) {
           return d.visit;
         })).values());
-        console.log(measure.visits);
       });
       return nested;
     }
@@ -419,7 +437,7 @@
       mutate.call(this);
       this.set = set(this.data);
       this.group = group(this.data);
-      this.summary = summarize(this.data, this.set);
+      this.summary = summarize(this.data, this.set, this.settings);
       this.timepoint = timepoint(this.settings.timepoint, this.set);
     }
 
@@ -490,7 +508,7 @@
       var lineGenerator = d3.line().x(function (d) {
         return scales.x(d[0]);
       }).y(function (d) {
-        return scales.y(d[1]);
+        return scales.y(d[1].value);
       });
       var lines = svg.selectAll('path.line').data(data).join('path').classed('path', true).attr('d', function (d) {
         var currentTimepoint = d[1][_this.settings.timepoint];
@@ -499,8 +517,9 @@
         });
         return lineGenerator(pathData);
       }).attr('stroke', function (d) {
-        return scales.color(d[0]);
-      }).style('stroke-width', 4).style('fill', 'none');
+        return scales.color(d.color_value);
+      }).style('stroke-width', 4) //.style('stroke-opacity', .5)
+      .style('fill', 'none');
       lines.lineGenerator = lineGenerator;
       return lines;
     }
@@ -510,8 +529,9 @@
 
       var points = svg.selectAll('g.point-group').data(data, function (d) {
         return d[0];
-      }).join('g').classed('point-group', true).attr('fill', function (d) {
-        return scales.color(d[0]);
+      }).join('g').classed('point-group', true) //.attr('fill-opacity', .75)
+      .attr('fill', function (d) {
+        return scales.color(d.color_value);
       });
       points.selectAll('circle.point').data(function (d) {
         return d[1].slice(0, _this.settings.timepoint + 1);
@@ -520,7 +540,7 @@
       }).join('circle').classed('point', true).attr('cx', function (d) {
         return scales.x(d[0]);
       }).attr('cy', function (d) {
-        return scales.y(d[1]);
+        return scales.y(d[1].value);
       }).attr('r', 5).attr('stroke', 'white');
       return points;
     }
@@ -535,7 +555,7 @@
           value: subset[subset.length - 1]
         };
       }).attr('transform', function (d) {
-        return 'translate(' + scales.x(d.value[0]) + ',' + scales.y(d.value[1]) + ')';
+        return 'translate(' + scales.x(d.value[0]) + ',' + scales.y(d.value[1].value) + ')';
       }).attr('x', 12).text(function (d) {
         return d.name;
       }).style('fill', function (d) {
@@ -569,12 +589,12 @@
           return scales.x(datum[0]);
         }).attr('cy', function (d) {
           var datum = d.stratum[1][_this.settings.timepoint - 1];
-          return scales.y(datum[1]);
+          return scales.y(datum[1].value);
         }).call(function (enter) {
           return enter.transition().duration(_this.settings.speed).attr('cx', function (d) {
             return scales.x(d[0]);
           }).attr('cy', function (d) {
-            return scales.y(d[1]);
+            return scales.y(d[1].value);
           });
         });
       });
@@ -591,7 +611,7 @@
           value: subset[subset.length - 1]
         };
       }).transition().duration(this.settings.speed).attr('transform', function (d) {
-        return 'translate(' + scales.x(d.value[0]) + ',' + scales.y(d.value[1]) + ')';
+        return 'translate(' + scales.x(d.value[0]) + ',' + scales.y(d.value[1].value) + ')';
       });
     }
 
@@ -620,16 +640,13 @@
             }), d3.max(measure.tabular, function (d) {
               return d.value;
             })], dimensions, layout.svg),
-            color: getColorScale(this.set.stratification)
+            color: getColorScale(this.set.color)
           };
           measure.scales = scales; // graphical objects
 
-          var lines = plotLines.call(this, layout.svg, data, scales);
-          var points = plotPoints.call(this, layout.svg, data, scales);
-          var annotations = plotAnnotations.call(this, layout.svg, data, scales);
-          measure.lines = lines;
-          measure.points = points;
-          measure.annotations = annotations;
+          measure.lines = plotLines.call(this, layout.svg, data, scales);
+          measure.points = plotPoints.call(this, layout.svg, data, scales);
+          if (this.settings.annotate) measure.annotations = plotAnnotations.call(this, layout.svg, data, scales);
         } // increment timepoint and update plot accordingly
 
       } catch (err) {
@@ -645,8 +662,7 @@
           this.interval.stop();
           this.settings.timepoint = 0;
         } else {
-          this.timepoint = timepoint(this.settings.timepoint, this.set);
-          console.log(this.timepoint); // TODO: handle measures with missing data at certain visits.
+          this.timepoint = timepoint(this.settings.timepoint, this.set); // TODO: handle measures with missing data at certain visits.
           //   - use actual timepoint / visit value rather than index
 
           var _iterator2 = _createForOfIteratorHelper(this.summary),
@@ -658,7 +674,7 @@
               //if (measure.tabular.map(d => d.visit).includes(this.timepoint.visit)) {
               updateLines.call(this, measure.lines, measure.scales);
               updatePoints.call(this, measure.points, measure.scales);
-              updateAnnotations.call(this, measure.annotations, measure.scales); //}
+              if (this.settings.annotate) updateAnnotations.call(this, measure.annotations, measure.scales); //}
             }
           } catch (err) {
             _iterator2.e(err);
@@ -682,11 +698,9 @@
       var main = {
         data: _data_,
         element: _element_,
-        settings: Object.assign(settings(), _settings_),
+        settings: settings().update(Object.assign(settings(), _settings_)),
         util: util
       };
-      main.settings.update.call(main); // tweak settings based on user input
-
       main.layout = layout.call(main); // add elements to DOM
 
       data.call(main); // mutate and structure data
