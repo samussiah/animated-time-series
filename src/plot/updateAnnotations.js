@@ -1,13 +1,34 @@
+import updateSpacing from './annotations/updateSpacing';
+
 export default function updateAnnotations(annotations, scales) {
     annotations
         .datum((d) => {
-            const subset = d.value.stratum[1].slice(0, this.settings.timepoint + 1);
-            return { name: d.value.stratum[0], value: subset[subset.length - 1] };
-        })
+            const datum = d.stratum[1][this.settings.timepoint];
+
+            return {
+                x: scales.x(datum[0]),
+                y: scales.y(datum[1].value),
+                color: scales.color(d[0]),
+                text: d[0],
+                stratum: d.stratum
+            };
+        });
+
+    updateSpacing.call(this, annotations.data());
+
+    annotations
         .transition()
         .duration(this.settings.speed)
         .attr(
-            'transform',
-            (d) => 'translate(' + scales.x(d.value[0]) + ',' + scales.y(d.value[1].value) + ')'
+            'x',
+            (d) => {
+                return d.x;
+            }
+        )
+        .attr(
+            'y',
+            (d) => {
+                return d.y;
+            }
         );
 }

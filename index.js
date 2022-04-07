@@ -4,6 +4,43 @@
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.animatedTimeSeries = factory());
 }(this, (function () { 'use strict';
 
+    d3.geomean = function (data) {
+      var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function (d) {
+        return d;
+      };
+      var r = 64;
+      var K = Math.pow(2, r);
+      var K1 = Math.pow(2, -r);
+      var p = 1; // product
+
+      var n = 0; // count
+
+      var s = 1; // sign
+
+      var k = 0; // track exponent to prevent under/overflows
+
+      for (var i = 0; i < data.length; i++) {
+        var v = value(data[i]);
+
+        if (+v === +v) {
+          n++;
+          s = Math.sign(v);
+          if (s === 0) return 0;
+          p *= Math.abs(v);
+
+          while (p > K) {
+            p *= K1, ++k;
+          }
+
+          while (p < K1) {
+            p *= K, --k;
+          }
+        }
+      }
+
+      return n ? s * Math.pow(2, (Math.log2(p) + k * r) / n) : NaN;
+    };
+
     function addElement(name, parent) {
       var tagName = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'div';
       var data = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
@@ -58,47 +95,22 @@
         day_var: 'ADY',
         measure_var: 'PARAM',
         result_var: 'AVAL',
-        change_var: 'CHG',
-        percent_change_var: 'PCHG',
-        outcome: 'result',
         var_labels: {
           stratification: null,
+          color_var: null,
           id: 'Participant ID',
           visit: 'Visit',
           visit_order: 'Visit Order',
           measure: 'Measure',
-          result: 'Result',
-          baseline: 'Baseline',
-          change: 'Change',
-          chg: 'Change',
-          percent_change: '% Change',
-          pchg: '% Change',
-          fold_change: 'Fold Change',
-          fchg: 'Fold Change'
+          result: 'Result'
         },
         // statistics
-        aggregate: 'median',
+        aggregate: 'mean',
         // animation
         play: true,
         timepoint: 0,
         speed: 1000,
         loop_delay: 10000,
-        // x
-        x_var: 'day',
-        // ['visit', 'day']
-        x_type: 'linear',
-        // ['ordinal', 'linear', 'log']
-        // y
-        y_var: 'result',
-        // ['result', 'change', 'percent_change']
-        y_type: 'linear',
-        // ['linear', 'log']
-        y_limits: null,
-        // [25,75]
-        // color
-        //color_var: 'change', // ['result', 'change', 'percent_change']
-        color_type: 'linear',
-        // ['categorical', 'linear', 'log']
         // dimensions
         width: null,
         // defined in ./layout/getDimensions
@@ -107,6 +119,8 @@
         margin: {},
         // miscellaneous
         annotate: true,
+        fontSize: 15,
+        fontWeight: 'bold',
         footnotes: [//`<sup>1</sup> Displaying [aggregate] [outcome].`,
         ]
       };
@@ -305,6 +319,7 @@
           return d.day;
         });
       });
+      console.table(set.timepoint);
       return set;
     }
 
@@ -370,8 +385,7 @@
       } // x,y
       ); // TODO: define a more complex nested value that includes the data, the summarized value, and
       // the color of the stratification variable, and anything else needed.
-
-      console.log(settings.color_var); // Iterate over measures to generate tabular summary.
+      // Iterate over measures to generate tabular summary.
 
       nested.forEach(function (measure, i) {
         // Create array with as many elements as stratification and visit values combined.
@@ -386,8 +400,7 @@
           if (stratumDatum) stratumDatum[1].sort(function (a, b) {
             return set.visit.indexOf(a[0]) - set.visit.indexOf(b[0]);
           });
-          stratumDatum.color_value = stratumDatum[1][0][1].data[0][settings.color_var];
-          console.log(stratumDatum.color_value); // Iterate over visits within strata.
+          stratumDatum.color_value = stratumDatum[1][0][1].data[0][settings.color_var]; // Iterate over visits within strata.
 
           set.visit.forEach(function (visit, j) {
             // Return data for given measure / stratum / visit.
@@ -441,9 +454,9 @@
       this.timepoint = timepoint(this.settings.timepoint, this.set);
     }
 
-    function getDimensions$1() {
+    function getDimensions$1(settings) {
       var margin = {
-        top: 25,
+        top: settings.fontSize * 2,
         right: 100,
         bottom: 25,
         left: 50
@@ -460,8 +473,15 @@
     function getLayout(key, dimensions) {
       var main = this.util.addElement('container', this.layout.charts);
       var header = this.util.addElement('header', main, 'h3').text(key);
-      var svg = this.util.addElement('time-series__svg', main, 'svg').attr('width', dimensions.width + dimensions.margin.left + dimensions.margin.right).attr('height', dimensions.height + dimensions.margin.top + dimensions.margin.bottom);
-      var g = svg.append('g').attr('transform', 'translate(' + dimensions.margin.left + ',' + dimensions.margin.top + ')');
+      var width = dimensions.width + dimensions.margin.left + dimensions.margin.right;
+      var height = dimensions.height + dimensions.margin.top + dimensions.margin.bottom;
+      var margin = dimensions.margin;
+      var svg = this.util.addElement('time-series__svg', main, 'svg').attr('width', width).attr('height', height);
+      var g = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+      g.dimensions = dimensions;
+      g.width = width;
+      g.height = height;
+      g.margin = margin;
       return {
         main: main,
         header: header,
@@ -510,7 +530,8 @@
       }).y(function (d) {
         return scales.y(d[1].value);
       });
-      var lines = svg.selectAll('path.line').data(data).join('path').classed('path', true).attr('d', function (d) {
+      var lines = svg.selectAll('path.line').data(data).join('path').classed('line', true);
+      lines.attr('d', function (d) {
         var currentTimepoint = d[1][_this.settings.timepoint];
         var pathData = d[1].map(function (d, i) {
           return i >= _this.settings.timepoint ? currentTimepoint : d;
@@ -518,8 +539,8 @@
         return lineGenerator(pathData);
       }).attr('stroke', function (d) {
         return scales.color(d.color_value);
-      }).style('stroke-width', 4) //.style('stroke-opacity', .5)
-      .style('fill', 'none');
+      }).attr('stroke-width', Math.max(12 / this.set.stratification.length, 1)) //.attr('stroke-opacity', .5)
+      .attr('fill', 'none');
       lines.lineGenerator = lineGenerator;
       return lines;
     }
@@ -527,40 +548,71 @@
     function plotPoints(svg, data, scales) {
       var _this = this;
 
-      var points = svg.selectAll('g.point-group').data(data, function (d) {
+      var pointGroups = svg.selectAll('g.point-group').data(data, function (d) {
         return d[0];
-      }).join('g').classed('point-group', true) //.attr('fill-opacity', .75)
+      }).join('g').classed('point-group', true);
+      pointGroups //.attr('fill-opacity', .75)
       .attr('fill', function (d) {
         return scales.color(d.color_value);
       });
-      points.selectAll('circle.point').data(function (d) {
+      var points = pointGroups.selectAll('circle.point').data(function (d) {
         return d[1].slice(0, _this.settings.timepoint + 1);
       }, function (d, i) {
         return [d.stratum[0], i].join('|');
-      }).join('circle').classed('point', true).attr('cx', function (d) {
+      }).join('circle').classed('point', true);
+      points.attr('cx', function (d) {
         return scales.x(d[0]);
       }).attr('cy', function (d) {
         return scales.y(d[1].value);
       }).attr('r', 5).attr('stroke', 'white');
-      return points;
+      return pointGroups;
+    }
+
+    // TODO: reverse algorithm to shift text upward - add top margin as needed
+    //
+    // reposition annotations to avoid overlap
+    function updateSpacing(data) {
+      var spacing = this.settings.fontSize;
+      data.sort(function (a, b) {
+        return b.y - a.y;
+      }).forEach(function (d, i) {
+        if (i > 0) {
+          var diff = data[i - 1].y - d.y;
+
+          if (diff < spacing) {
+            d.y = d.y - (spacing - diff);
+          }
+        }
+      });
     }
 
     function plotAnnotations(svg, data, scales) {
       var _this = this;
 
-      var annotations = svg.selectAll('text.annotation').data(data).join('text').classed('annotation', true).datum(function (d) {
-        var subset = d[1].slice(0, _this.settings.timepoint + 1);
+      // create elements
+      var annotations = svg.selectAll('text.annotation').data(data).join('text').classed('annotation', true); // bind data
+
+      annotations.datum(function (d) {
+        var datum = d[1][_this.settings.timepoint];
         return {
-          name: d[0],
-          value: subset[subset.length - 1]
+          x: scales.x(datum[0]),
+          y: scales.y(datum[1].value),
+          color: scales.color(d[0]),
+          text: d[0],
+          stratum: d
         };
-      }).attr('transform', function (d) {
-        return 'translate(' + scales.x(d.value[0]) + ',' + scales.y(d.value[1].value) + ')';
-      }).attr('x', 12).text(function (d) {
-        return d.name;
-      }).style('fill', function (d) {
-        return scales.color(d.name);
-      }).style('font-size', 15);
+      });
+      updateSpacing.call(this, annotations.data()); // apply attributes
+
+      annotations.attr('x', function (d) {
+        return d.x;
+      }).attr('y', function (d) {
+        return d.y;
+      }).attr('dx', 7).attr('dy', this.settings.fontSize / 3).attr('fill', function (d) {
+        return d.color;
+      }).style('font-size', this.settings.fontSize).style('font-weight', this.settings.fontWeight).text(function (d) {
+        return d.text;
+      });
       return annotations;
     }
 
@@ -605,13 +657,20 @@
       var _this = this;
 
       annotations.datum(function (d) {
-        var subset = d.value.stratum[1].slice(0, _this.settings.timepoint + 1);
+        var datum = d.stratum[1][_this.settings.timepoint];
         return {
-          name: d.value.stratum[0],
-          value: subset[subset.length - 1]
+          x: scales.x(datum[0]),
+          y: scales.y(datum[1].value),
+          color: scales.color(d[0]),
+          text: d[0],
+          stratum: d.stratum
         };
-      }).transition().duration(this.settings.speed).attr('transform', function (d) {
-        return 'translate(' + scales.x(d.value[0]) + ',' + scales.y(d.value[1].value) + ')';
+      });
+      updateSpacing.call(this, annotations.data());
+      annotations.transition().duration(this.settings.speed).attr('x', function (d) {
+        return d.x;
+      }).attr('y', function (d) {
+        return d.y;
       });
     }
 
@@ -621,7 +680,7 @@
       //this.summary.forEach((stratum) => {
       //    stratum.subset = stratum[1].slice(0, this.settings.timepoint + 1);
       //});
-      var dimensions = getDimensions$1(); // Iterate through measures.
+      var dimensions = getDimensions$1(this.settings); // Iterate through measures.
 
       var _iterator = _createForOfIteratorHelper(this.summary),
           _step;
@@ -662,8 +721,7 @@
           this.interval.stop();
           this.settings.timepoint = 0;
         } else {
-          this.timepoint = timepoint(this.settings.timepoint, this.set); // TODO: handle measures with missing data at certain visits.
-          //   - use actual timepoint / visit value rather than index
+          this.timepoint = timepoint(this.settings.timepoint, this.set);
 
           var _iterator2 = _createForOfIteratorHelper(this.summary),
               _step2;
@@ -671,10 +729,9 @@
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
               var measure = _step2.value;
-              //if (measure.tabular.map(d => d.visit).includes(this.timepoint.visit)) {
               updateLines.call(this, measure.lines, measure.scales);
               updatePoints.call(this, measure.points, measure.scales);
-              if (this.settings.annotate) updateAnnotations.call(this, measure.annotations, measure.scales); //}
+              if (this.settings.annotate) updateAnnotations.call(this, measure.annotations, measure.scales);
             }
           } catch (err) {
             _iterator2.e(err);

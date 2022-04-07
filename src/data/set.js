@@ -17,6 +17,7 @@ export default function set(data) {
             (d) => d.day
         )
     );
+    console.table(set.timepoint);
 
     return set;
 }

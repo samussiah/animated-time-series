@@ -19,7 +19,7 @@ export default function plot() {
     //    stratum.subset = stratum[1].slice(0, this.settings.timepoint + 1);
     //});
 
-    const dimensions = getDimensions();
+    const dimensions = getDimensions(this.settings);
 
     // Iterate through measures.
     for (const measure of this.summary) {
@@ -53,15 +53,11 @@ export default function plot() {
         } else {
             this.timepoint = timepoint(this.settings.timepoint, this.set);
 
-            // TODO: handle measures with missing data at certain visits.
-            //   - use actual timepoint / visit value rather than index
             for (const measure of this.summary) {
-                //if (measure.tabular.map(d => d.visit).includes(this.timepoint.visit)) {
-                    updateLines.call(this, measure.lines, measure.scales);
-                    updatePoints.call(this, measure.points, measure.scales);
-                    if (this.settings.annotate)
-                        updateAnnotations.call(this, measure.annotations, measure.scales);
-                //}
+                updateLines.call(this, measure.lines, measure.scales);
+                updatePoints.call(this, measure.points, measure.scales);
+                if (this.settings.annotate)
+                    updateAnnotations.call(this, measure.annotations, measure.scales);
             }
         }
     };

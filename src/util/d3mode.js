@@ -19,6 +19,7 @@ export default function mode(values, valueof) {
 
     if (count) return sum / count;
 }
+
 d3.mode = function (array) {
     if (array.length == 0) return null;
     var modeMap = {};
@@ -33,5 +34,6 @@ d3.mode = function (array) {
             maxCount = modeMap[el];
         }
     }
+
     return maxEl;
 };

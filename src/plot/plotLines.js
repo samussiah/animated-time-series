@@ -8,7 +8,9 @@ export default function plotLines(svg, data, scales) {
         .selectAll('path.line')
         .data(data)
         .join('path')
-        .classed('path', true)
+        .classed('line', true);
+
+    lines
         .attr('d', (d) => {
             const currentTimepoint = d[1][this.settings.timepoint];
             const pathData = d[1].map((d, i) =>
@@ -20,9 +22,15 @@ export default function plotLines(svg, data, scales) {
         .attr('stroke', function (d) {
             return scales.color(d.color_value);
         })
-        .style('stroke-width', 4)
-        //.style('stroke-opacity', .5)
-        .style('fill', 'none');
+        .attr(
+            'stroke-width',
+            Math.max(
+                12/this.set.stratification.length,
+                1
+            )
+        )
+        //.attr('stroke-opacity', .5)
+        .attr('fill', 'none');
 
     lines.lineGenerator = lineGenerator;
 

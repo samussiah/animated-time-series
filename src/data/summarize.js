@@ -15,7 +15,7 @@ export default function summarize(data, set, settings) {
 
     // TODO: define a more complex nested value that includes the data, the summarized value, and
     // the color of the stratification variable, and anything else needed.
-console.log(settings.color_var);
+
     // Iterate over measures to generate tabular summary.
     nested.forEach((measure, i) => {
         // Create array with as many elements as stratification and visit values combined.
@@ -36,7 +36,6 @@ console.log(settings.color_var);
                     ));
 
             stratumDatum.color_value = stratumDatum[1][0][1].data[0][settings.color_var];
-            console.log(stratumDatum.color_value);
 
             // Iterate over visits within strata.
             set.visit.forEach((visit,j) => {
