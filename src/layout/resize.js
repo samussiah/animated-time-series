@@ -1,5 +1,5 @@
 import getDimensions from './getDimensions';
-import draw from '../init/draw';
+//import draw from '../init/draw';
 
 export default function resize() {
     getDimensions.call(this);

@@ -3,7 +3,6 @@ import settings from './settings';
 import layout from './layout';
 import data from './data';
 import plot from './plot';
-import init from './init';
 
 export default function animatedTimeSeries(_data_, _element_ = 'body', _settings_ = {}) {
     const main = {
@@ -15,8 +14,7 @@ export default function animatedTimeSeries(_data_, _element_ = 'body', _settings
 
     main.layout = layout.call(main); // add elements to DOM
     data.call(main); // mutate and structure data
-    plot.call(main);
-    //init.call(main); // generate the output
+    plot.call(main); // define and render plots
 
     return main;
 }

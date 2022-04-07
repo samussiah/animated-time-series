@@ -1,4 +1,4 @@
-import interval from '../../init/interval';
+//import interval from '../../init/interval';
 
 export default function play(parent) {
     const main = this;

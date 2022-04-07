@@ -1,4 +1,4 @@
-import { iterate } from '../../init/interval';
+//import { iterate } from '../../init/interval';
 
 export default function step(parent) {
     const main = this;
