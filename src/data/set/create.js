@@ -4,9 +4,7 @@ export default function create(variable, data) {
     switch (variable) {
         case 'visit':
             set = new Set(
-                data
-                    .filter((d) => !(d.visit_order % 1))
-                    .map((d) => d.visit + '|' + d.visit_order)
+                data.filter((d) => !(d.visit_order % 1)).map((d) => d.visit + '|' + d.visit_order)
             );
 
             array = [...set.values()]

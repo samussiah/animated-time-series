@@ -21,7 +21,7 @@ export default function settings() {
             visit: 'Visit',
             visit_order: 'Visit Order',
             measure: 'Measure',
-            result: 'Result'
+            result: 'Result',
         },
 
         // statistics
@@ -44,6 +44,6 @@ export default function settings() {
         fontWeight: 'bold',
         footnotes: [
             //`<sup>1</sup> Displaying [aggregate] [outcome].`,
-        ]
+        ],
     };
 }

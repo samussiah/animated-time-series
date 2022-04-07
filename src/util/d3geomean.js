@@ -1,4 +1,4 @@
-d3.geomean = function(data, value = d => d) {
+d3.geomean = function (data, value = (d) => d) {
     const r = 64;
     const K = 2 ** r;
     const K1 = 2 ** -r;

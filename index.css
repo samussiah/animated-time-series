@@ -145,8 +145,8 @@
     shape-rendering: crispEdges;*/
 }
 .grid-lines line {
-  stroke: gray;
-  stroke-opacity: 0.2;
+    stroke: gray;
+    stroke-opacity: 0.2;
 }
 
 .atm-axis text {

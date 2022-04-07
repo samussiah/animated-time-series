@@ -9,9 +9,7 @@ export default function animatedTimeSeries(_data_, _element_ = 'body', _settings
     const main = {
         data: _data_,
         element: _element_,
-        settings: settings().update(
-            Object.assign(settings(), _settings_)
-        ),
+        settings: settings().update(Object.assign(settings(), _settings_)),
         util,
     };
 

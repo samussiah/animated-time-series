@@ -31,7 +31,11 @@ export default function plot() {
         // scales
         const scales = {
             x: getXScale(this.set.visit, dimensions, layout.svg, measure.visits),
-            y: getYScale([d3.min(measure.tabular, (d) => d.value), d3.max(measure.tabular, (d) => d.value)], dimensions, layout.svg),
+            y: getYScale(
+                [d3.min(measure.tabular, (d) => d.value), d3.max(measure.tabular, (d) => d.value)],
+                dimensions,
+                layout.svg
+            ),
             color: getColorScale(this.set.color),
         };
         measure.scales = scales;

@@ -10,10 +10,7 @@ export default function getLayout(key, dimensions) {
         .attr('height', height);
     const g = svg
         .append('g')
-        .attr(
-            'transform',
-            'translate(' + margin.left + ',' + margin.top + ')'
-        );
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
     g.dimensions = dimensions;
     g.width = width;
     g.height = height;
@@ -22,6 +19,6 @@ export default function getLayout(key, dimensions) {
     return {
         main,
         header,
-        svg: g
+        svg: g,
     };
 }

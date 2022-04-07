@@ -17,7 +17,7 @@ export default function plotPoints(svg, data, scales) {
             (d) => {
                 return d[1].slice(0, this.settings.timepoint + 1);
             },
-            (d,i) => {
+            (d, i) => {
                 return [d.stratum[0], i].join('|');
             }
         )

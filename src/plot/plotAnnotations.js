@@ -9,37 +9,30 @@ export default function plotAnnotations(svg, data, scales) {
         .classed('annotation', true);
 
     // bind data
-    annotations
-        .datum((d) => {
-            const datum = d[1][this.settings.timepoint];
+    annotations.datum((d) => {
+        const datum = d[1][this.settings.timepoint];
 
-            return {
-                x: scales.x(datum[0]),
-                y: scales.y(datum[1].value),
-                color: scales.color(d[0]),
-                text: d[0],
-                stratum: d
-            };
-        });
+        return {
+            x: scales.x(datum[0]),
+            y: scales.y(datum[1].value),
+            color: scales.color(d[0]),
+            text: d[0],
+            stratum: d,
+        };
+    });
 
     updateSpacing.call(this, annotations.data());
 
     // apply attributes
     annotations
-        .attr(
-            'x',
-            (d) => {
-                return d.x;
-            }
-        )
-        .attr(
-            'y',
-            (d) => {
-                return d.y;
-            }
-        )
+        .attr('x', (d) => {
+            return d.x;
+        })
+        .attr('y', (d) => {
+            return d.y;
+        })
         .attr('dx', 7)
-        .attr('dy', this.settings.fontSize/3)
+        .attr('dy', this.settings.fontSize / 3)
         .attr('fill', (d) => {
             return d.color;
         })

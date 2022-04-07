@@ -4,11 +4,7 @@ export default function plotLines(svg, data, scales) {
         .x((d) => scales.x(d[0]))
         .y((d) => scales.y(d[1].value));
 
-    const lines = svg
-        .selectAll('path.line')
-        .data(data)
-        .join('path')
-        .classed('line', true);
+    const lines = svg.selectAll('path.line').data(data).join('path').classed('line', true);
 
     lines
         .attr('d', (d) => {
@@ -22,13 +18,7 @@ export default function plotLines(svg, data, scales) {
         .attr('stroke', function (d) {
             return scales.color(d.color_value);
         })
-        .attr(
-            'stroke-width',
-            Math.max(
-                12/this.set.stratification.length,
-                1
-            )
-        )
+        .attr('stroke-width', Math.max(12 / this.set.stratification.length, 1))
         //.attr('stroke-opacity', .5)
         .attr('fill', 'none');
 
