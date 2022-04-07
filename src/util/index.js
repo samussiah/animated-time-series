@@ -3,5 +3,5 @@ import './d3mode';
 import addElement from './addElement';
 
 export default {
-    addElement
+    addElement,
 };
