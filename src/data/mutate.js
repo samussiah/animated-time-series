@@ -1,8 +1,4 @@
 export default function mutate() {
-    const numericId = this.data.every(
-        (d) => /^-?\d+\.?\d*$/.test(d.id) || /^-?\d*\.?\d+$/.test(d.id)
-    );
-
     this.data.forEach((d) => {
         // Rename data variables.
         Object.keys(this.settings)

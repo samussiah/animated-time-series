@@ -1,7 +1,7 @@
-import getDatum from './getDatum';
-import getValue from './getValue';
+import './d3geomean';
+import './d3mode';
+import addElement from './addElement';
 
 export default {
-    getDatum,
-    getValue,
+    addElement,
 };

@@ -1,20 +1,20 @@
-import defaults from './settings';
 import util from './util/index';
+import settings from './settings';
 import layout from './layout';
-import dataManipulation from './data';
-import init from './init';
+import data from './data';
+import plot from './plot';
 
-export default function animatedTimeSeries(data, element = 'body', settings = {}) {
+export default function animatedTimeSeries(_data_, _element_ = 'body', _settings_ = {}) {
     const main = {
-        data,
-        element,
-        settings: Object.assign(defaults, settings),
+        data: _data_,
+        element: _element_,
+        settings: settings().update(Object.assign(settings(), _settings_)),
         util,
     };
 
-    main.containers = layout.call(main); // add elements to DOM
-    dataManipulation.call(main); // mutate and structure data
-    init.call(main); // run the animation
+    main.layout = layout.call(main); // add elements to DOM
+    data.call(main); // mutate and structure data
+    plot.call(main); // define and render plots
 
     return main;
 }
