@@ -27,7 +27,10 @@ export default function settings() {
 
         // statistics
         aggregate: 'mean',
-        xScale: 'ordinal', // [ 'ordinal' , 'continuous' ]
+
+        // x stuff
+        xType: 'ordinal', // [ 'ordinal' , 'discrete' ]
+        xVar: 'visit', // [ 'visit', 'timepoint' ]
 
         // animation
         play: true,

@@ -10,10 +10,11 @@ export default function plotAnnotations(svg, data, scales) {
 
     // bind data
     annotations.datum((d) => {
+        // Get visit datum.
         const datum = d[1][this.settings.timepoint];
 
         return {
-            x: scales.x(datum[0]),
+            x: scales.x(datum[this.settings.xVar]),
             y: scales.y(datum[1].value),
             color: scales.color(d[0]),
             text: d[0],

@@ -5,7 +5,7 @@ export default function updateAnnotations(annotations, scales) {
         const datum = d.stratum[1][this.settings.timepoint];
 
         return {
-            x: scales.x(datum[0]),
+            x: scales.x(datum[this.settings.xVar]),
             y: scales.y(datum[1].value),
             color: scales.color(d[0]),
             text: d[0],

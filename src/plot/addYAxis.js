@@ -1,12 +1,8 @@
 export default function addYAxis(svg, yScale) {
-    const yAxis = svg
-        .append('g')
-        .classed('atm-axis', true)
-        .call(d3.axisLeft(yScale));
+    const yAxis = svg.append('g').classed('atm-axis', true).call(d3.axisLeft(yScale));
 
-    yAxis.grid = svg
-        .append('g')
-        .call(g => g
+    yAxis.grid = svg.append('g').call((g) =>
+        g
             .attr('class', 'grid-lines')
             .selectAll('line')
             .data(yScale.ticks())
@@ -15,7 +11,7 @@ export default function addYAxis(svg, yScale) {
             .attr('x2', svg.dimensions.width)
             .attr('y1', (d) => yScale(d))
             .attr('y2', (d) => yScale(d))
-        );
+    );
 
     return yAxis;
 }

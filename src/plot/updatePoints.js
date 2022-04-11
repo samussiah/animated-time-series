@@ -17,7 +17,7 @@ export default function updatePoints(points, scales) {
                 .attr('stroke', 'white')
                 .attr('cx', (d) => {
                     const datum = d.stratum[1][this.settings.timepoint - 1];
-                    return scales.x(datum[0]);
+                    return scales.x(datum[this.settings.xVar]);
                 })
                 .attr('cy', (d) => {
                     const datum = d.stratum[1][this.settings.timepoint - 1];
@@ -27,7 +27,7 @@ export default function updatePoints(points, scales) {
                     enter
                         .transition()
                         .duration(this.settings.speed)
-                        .attr('cx', (d) => scales.x(d[0]))
+                        .attr('cx', (d) => scales.x(d[this.settings.xVar]))
                         .attr('cy', (d) => scales.y(d[1].value))
                 )
         );

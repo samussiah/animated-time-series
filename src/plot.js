@@ -23,13 +23,8 @@ export default function plot() {
     //});
 
     const dimensions = getDimensions(this.settings);
-    const xScale = getXScale(
-        this.set.visit,
-        dimensions
-    ); // TODO: pass set in here
-    const colorScale = getColorScale(
-        this.set.color
-    );
+    const xScale = getXScale(this.settings.xType, this.set[this.settings.xVar], dimensions); // TODO: pass set in here
+    const colorScale = getColorScale(this.set.color);
 
     // Iterate through measures.
     for (const measure of this.summary) {
@@ -42,22 +37,21 @@ export default function plot() {
         measure.scales = {
             x: xScale.copy(),
             y: getYScale(
-                measure.tabular.map(d => d.value),
+                measure.tabular.map((d) => d.value),
                 dimensions
             ),
-            color: colorScale.copy()
+            color: colorScale.copy(),
         };
 
         // axes
         measure.xAxis = addXAxis(
+            this.settings.xType,
             layout.svg,
+            this.set,
             measure.scales.x,
             measure.visits
         );
-        measure.yAxis = addYAxis(
-            layout.svg,
-            measure.scales.y
-        );
+        measure.yAxis = addYAxis(layout.svg, measure.scales.y);
 
         // graphical objects
         measure.lines = plotLines.call(this, layout.svg, data, measure.scales);

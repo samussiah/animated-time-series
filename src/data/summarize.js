@@ -26,7 +26,25 @@ export default function summarize(data, set, settings) {
         // TODO: handle missing strata for given measure
         // Iterate over strata within measure.
         set.stratification.forEach((stratum, i) => {
-            const stratumDatum = measure[1].find((d) => d[0] === stratum);
+            let stratumDatum = measure[1].find((d) => d[0] === stratum);
+
+            // Handle missing data.
+            if (stratumDatum === undefined) {
+                stratumDatum = [
+                    stratum,
+                    set.visit.map((visit) => {
+                        return [
+                            visit,
+                            {
+                                data: [],
+                                value: null,
+                            },
+                        ];
+                    }),
+                ];
+
+                measure[1].splice(i, 0, stratumDatum);
+            }
 
             // Sort visit-level summary.
             if (stratumDatum)
@@ -40,16 +58,17 @@ export default function summarize(data, set, settings) {
                 let visitDatum = stratumDatum[1].find((d) => d[0] === visit);
 
                 // TODO: what if measure is not captured at first visit?  Use next visit?
-                // If measure is not captured at given visit, use previous visit.
+                // Handle missing data. If measure is not captured at given visit, use previous visit.
                 if (visitDatum === undefined) {
                     visitDatum = [...stratumDatum[1][j - 1]];
                     stratumDatum[1].splice(j, 0, visitDatum);
                 }
 
                 visitDatum.visit = visitDatum[0];
-                visitDatum.index = set.visit.findIndex(visit => visit === visitDatum[0]);
+                visitDatum.index = set.visit.findIndex((visit) => visit === visitDatum[0]);
                 visitDatum.visit_order = set.visit_order[visitDatum.index];
                 visitDatum.timepoint = set.timepoint[visitDatum.index];
+                // TODO: add day?
 
                 // Attach stratum-level data to visit.
                 visitDatum.stratum = stratumDatum;
