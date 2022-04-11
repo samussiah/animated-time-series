@@ -32,6 +32,14 @@ export default function settings() {
         xType: 'ordinal', // [ 'ordinal' , 'discrete' ]
         xVar: 'visit', // [ 'visit', 'timepoint' ]
 
+        // y stuff
+
+        // color stuff
+        displayLegend: false,
+        annotate: true,
+        fontSize: 15,
+        fontWeight: 'bold',
+
         // animation
         play: true,
         timepoint: 0,
@@ -44,9 +52,6 @@ export default function settings() {
         margin: {},
 
         // miscellaneous
-        annotate: true,
-        fontSize: 15,
-        fontWeight: 'bold',
         footnotes: [
             //`<sup>1</sup> Displaying [aggregate] [outcome].`,
         ],

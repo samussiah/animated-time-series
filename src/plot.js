@@ -1,3 +1,5 @@
+import timepoint from './data/timepoint';
+
 import getDimensions from './plot/getDimensions';
 import getLayout from './plot/getLayout';
 
@@ -7,12 +9,12 @@ import getColorScale from './plot/getColorScale';
 
 import addXAxis from './plot/addXAxis';
 import addYAxis from './plot/addYAxis';
-//import addLegend from './plot/addLegend';
+import addLegend from './plot/addLegend';
+
 import plotLines from './plot/plotLines';
 import plotPoints from './plot/plotPoints';
 import plotAnnotations from './plot/plotAnnotations';
 
-import timepoint from './data/timepoint';
 import updateLines from './plot/updateLines';
 import updatePoints from './plot/updatePoints';
 import updateAnnotations from './plot/updateAnnotations';
@@ -58,6 +60,8 @@ export default function plot() {
         measure.points = plotPoints.call(this, layout.svg, data, measure.scales);
         if (this.settings.annotate)
             measure.annotations = plotAnnotations.call(this, layout.svg, data, measure.scales);
+        else
+            measure.legend = addLegend.call(this, layout.svg, measure.scales.color);
     }
 
     // increment timepoint and update plot accordingly
