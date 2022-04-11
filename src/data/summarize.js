@@ -1,3 +1,5 @@
+// TODO: refactor - this shit's hard to pull apart
+// TODO: define and display continuous x-axis
 export default function summarize(data, set, settings) {
     // Nest data by measure, stratification, and visit and average results.
     const nested = d3.rollups(
@@ -43,6 +45,11 @@ export default function summarize(data, set, settings) {
                     visitDatum = [...stratumDatum[1][j - 1]];
                     stratumDatum[1].splice(j, 0, visitDatum);
                 }
+
+                visitDatum.visit = visitDatum[0];
+                visitDatum.index = set.visit.findIndex(visit => visit === visitDatum[0]);
+                visitDatum.visit_order = set.visit_order[visitDatum.index];
+                visitDatum.timepoint = set.timepoint[visitDatum.index];
 
                 // Attach stratum-level data to visit.
                 visitDatum.stratum = stratumDatum;

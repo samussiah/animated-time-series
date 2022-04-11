@@ -20,18 +20,20 @@ export default function settings() {
             id: 'Participant ID',
             visit: 'Visit',
             visit_order: 'Visit Order',
+            day: 'Study Day',
             measure: 'Measure',
             result: 'Result',
         },
 
         // statistics
         aggregate: 'mean',
+        xScale: 'ordinal', // [ 'ordinal' , 'continuous' ]
 
         // animation
         play: true,
         timepoint: 0,
         speed: 1000,
-        loop_delay: 10000,
+        loopDelay: 10000,
 
         // dimensions
         width: null, // defined in ./layout/getDimensions
