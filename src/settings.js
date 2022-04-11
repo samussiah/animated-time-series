@@ -20,6 +20,7 @@ export default function settings() {
             id: 'Participant ID',
             visit: 'Visit',
             visit_order: 'Visit Order',
+            day: 'Study Day',
             measure: 'Measure',
             result: 'Result',
         },
@@ -27,11 +28,15 @@ export default function settings() {
         // statistics
         aggregate: 'mean',
 
+        // x stuff
+        xType: 'ordinal', // [ 'ordinal' , 'discrete' ]
+        xVar: 'visit', // [ 'visit', 'timepoint' ]
+
         // animation
         play: true,
         timepoint: 0,
         speed: 1000,
-        loop_delay: 10000,
+        loopDelay: 10000,
 
         // dimensions
         width: null, // defined in ./layout/getDimensions

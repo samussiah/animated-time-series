@@ -91,6 +91,7 @@
     };
 
     function update(settings) {
+        // TODO: support non-stratified outputs.
         // Set stratification variable to whatever.
         //if (settings.stratification_var === null)
         //    settings.stratificaton_var = '?';//settings.stratification_var;
@@ -98,7 +99,10 @@
         if (settings.color_var === null) settings.color_var = settings.stratification_var; //
 
         if (settings.var_labels.stratification === null)
-            settings.var_labels.stratification = settings.stratification_var; // Update footnotes.
+            settings.var_labels.stratification = settings.stratification_var;
+        if (!['ordinal', 'discrete'].includes(settings.xType)) settings.xType = 'ordinal';
+        if (settings.xType === 'ordinal') settings.xVar = 'visit';
+        else if (settings.xType === 'discrete') settings.xVar = 'timepoint'; // Update footnotes.
 
         settings.footnotes = settings.footnotes.map(function (text) {
             return text
@@ -126,16 +130,22 @@
                 id: 'Participant ID',
                 visit: 'Visit',
                 visit_order: 'Visit Order',
+                day: 'Study Day',
                 measure: 'Measure',
                 result: 'Result',
             },
             // statistics
             aggregate: 'mean',
+            // x stuff
+            xType: 'ordinal',
+            // [ 'ordinal' , 'discrete' ]
+            xVar: 'visit',
+            // [ 'visit', 'timepoint' ]
             // animation
             play: true,
             timepoint: 0,
             speed: 1000,
-            loop_delay: 10000,
+            loopDelay: 10000,
             // dimensions
             width: null,
             // defined in ./layout/getDimensions
@@ -372,7 +382,8 @@
         set.visit = create('visit', data);
         set.visit_order = create('visit_order', data);
         set.day = create('day', data);
-        set.measure = create('measure', data);
+        set.measure = create('measure', data); // Calculate median continuous timepoint of each ordinal timepoint.
+
         set.timepoint = set.visit.map(function (visit) {
             return d3.median(
                 data.filter(function (d) {
@@ -383,7 +394,6 @@
                 }
             );
         });
-        console.table(set.timepoint);
         return set;
     }
 
@@ -437,6 +447,8 @@
         return group;
     }
 
+    // TODO: refactor - this shit's hard to pull apart
+    // TODO: define and display continuous x-axis
     function summarize(data, set, settings) {
         // Nest data by measure, stratification, and visit and average results.
         var nested = d3.rollups(
@@ -470,7 +482,23 @@
             set.stratification.forEach(function (stratum, i) {
                 var stratumDatum = measure[1].find(function (d) {
                     return d[0] === stratum;
-                }); // Sort visit-level summary.
+                }); // Handle missing data.
+
+                if (stratumDatum === undefined) {
+                    stratumDatum = [
+                        stratum,
+                        set.visit.map(function (visit) {
+                            return [
+                                visit,
+                                {
+                                    data: [],
+                                    value: null,
+                                },
+                            ];
+                        }),
+                    ];
+                    measure[1].splice(i, 0, stratumDatum);
+                } // Sort visit-level summary.
 
                 if (stratumDatum)
                     stratumDatum[1].sort(function (a, b) {
@@ -483,12 +511,20 @@
                     var visitDatum = stratumDatum[1].find(function (d) {
                         return d[0] === visit;
                     }); // TODO: what if measure is not captured at first visit?  Use next visit?
-                    // If measure is not captured at given visit, use previous visit.
+                    // Handle missing data. If measure is not captured at given visit, use previous visit.
 
                     if (visitDatum === undefined) {
                         visitDatum = _toConsumableArray(stratumDatum[1][j - 1]);
                         stratumDatum[1].splice(j, 0, visitDatum);
-                    } // Attach stratum-level data to visit.
+                    }
+
+                    visitDatum.visit = visitDatum[0];
+                    visitDatum.index = set.visit.findIndex(function (visit) {
+                        return visit === visitDatum[0];
+                    });
+                    visitDatum.visit_order = set.visit_order[visitDatum.index];
+                    visitDatum.timepoint = set.timepoint[visitDatum.index]; // TODO: add day?
+                    // Attach stratum-level data to visit.
 
                     visitDatum.stratum = stratumDatum; // Define "row" in tabular summary.
 
@@ -537,7 +573,7 @@
         var margin = {
             top: settings.fontSize * 2,
             right: 100,
-            bottom: 25,
+            bottom: 55,
             left: 50,
         };
         var width = 500 - margin.left - margin.right;
@@ -573,40 +609,29 @@
         };
     }
 
-    function getXScale(domain, dimensions, svg, visits) {
-        var xScale = d3.scalePoint().domain(domain).range([0, dimensions.width]).padding([0.5]);
-        var xAxis = svg
-            .append('g')
-            .classed('atm-axis', true)
-            .attr('transform', 'translate(0,' + dimensions.height + ')')
-            .call(d3.axisBottom(xScale));
-        xAxis.selectAll('.tick').classed('atm-missing', function (d) {
-            return visits.includes(d) === false;
-        });
+    function getXScale(type, domain, dimensions) {
+        var xScale;
+
+        if (type === 'ordinal') {
+            xScale = d3.scalePoint().domain(domain).range([0, dimensions.width]).padding([0.5]);
+        } else {
+            var extent = d3.extent(domain);
+            var range = extent[1] - extent[0];
+            xScale = d3
+                .scaleLinear()
+                .domain([extent[0] - range * 0.05, extent[1] + range * 0.05]) //.nice()
+                .range([0, dimensions.width]);
+        }
+
         return xScale;
     }
 
-    function getYScale(domain, dimensions, svg) {
-        var yScale = d3.scaleLinear().domain(domain).nice().range([dimensions.height, 0]);
-        svg.append('g').classed('atm-axis', true).call(d3.axisLeft(yScale));
-
-        var yGrid = function yGrid(g) {
-            return g
-                .attr('class', 'grid-lines')
-                .selectAll('line')
-                .data(yScale.ticks())
-                .join('line')
-                .attr('x1', 0) //dimensions.margin.left)
-                .attr('x2', dimensions.width) // - dimensions.margin.right)
-                .attr('y1', function (d) {
-                    return yScale(d);
-                })
-                .attr('y2', function (d) {
-                    return yScale(d);
-                });
-        };
-
-        svg.append('g').call(yGrid);
+    function getYScale(values, dimensions) {
+        var yScale = d3
+            .scaleLinear()
+            .domain([d3.min(values), d3.max(values)])
+            .nice()
+            .range([dimensions.height, 0]);
         return yScale;
     }
 
@@ -617,13 +642,70 @@
         return colorScale;
     }
 
+    function addXAxis(type, svg, set, xScale) {
+        var xAxis = svg
+            .append('g')
+            .classed('atm-axis', true)
+            .attr('transform', 'translate(0,' + svg.dimensions.height + ')');
+
+        if (type === 'ordinal') {
+            xAxis.call(d3.axisBottom(xScale));
+        } else {
+            xAxis.call(
+                d3
+                    .axisBottom(xScale)
+                    .tickValues(set.timepoint)
+                    .tickFormat(function (d, i) {
+                        return set.visit[i];
+                    })
+            );
+        }
+
+        xAxis
+            .selectAll('text')
+            .style('text-anchor', 'end')
+            .attr('transform', 'rotate(-45)')
+            .attr('dx', '-.8em')
+            .attr('dy', '.15em'); // TODO: make this work with a discrete time scale
+        //if (visits !== null)
+        //    xAxis
+        //        .selectAll('.tick')
+        //        .classed(
+        //            'atm-missing',
+        //            (d) => {
+        //                visits.includes(d) === false
+        //            });
+
+        return xAxis;
+    }
+
+    function addYAxis(svg, yScale) {
+        var yAxis = svg.append('g').classed('atm-axis', true).call(d3.axisLeft(yScale));
+        yAxis.grid = svg.append('g').call(function (g) {
+            return g
+                .attr('class', 'grid-lines')
+                .selectAll('line')
+                .data(yScale.ticks())
+                .join('line')
+                .attr('x1', 0)
+                .attr('x2', svg.dimensions.width)
+                .attr('y1', function (d) {
+                    return yScale(d);
+                })
+                .attr('y2', function (d) {
+                    return yScale(d);
+                });
+        });
+        return yAxis;
+    }
+
     function plotLines(svg, data, scales) {
         var _this = this;
 
         var lineGenerator = d3
             .line()
             .x(function (d) {
-                return scales.x(d[0]);
+                return scales.x(d[_this.settings.xVar]);
             })
             .y(function (d) {
                 return scales.y(d[1].value);
@@ -674,7 +756,7 @@
             .classed('point', true);
         points
             .attr('cx', function (d) {
-                return scales.x(d[0]);
+                return scales.x(d[_this.settings.xVar]);
             })
             .attr('cy', function (d) {
                 return scales.y(d[1].value);
@@ -713,9 +795,10 @@
             .classed('annotation', true); // bind data
 
         annotations.datum(function (d) {
+            // Get visit datum.
             var datum = d[1][_this.settings.timepoint];
             return {
-                x: scales.x(datum[0]),
+                x: scales.x(datum[_this.settings.xVar]),
                 y: scales.y(datum[1].value),
                 color: scales.color(d[0]),
                 text: d[0],
@@ -780,7 +863,7 @@
                     .attr('stroke', 'white')
                     .attr('cx', function (d) {
                         var datum = d.stratum[1][_this.settings.timepoint - 1];
-                        return scales.x(datum[0]);
+                        return scales.x(datum[_this.settings.xVar]);
                     })
                     .attr('cy', function (d) {
                         var datum = d.stratum[1][_this.settings.timepoint - 1];
@@ -791,7 +874,7 @@
                             .transition()
                             .duration(_this.settings.speed)
                             .attr('cx', function (d) {
-                                return scales.x(d[0]);
+                                return scales.x(d[_this.settings.xVar]);
                             })
                             .attr('cy', function (d) {
                                 return scales.y(d[1].value);
@@ -807,7 +890,7 @@
         annotations.datum(function (d) {
             var datum = d.stratum[1][_this.settings.timepoint];
             return {
-                x: scales.x(datum[0]),
+                x: scales.x(datum[_this.settings.xVar]),
                 y: scales.y(datum[1].value),
                 color: scales.color(d[0]),
                 text: d[0],
@@ -832,7 +915,10 @@
         //this.summary.forEach((stratum) => {
         //    stratum.subset = stratum[1].slice(0, this.settings.timepoint + 1);
         //});
-        var dimensions = getDimensions$1(this.settings); // Iterate through measures.
+        var dimensions = getDimensions$1(this.settings);
+        var xScale = getXScale(this.settings.xType, this.set[this.settings.xVar], dimensions); // TODO: pass set in here
+
+        var colorScale = getColorScale(this.set.color); // Iterate through measures.
 
         var _iterator = _createForOfIteratorHelper(this.summary),
             _step;
@@ -844,28 +930,35 @@
 
                 var layout = getLayout.call(this, measure[0], dimensions); // scales
 
-                var scales = {
-                    x: getXScale(this.set.visit, dimensions, layout.svg, measure.visits),
+                measure.scales = {
+                    x: xScale.copy(),
                     y: getYScale(
-                        [
-                            d3.min(measure.tabular, function (d) {
-                                return d.value;
-                            }),
-                            d3.max(measure.tabular, function (d) {
-                                return d.value;
-                            }),
-                        ],
-                        dimensions,
-                        layout.svg
+                        measure.tabular.map(function (d) {
+                            return d.value;
+                        }),
+                        dimensions
                     ),
-                    color: getColorScale(this.set.color),
-                };
-                measure.scales = scales; // graphical objects
+                    color: colorScale.copy(),
+                }; // axes
 
-                measure.lines = plotLines.call(this, layout.svg, data, scales);
-                measure.points = plotPoints.call(this, layout.svg, data, scales);
+                measure.xAxis = addXAxis(
+                    this.settings.xType,
+                    layout.svg,
+                    this.set,
+                    measure.scales.x,
+                    measure.visits
+                );
+                measure.yAxis = addYAxis(layout.svg, measure.scales.y); // graphical objects
+
+                measure.lines = plotLines.call(this, layout.svg, data, measure.scales);
+                measure.points = plotPoints.call(this, layout.svg, data, measure.scales);
                 if (this.settings.annotate)
-                    measure.annotations = plotAnnotations.call(this, layout.svg, data, scales);
+                    measure.annotations = plotAnnotations.call(
+                        this,
+                        layout.svg,
+                        data,
+                        measure.scales
+                    );
             } // increment timepoint and update plot accordingly
         } catch (err) {
             _iterator.e(err);

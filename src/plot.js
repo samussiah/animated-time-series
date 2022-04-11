@@ -5,6 +5,9 @@ import getXScale from './plot/getXScale';
 import getYScale from './plot/getYScale';
 import getColorScale from './plot/getColorScale';
 
+import addXAxis from './plot/addXAxis';
+import addYAxis from './plot/addYAxis';
+//import addLegend from './plot/addLegend';
 import plotLines from './plot/plotLines';
 import plotPoints from './plot/plotPoints';
 import plotAnnotations from './plot/plotAnnotations';
@@ -20,6 +23,8 @@ export default function plot() {
     //});
 
     const dimensions = getDimensions(this.settings);
+    const xScale = getXScale(this.settings.xType, this.set[this.settings.xVar], dimensions); // TODO: pass set in here
+    const colorScale = getColorScale(this.set.color);
 
     // Iterate through measures.
     for (const measure of this.summary) {
@@ -29,22 +34,30 @@ export default function plot() {
         const layout = getLayout.call(this, measure[0], dimensions);
 
         // scales
-        const scales = {
-            x: getXScale(this.set.visit, dimensions, layout.svg, measure.visits),
+        measure.scales = {
+            x: xScale.copy(),
             y: getYScale(
-                [d3.min(measure.tabular, (d) => d.value), d3.max(measure.tabular, (d) => d.value)],
-                dimensions,
-                layout.svg
+                measure.tabular.map((d) => d.value),
+                dimensions
             ),
-            color: getColorScale(this.set.color),
+            color: colorScale.copy(),
         };
-        measure.scales = scales;
+
+        // axes
+        measure.xAxis = addXAxis(
+            this.settings.xType,
+            layout.svg,
+            this.set,
+            measure.scales.x,
+            measure.visits
+        );
+        measure.yAxis = addYAxis(layout.svg, measure.scales.y);
 
         // graphical objects
-        measure.lines = plotLines.call(this, layout.svg, data, scales);
-        measure.points = plotPoints.call(this, layout.svg, data, scales);
+        measure.lines = plotLines.call(this, layout.svg, data, measure.scales);
+        measure.points = plotPoints.call(this, layout.svg, data, measure.scales);
         if (this.settings.annotate)
-            measure.annotations = plotAnnotations.call(this, layout.svg, data, scales);
+            measure.annotations = plotAnnotations.call(this, layout.svg, data, measure.scales);
     }
 
     // increment timepoint and update plot accordingly

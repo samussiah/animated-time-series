@@ -9,7 +9,8 @@ fetch('./adlb-trend.csv')
             )),
             '#container',
             {
-                stratification_var: 'ARMCD'
+                stratification_var: 'ARMCD',
+                xType: 'discrete'
             }
         );
     });

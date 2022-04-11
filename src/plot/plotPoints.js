@@ -26,7 +26,7 @@ export default function plotPoints(svg, data, scales) {
 
     points
         .attr('cx', (d) => {
-            return scales.x(d[0]);
+            return scales.x(d[this.settings.xVar]);
         })
         .attr('cy', (d) => {
             return scales.y(d[1].value);
