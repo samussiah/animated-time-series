@@ -13,10 +13,12 @@ import addLegend from './plot/addLegend';
 
 import plotLines from './plot/plotLines';
 import plotPoints from './plot/plotPoints';
+import plotCIs from './plot/plotCIs';
 import plotAnnotations from './plot/plotAnnotations';
 
 import updateLines from './plot/updateLines';
 import updatePoints from './plot/updatePoints';
+import updateCIs from './plot/updateCIs';
 import updateAnnotations from './plot/updateAnnotations';
 
 export default function plot() {
@@ -36,10 +38,20 @@ export default function plot() {
         const layout = getLayout.call(this, measure[0], dimensions);
 
         // scales
+        const yValues = measure.tabular.map(d => d.value);
+
+        if (this.settings.displayCIs) {
+            data.map(d => d[1])
+                .flat()
+                .map(d => d[1].stats[`${this.settings.aggregate}_ci`])
+                .flat()
+                .forEach(ci => yValues.push(ci));
+        }
+
         measure.scales = {
             x: xScale.copy(),
             y: getYScale(
-                measure.tabular.map((d) => d.value),
+                yValues,
                 dimensions
             ),
             color: colorScale.copy(),
@@ -58,6 +70,8 @@ export default function plot() {
         // graphical objects
         measure.lines = plotLines.call(this, layout.svg, data, measure.scales);
         measure.points = plotPoints.call(this, layout.svg, data, measure.scales);
+        if (this.settings.displayCIs)
+            measure.CIs = plotCIs.call(this, layout.svg, data, measure.scales);
         if (this.settings.annotate)
             measure.annotations = plotAnnotations.call(this, layout.svg, data, measure.scales);
         else
@@ -77,6 +91,8 @@ export default function plot() {
             for (const measure of this.summary) {
                 updateLines.call(this, measure.lines, measure.scales);
                 updatePoints.call(this, measure.points, measure.scales);
+                if (this.settings.displayCIs)
+                    updateCIs.call(this, measure.CIs, measure.scales);
                 if (this.settings.annotate)
                     updateAnnotations.call(this, measure.annotations, measure.scales);
             }

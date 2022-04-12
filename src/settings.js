@@ -27,6 +27,8 @@ export default function settings() {
 
         // statistics
         aggregate: 'mean',
+        displayCIs: true,
+        alpha: 0.05,
 
         // x stuff
         xType: 'ordinal', // [ 'ordinal' , 'discrete' ]

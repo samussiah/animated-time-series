@@ -4,62 +4,6 @@
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.animatedTimeSeries = factory());
 }(this, (function () { 'use strict';
 
-    d3.geomean = function (data) {
-      var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function (d) {
-        return d;
-      };
-      var r = 64;
-      var K = Math.pow(2, r);
-      var K1 = Math.pow(2, -r);
-      var p = 1; // product
-
-      var n = 0; // count
-
-      var s = 1; // sign
-
-      var k = 0; // track exponent to prevent under/overflows
-
-      for (var i = 0; i < data.length; i++) {
-        var v = value(data[i]);
-
-        if (+v === +v) {
-          n++;
-          s = Math.sign(v);
-          if (s === 0) return 0;
-          p *= Math.abs(v);
-
-          while (p > K) {
-            p *= K1, ++k;
-          }
-
-          while (p < K1) {
-            p *= K, --k;
-          }
-        }
-      }
-
-      return n ? s * Math.pow(2, (Math.log2(p) + k * r) / n) : NaN;
-    };
-
-    d3.mode = function (array) {
-      if (array.length == 0) return null;
-      var modeMap = {};
-      var maxEl = array[0],
-          maxCount = 1;
-
-      for (var i = 0; i < array.length; i++) {
-        var el = array[i];
-        if (modeMap[el] == null) modeMap[el] = 1;else modeMap[el]++;
-
-        if (modeMap[el] > maxCount) {
-          maxEl = el;
-          maxCount = modeMap[el];
-        }
-      }
-
-      return maxEl;
-    };
-
     function addElement(name, parent) {
       var tagName = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'div';
       var data = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
@@ -122,6 +66,8 @@
         },
         // statistics
         aggregate: 'mean',
+        displayCIs: true,
+        alpha: 0.05,
         // x stuff
         xType: 'ordinal',
         // [ 'ordinal' , 'discrete' ]
@@ -389,16 +335,47 @@
       return group;
     }
 
+    // import nest from './summarize/nest';
+    // import shell from './summarize/shell';
     // TODO: refactor - this shit's hard to pull apart
     // TODO: define and display continuous x-axis
     function summarize(data, set, settings) {
       // Nest data by measure, stratification, and visit and average results.
       var nested = d3.rollups(data, function (group) {
+        var results = group.map(function (d) {
+          return d.result;
+        }).sort(function (a, b) {
+          return a - b;
+        });
+        var jObj = jStat(results);
+        var n = group.length;
+        var mean = d3.mean(results);
+        var deviation = d3.deviation(results);
+        var mean_ci = jStat.tci(mean, settings.alpha, results);
+        var min = d3.min(results);
+        var median = d3.median(results);
+        var max = d3.max(results);
+        var geomean = jStat.geomean(results);
+        var geomean_ci = jStat.tci(Math.log(geomean), settings.alpha, results.map(function (result) {
+          return Math.log(result);
+        })).map(function (bound) {
+          return Math.exp(bound);
+        });
+        var stats = {
+          n: n,
+          mean: mean,
+          deviation: deviation,
+          mean_ci: mean_ci,
+          min: min,
+          median: median,
+          max: max,
+          geomean: geomean,
+          geomean_ci: geomean_ci
+        };
         return {
           data: group,
-          value: d3[settings.aggregate](group, function (d) {
-            return d.result;
-          })
+          stats: stats,
+          value: stats[settings.aggregate]
         };
       }, function (d) {
         return d.measure;
@@ -409,9 +386,7 @@
       function (d) {
         return d.visit;
       } // x,y
-      ); // TODO: define a more complex nested value that includes the data, the summarized value, and
-      // the color of the stratification variable, and anything else needed.
-      // Iterate over measures to generate tabular summary.
+      ); // Iterate over measures to generate tabular summary.
 
       nested.forEach(function (measure, i) {
         // Create array with as many elements as stratification and visit values combined.
@@ -660,6 +635,33 @@
       return pointGroups;
     }
 
+    function plotCIs(svg, data, scales) {
+      var _this = this;
+
+      var ciGroups = svg.selectAll('g.ci-group').data(data, function (d) {
+        return d[0];
+      }).join('g').classed('ci-group', true);
+      ciGroups //.attr('fill-opacity', .75)
+      .attr('stroke', function (d) {
+        return scales.color(d.color_value);
+      }).attr('stroke-width', 3);
+      var CIs = ciGroups.selectAll('line.ci').data(function (d) {
+        return d[1].slice(0, _this.settings.timepoint + 1);
+      }, function (d, i) {
+        return [d.stratum[0], i].join('|');
+      }).join('line').classed('ci', true);
+      CIs.attr('x1', function (d) {
+        return scales.x(d[_this.settings.xVar]);
+      }).attr('x2', function (d) {
+        return scales.x(d[_this.settings.xVar]);
+      }).attr('y1', function (d) {
+        return scales.y(d[1].stats["".concat(_this.settings.aggregate, "_ci")][0]);
+      }).attr('y2', function (d) {
+        return scales.y(d[1].stats["".concat(_this.settings.aggregate, "_ci")][1]);
+      });
+      return ciGroups;
+    }
+
     // TODO: reverse algorithm to shift text upward - add top margin as needed
     //
     // reposition annotations to avoid overlap
@@ -712,7 +714,7 @@
     function updateLines(lines, scales) {
       var _this = this;
 
-      lines.transition().duration(this.settings.speed).attr('d', function (d) {
+      lines.transition().duration(this.settings.speed - .25 * this.settings.speed * this.settings.displayCIs).attr('d', function (d) {
         var currentTimepoint = d[1][_this.settings.timepoint];
         var pathData = d[1].map(function (d, i) {
           return i >= _this.settings.timepoint ? currentTimepoint : d;
@@ -736,7 +738,7 @@
           var datum = d.stratum[1][_this.settings.timepoint - 1];
           return scales.y(datum[1].value);
         }).call(function (enter) {
-          return enter.transition().duration(_this.settings.speed).attr('cx', function (d) {
+          return enter.transition().duration(_this.settings.speed - .25 * _this.settings.speed * _this.settings.displayCIs).attr('cx', function (d) {
             return scales.x(d[_this.settings.xVar]);
           }).attr('cy', function (d) {
             return scales.y(d[1].value);
@@ -744,6 +746,33 @@
         });
       });
       return points;
+    }
+
+    function updateCIs(CIs, scales) {
+      var _this = this;
+
+      CIs.selectAll('line.ci').data(function (d) {
+        return d[1].slice(0, _this.settings.timepoint + 1);
+      }, function (d, i) {
+        return [d.stratum[0], i].join('|');
+      }).join(function (enter) {
+        return enter.append('line').classed('ci', true).attr('x1', function (d) {
+          return scales.x(d[_this.settings.xVar]);
+        }).attr('x2', function (d) {
+          return scales.x(d[_this.settings.xVar]);
+        }).attr('y1', function (d) {
+          return scales.y(d[1].value);
+        }).attr('y2', function (d) {
+          return scales.y(d[1].value);
+        }).call(function (enter) {
+          return enter.transition().duration(.25 * _this.settings.speed).delay(.75 * _this.settings.speed).attr('y1', function (d) {
+            return scales.y(d[1].stats["".concat(_this.settings.aggregate, "_ci")][0]);
+          }).attr('y2', function (d) {
+            return scales.y(d[1].stats["".concat(_this.settings.aggregate, "_ci")][1]);
+          });
+        });
+      });
+      return CIs;
     }
 
     function updateAnnotations(annotations, scales) {
@@ -760,7 +789,7 @@
         };
       });
       updateSpacing.call(this, annotations.data());
-      annotations.transition().duration(this.settings.speed).attr('x', function (d) {
+      annotations.transition().duration(this.settings.speed - .25 * this.settings.speed * this.settings.displayCIs).attr('x', function (d) {
         return d.x;
       }).attr('y', function (d) {
         return d.y;
@@ -782,26 +811,43 @@
           _step;
 
       try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var _loop = function _loop() {
           var measure = _step.value;
           var data = measure[1]; // layout
 
-          var layout = getLayout.call(this, measure[0], dimensions); // scales
+          var layout = getLayout.call(_this, measure[0], dimensions); // scales
+
+          var yValues = measure.tabular.map(function (d) {
+            return d.value;
+          });
+
+          if (_this.settings.displayCIs) {
+            data.map(function (d) {
+              return d[1];
+            }).flat().map(function (d) {
+              return d[1].stats["".concat(_this.settings.aggregate, "_ci")];
+            }).flat().forEach(function (ci) {
+              return yValues.push(ci);
+            });
+          }
 
           measure.scales = {
             x: xScale.copy(),
-            y: getYScale(measure.tabular.map(function (d) {
-              return d.value;
-            }), dimensions),
+            y: getYScale(yValues, dimensions),
             color: colorScale.copy()
           }; // axes
 
-          measure.xAxis = addXAxis(this.settings.xType, layout.svg, this.set, measure.scales.x, measure.visits);
+          measure.xAxis = addXAxis(_this.settings.xType, layout.svg, _this.set, measure.scales.x, measure.visits);
           measure.yAxis = addYAxis(layout.svg, measure.scales.y); // graphical objects
 
-          measure.lines = plotLines.call(this, layout.svg, data, measure.scales);
-          measure.points = plotPoints.call(this, layout.svg, data, measure.scales);
-          if (this.settings.annotate) measure.annotations = plotAnnotations.call(this, layout.svg, data, measure.scales);else measure.legend = addLegend.call(this, layout.svg, measure.scales.color);
+          measure.lines = plotLines.call(_this, layout.svg, data, measure.scales);
+          measure.points = plotPoints.call(_this, layout.svg, data, measure.scales);
+          if (_this.settings.displayCIs) measure.CIs = plotCIs.call(_this, layout.svg, data, measure.scales);
+          if (_this.settings.annotate) measure.annotations = plotAnnotations.call(_this, layout.svg, data, measure.scales);else measure.legend = addLegend.call(_this, layout.svg, measure.scales.color);
+        };
+
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          _loop();
         } // increment timepoint and update plot accordingly
 
       } catch (err) {
@@ -827,6 +873,7 @@
               var measure = _step2.value;
               updateLines.call(this, measure.lines, measure.scales);
               updatePoints.call(this, measure.points, measure.scales);
+              if (this.settings.displayCIs) updateCIs.call(this, measure.CIs, measure.scales);
               if (this.settings.annotate) updateAnnotations.call(this, measure.annotations, measure.scales);
             }
           } catch (err) {
