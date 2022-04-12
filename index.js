@@ -75,8 +75,11 @@
         // [ 'visit', 'timepoint' ]
         // y stuff
         // color stuff
+        offset: 7.5,
         displayLegend: false,
         annotate: true,
+        pointRadius: 5,
+        strokeWidth: 4,
         fontSize: 15,
         fontWeight: 'bold',
         // animation
@@ -412,7 +415,8 @@
           if (stratumDatum) stratumDatum[1].sort(function (a, b) {
             return set.visit.indexOf(a[0]) - set.visit.indexOf(b[0]);
           });
-          stratumDatum.color_value = stratumDatum[1][0][1].data[0][settings.color_var]; // Iterate over visits within strata.
+          stratumDatum.color_value = stratumDatum[1][0][1].data[0][settings.color_var];
+          stratumDatum.offset = set.offsets[i]; // Iterate over visits within strata.
 
           set.visit.forEach(function (visit, j) {
             // Return data for given measure / stratum / visit.
@@ -468,6 +472,7 @@
     function data() {
       mutate.call(this);
       this.set = set(this.data);
+      this.set.offsets = d3.range(Math.ceil(-this.set.stratification.length / 2) * this.settings.offset + this.settings.offset / 2 * !(this.set.stratification.length % 2), Math.ceil(this.set.stratification.length / 2) * this.settings.offset + this.settings.offset / 2 * !(this.set.stratification.length % 2), this.settings.offset);
       this.group = group(this.data);
       this.summary = summarize(this.data, this.set, this.settings);
       this.timepoint = timepoint(this.settings.timepoint, this.set);
@@ -476,12 +481,12 @@
     function getDimensions$1(settings) {
       var margin = {
         top: settings.fontSize * 2,
-        right: 100,
+        right: 150,
         bottom: 55,
         left: 50
       };
-      var width = 500 - margin.left - margin.right;
-      var height = 200 - margin.top - margin.bottom;
+      var width = 750 - margin.left - margin.right;
+      var height = 250 - margin.top - margin.bottom;
       return {
         margin: margin,
         width: width,
@@ -572,20 +577,20 @@
 
     function addLegend(svg, colorScale) {
       var legend = svg.append('g').classed('atm-legend', true);
-      legend.selectAll("mydots").data(colorScale.domain()).join('circle').attr("cx", svg.width - svg.margin.left - svg.margin.right + 10).attr("cy", function (d, i) {
+      legend.selectAll('mydots').data(colorScale.domain()).join('circle').attr('cx', svg.width - svg.margin.left - svg.margin.right + 10).attr('cy', function (d, i) {
         return i * 20 - svg.margin.top / 2;
       }) // 100 is where the first dot appears. 25 is the distance between dots
-      .attr("r", 4).style("fill", function (d) {
+      .attr('r', 4).style('fill', function (d) {
         return colorScale(d);
       });
-      legend.selectAll("mylabels").data(colorScale.domain()).join("text").attr("x", svg.width - svg.margin.left - svg.margin.right + 15).attr("y", function (d, i) {
+      legend.selectAll('mylabels').data(colorScale.domain()).join('text').attr('x', svg.width - svg.margin.left - svg.margin.right + 15).attr('y', function (d, i) {
         return i * 20 - svg.margin.top / 2;
       }) // 100 is where the first dot appears. 25 is the distance between dots
-      .style("fill", function (d) {
+      .style('fill', function (d) {
         return colorScale(d);
       }).text(function (d) {
         return d;
-      }).attr("text-anchor", "left").style('font-size', this.settings.fontSize).style('font-weight', this.settings.fontWeight).style("alignment-baseline", "middle");
+      }).attr('text-anchor', 'left').style('font-size', this.settings.fontSize).style('font-weight', this.settings.fontWeight).style('alignment-baseline', 'middle');
       return legend;
     }
 
@@ -593,7 +598,7 @@
       var _this = this;
 
       var lineGenerator = d3.line().x(function (d) {
-        return scales.x(d[_this.settings.xVar]);
+        return scales.x(d[_this.settings.xVar]) + d.stratum.offset;
       }).y(function (d) {
         return scales.y(d[1].value);
       });
@@ -606,8 +611,7 @@
         return lineGenerator(pathData);
       }).attr('stroke', function (d) {
         return scales.color(d.color_value);
-      }).attr('stroke-width', Math.max(12 / this.set.stratification.length, 1)) //.attr('stroke-opacity', .5)
-      .attr('fill', 'none');
+      }).attr('stroke-width', this.settings.strokeWidth).attr('fill', 'none');
       lines.lineGenerator = lineGenerator;
       return lines;
     }
@@ -628,10 +632,10 @@
         return [d.stratum[0], i].join('|');
       }).join('circle').classed('point', true);
       points.attr('cx', function (d) {
-        return scales.x(d[_this.settings.xVar]);
+        return scales.x(d[_this.settings.xVar]) + d.stratum.offset;
       }).attr('cy', function (d) {
         return scales.y(d[1].value);
-      }).attr('r', 5).attr('stroke', 'white');
+      }).attr('r', this.settings.pointRadius).attr('stroke', 'white');
       return pointGroups;
     }
 
@@ -644,21 +648,21 @@
       ciGroups //.attr('fill-opacity', .75)
       .attr('stroke', function (d) {
         return scales.color(d.color_value);
-      }).attr('stroke-width', 3);
+      }).attr('stroke-width', this.settings.strokeWidth);
       var CIs = ciGroups.selectAll('line.ci').data(function (d) {
         return d[1].slice(0, _this.settings.timepoint + 1);
       }, function (d, i) {
         return [d.stratum[0], i].join('|');
       }).join('line').classed('ci', true);
       CIs.attr('x1', function (d) {
-        return scales.x(d[_this.settings.xVar]);
+        return scales.x(d[_this.settings.xVar]) + d.stratum.offset;
       }).attr('x2', function (d) {
-        return scales.x(d[_this.settings.xVar]);
+        return scales.x(d[_this.settings.xVar]) + d.stratum.offset;
       }).attr('y1', function (d) {
         return scales.y(d[1].stats["".concat(_this.settings.aggregate, "_ci")][0]);
       }).attr('y2', function (d) {
         return scales.y(d[1].stats["".concat(_this.settings.aggregate, "_ci")][1]);
-      });
+      }).attr('stroke-linecap', 'round');
       return ciGroups;
     }
 
@@ -689,6 +693,7 @@
       annotations.datum(function (d) {
         // Get visit datum.
         var datum = d[1][_this.settings.timepoint];
+        console.log(datum.stratum.offset);
         return {
           x: scales.x(datum[_this.settings.xVar]),
           y: scales.y(datum[1].value),
@@ -703,7 +708,7 @@
         return d.x;
       }).attr('y', function (d) {
         return d.y;
-      }).attr('dx', 7).attr('dy', this.settings.fontSize / 3).attr('fill', function (d) {
+      }).attr('dx', this.settings.offset * 3).attr('dy', this.settings.fontSize / 3).attr('fill', function (d) {
         return d.color;
       }).style('font-size', this.settings.fontSize).style('font-weight', this.settings.fontWeight).text(function (d) {
         return d.text;
@@ -714,7 +719,7 @@
     function updateLines(lines, scales) {
       var _this = this;
 
-      lines.transition().duration(this.settings.speed - .25 * this.settings.speed * this.settings.displayCIs).attr('d', function (d) {
+      lines.transition().duration(this.settings.speed - 0.25 * this.settings.speed * this.settings.displayCIs).attr('d', function (d) {
         var currentTimepoint = d[1][_this.settings.timepoint];
         var pathData = d[1].map(function (d, i) {
           return i >= _this.settings.timepoint ? currentTimepoint : d;
@@ -731,15 +736,15 @@
       }, function (d, i) {
         return [d.stratum[0], i].join('|');
       }).join(function (enter) {
-        return enter.append('circle').classed('point', true).attr('r', 5).attr('stroke', 'white').attr('cx', function (d) {
+        return enter.append('circle').classed('point', true).attr('r', _this.settings.pointRadius).attr('stroke', 'white').attr('cx', function (d) {
           var datum = d.stratum[1][_this.settings.timepoint - 1];
-          return scales.x(datum[_this.settings.xVar]);
+          return scales.x(datum[_this.settings.xVar]) + datum.stratum.offset;
         }).attr('cy', function (d) {
           var datum = d.stratum[1][_this.settings.timepoint - 1];
           return scales.y(datum[1].value);
         }).call(function (enter) {
-          return enter.transition().duration(_this.settings.speed - .25 * _this.settings.speed * _this.settings.displayCIs).attr('cx', function (d) {
-            return scales.x(d[_this.settings.xVar]);
+          return enter.transition().duration(_this.settings.speed - 0.25 * _this.settings.speed * _this.settings.displayCIs).attr('cx', function (d) {
+            return scales.x(d[_this.settings.xVar]) + d.stratum.offset;
           }).attr('cy', function (d) {
             return scales.y(d[1].value);
           });
@@ -757,19 +762,19 @@
         return [d.stratum[0], i].join('|');
       }).join(function (enter) {
         return enter.append('line').classed('ci', true).attr('x1', function (d) {
-          return scales.x(d[_this.settings.xVar]);
+          return scales.x(d[_this.settings.xVar]) + d.stratum.offset;
         }).attr('x2', function (d) {
-          return scales.x(d[_this.settings.xVar]);
+          return scales.x(d[_this.settings.xVar]) + d.stratum.offset;
         }).attr('y1', function (d) {
           return scales.y(d[1].value);
         }).attr('y2', function (d) {
           return scales.y(d[1].value);
         }).call(function (enter) {
-          return enter.transition().duration(.25 * _this.settings.speed).delay(.75 * _this.settings.speed).attr('y1', function (d) {
+          return enter.transition().duration(0.25 * _this.settings.speed).delay(0.75 * _this.settings.speed).attr('y1', function (d) {
             return scales.y(d[1].stats["".concat(_this.settings.aggregate, "_ci")][0]);
           }).attr('y2', function (d) {
             return scales.y(d[1].stats["".concat(_this.settings.aggregate, "_ci")][1]);
-          });
+          }).attr('stroke-linecap', 'round');
         });
       });
       return CIs;
@@ -789,7 +794,7 @@
         };
       });
       updateSpacing.call(this, annotations.data());
-      annotations.transition().duration(this.settings.speed - .25 * this.settings.speed * this.settings.displayCIs).attr('x', function (d) {
+      annotations.transition().duration(this.settings.speed - 0.25 * this.settings.speed * this.settings.displayCIs).attr('x', function (d) {
         return d.x;
       }).attr('y', function (d) {
         return d.y;

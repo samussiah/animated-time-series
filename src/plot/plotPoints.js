@@ -26,12 +26,12 @@ export default function plotPoints(svg, data, scales) {
 
     points
         .attr('cx', (d) => {
-            return scales.x(d[this.settings.xVar]);
+            return scales.x(d[this.settings.xVar]) + d.stratum.offset;
         })
         .attr('cy', (d) => {
             return scales.y(d[1].value);
         })
-        .attr('r', 5)
+        .attr('r', this.settings.pointRadius)
         .attr('stroke', 'white');
 
     return pointGroups;

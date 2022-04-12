@@ -10,7 +10,7 @@ export default function plotCIs(svg, data, scales) {
         .attr('stroke', (d) => {
             return scales.color(d.color_value);
         })
-        .attr('stroke-width', 3);
+        .attr('stroke-width', this.settings.strokeWidth)
 
     const CIs = ciGroups
         .selectAll('line.ci')
@@ -25,19 +25,19 @@ export default function plotCIs(svg, data, scales) {
         .join('line')
         .classed('ci', true);
 
-    CIs
-        .attr('x1', (d) => {
-            return scales.x(d[this.settings.xVar]);
-        })
+    CIs.attr('x1', (d) => {
+        return scales.x(d[this.settings.xVar]) + d.stratum.offset;
+    })
         .attr('x2', (d) => {
-            return scales.x(d[this.settings.xVar]);
+            return scales.x(d[this.settings.xVar]) + d.stratum.offset;
         })
         .attr('y1', (d) => {
             return scales.y(d[1].stats[`${this.settings.aggregate}_ci`][0]);
         })
         .attr('y2', (d) => {
             return scales.y(d[1].stats[`${this.settings.aggregate}_ci`][1]);
-        });
+        })
+        .attr('stroke-linecap', 'round');
 
     return ciGroups;
 }

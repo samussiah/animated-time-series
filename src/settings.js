@@ -37,8 +37,11 @@ export default function settings() {
         // y stuff
 
         // color stuff
+        offset: 7.5,
         displayLegend: false,
         annotate: true,
+        pointRadius: 5,
+        strokeWidth: 4,
         fontSize: 15,
         fontWeight: 'bold',
 

@@ -1,8 +1,12 @@
 export default function plotLines(svg, data, scales) {
     const lineGenerator = d3
         .line()
-        .x((d) => scales.x(d[this.settings.xVar]))
-        .y((d) => scales.y(d[1].value));
+        .x((d) => {
+            return scales.x(d[this.settings.xVar]) + d.stratum.offset;
+        })
+        .y((d) => {
+            return scales.y(d[1].value);
+        });
 
     const lines = svg.selectAll('path.line').data(data).join('path').classed('line', true);
 
@@ -18,8 +22,7 @@ export default function plotLines(svg, data, scales) {
         .attr('stroke', function (d) {
             return scales.color(d.color_value);
         })
-        .attr('stroke-width', Math.max(12 / this.set.stratification.length, 1))
-        //.attr('stroke-opacity', .5)
+        .attr('stroke-width', this.settings.strokeWidth)
         .attr('fill', 'none');
 
     lines.lineGenerator = lineGenerator;

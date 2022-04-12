@@ -1,2 +1,1 @@
-export default function shell() {
-}
+export default function shell() {}
