@@ -1,3 +1,5 @@
+// import nest from './summarize/nest';
+// import shell from './summarize/shell';
 // TODO: refactor - this shit's hard to pull apart
 // TODO: define and display continuous x-axis
 export default function summarize(data, set, settings) {
@@ -5,18 +7,54 @@ export default function summarize(data, set, settings) {
     const nested = d3.rollups(
         data,
         (group) => {
+            const results = group
+                .map(d => d.result)
+                .sort((a,b) => a-b);
+
+            const jObj = jStat(results);
+
+            const n = group.length;
+            const mean = d3.mean(results);
+            const deviation = d3.deviation(results);
+            const mean_ci = jStat.tci(
+                mean,
+                settings.alpha,
+                results
+            );
+
+            const min = d3.min(results);
+            const median = d3.median(results);
+            const max = d3.max(results);
+
+            const geomean = jStat.geomean(results);
+            const geomean_ci = jStat.tci(
+                Math.log(geomean),
+                settings.alpha,
+                results.map(result => Math.log(result))
+            ).map(bound => Math.exp(bound));
+
+            const stats = {
+                n,
+                mean,
+                deviation,
+                mean_ci,
+                min,
+                median,
+                max,
+                geomean,
+                geomean_ci
+            };
+
             return {
                 data: group,
-                value: d3[settings.aggregate](group, (d) => d.result),
+                stats,
+                value: stats[settings.aggregate]
             };
         },
         (d) => d.measure, // facet
         (d) => d.stratification, // color
         (d) => d.visit // x,y
     );
-
-    // TODO: define a more complex nested value that includes the data, the summarized value, and
-    // the color of the stratification variable, and anything else needed.
 
     // Iterate over measures to generate tabular summary.
     nested.forEach((measure, i) => {

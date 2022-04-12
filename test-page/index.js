@@ -4,8 +4,8 @@ fetch('./adlb-trend.csv')
     .then(data => {
         const main = animatedTimeSeries(
             data.filter(d => (
-                !(+d.AVISITN%1) // remove "unscheduled" visits
-                ///count/.test(d.PARAM)
+                !(+d.AVISITN%1) && // remove "unscheduled" visits
+                /count/.test(d.PARAM)
             )),
             '#container',
             {

@@ -26,7 +26,9 @@ export default function updatePoints(points, scales) {
                 .call((enter) =>
                     enter
                         .transition()
-                        .duration(this.settings.speed)
+                        .duration(
+                            this.settings.speed - .25*this.settings.speed*this.settings.displayCIs
+                        )
                         .attr('cx', (d) => scales.x(d[this.settings.xVar]))
                         .attr('cy', (d) => scales.y(d[1].value))
                 )

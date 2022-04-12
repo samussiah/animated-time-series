@@ -16,6 +16,11 @@ export default function update(settings) {
     if (settings.xType === 'ordinal') settings.xVar = 'visit';
     else if (settings.xType === 'discrete') settings.xVar = 'timepoint';
 
+    if (settings.stratification_var !== settings.color_var) {
+        settings.annotate = false;
+        settings.displayLegend = true;
+    }
+
     // Update footnotes.
     settings.footnotes = settings.footnotes.map((text) =>
         text.replace('[aggregate]', settings.aggregate).replace('[outcome]', settings.outcome)

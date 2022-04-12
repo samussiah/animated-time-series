@@ -17,7 +17,9 @@ export default function updateAnnotations(annotations, scales) {
 
     annotations
         .transition()
-        .duration(this.settings.speed)
+        .duration(
+            this.settings.speed - .25*this.settings.speed*this.settings.displayCIs
+        )
         .attr('x', (d) => {
             return d.x;
         })

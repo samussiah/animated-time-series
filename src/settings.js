@@ -27,10 +27,20 @@ export default function settings() {
 
         // statistics
         aggregate: 'mean',
+        displayCIs: true,
+        alpha: 0.05,
 
         // x stuff
         xType: 'ordinal', // [ 'ordinal' , 'discrete' ]
         xVar: 'visit', // [ 'visit', 'timepoint' ]
+
+        // y stuff
+
+        // color stuff
+        displayLegend: false,
+        annotate: true,
+        fontSize: 15,
+        fontWeight: 'bold',
 
         // animation
         play: true,
@@ -44,9 +54,6 @@ export default function settings() {
         margin: {},
 
         // miscellaneous
-        annotate: true,
-        fontSize: 15,
-        fontWeight: 'bold',
         footnotes: [
             //`<sup>1</sup> Displaying [aggregate] [outcome].`,
         ],
