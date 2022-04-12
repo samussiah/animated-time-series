@@ -1,6 +1,5 @@
 export default function updateCIs(CIs, scales) {
-    CIs
-        .selectAll('line.ci')
+    CIs.selectAll('line.ci')
         .data(
             (d) => {
                 return d[1].slice(0, this.settings.timepoint + 1);
@@ -14,10 +13,10 @@ export default function updateCIs(CIs, scales) {
                 .append('line')
                 .classed('ci', true)
                 .attr('x1', (d) => {
-                    return scales.x(d[this.settings.xVar]);
+                    return scales.x(d[this.settings.xVar]) + d.stratum.offset;
                 })
                 .attr('x2', (d) => {
-                    return scales.x(d[this.settings.xVar]);
+                    return scales.x(d[this.settings.xVar]) + d.stratum.offset;
                 })
                 .attr('y1', (d) => {
                     return scales.y(d[1].value);
@@ -28,14 +27,15 @@ export default function updateCIs(CIs, scales) {
                 .call((enter) =>
                     enter
                         .transition()
-                        .duration(.25*this.settings.speed)
-                        .delay(.75*this.settings.speed)
+                        .duration(0.25 * this.settings.speed)
+                        .delay(0.75 * this.settings.speed)
                         .attr('y1', (d) => {
                             return scales.y(d[1].stats[`${this.settings.aggregate}_ci`][0]);
                         })
                         .attr('y2', (d) => {
                             return scales.y(d[1].stats[`${this.settings.aggregate}_ci`][1]);
                         })
+                        .attr('stroke-linecap', 'round')
                 )
         );
 

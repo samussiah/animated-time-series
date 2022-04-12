@@ -1,2 +1,1 @@
-export default function nest() {
-}
+export default function nest() {}

@@ -7,31 +7,27 @@ export default function summarize(data, set, settings) {
     const nested = d3.rollups(
         data,
         (group) => {
-            const results = group
-                .map(d => d.result)
-                .sort((a,b) => a-b);
+            const results = group.map((d) => d.result).sort((a, b) => a - b);
 
             const jObj = jStat(results);
 
             const n = group.length;
             const mean = d3.mean(results);
             const deviation = d3.deviation(results);
-            const mean_ci = jStat.tci(
-                mean,
-                settings.alpha,
-                results
-            );
+            const mean_ci = jStat.tci(mean, settings.alpha, results);
 
             const min = d3.min(results);
             const median = d3.median(results);
             const max = d3.max(results);
 
             const geomean = jStat.geomean(results);
-            const geomean_ci = jStat.tci(
-                Math.log(geomean),
-                settings.alpha,
-                results.map(result => Math.log(result))
-            ).map(bound => Math.exp(bound));
+            const geomean_ci = jStat
+                .tci(
+                    Math.log(geomean),
+                    settings.alpha,
+                    results.map((result) => Math.log(result))
+                )
+                .map((bound) => Math.exp(bound));
 
             const stats = {
                 n,
@@ -42,13 +38,13 @@ export default function summarize(data, set, settings) {
                 median,
                 max,
                 geomean,
-                geomean_ci
+                geomean_ci,
             };
 
             return {
                 data: group,
                 stats,
-                value: stats[settings.aggregate]
+                value: stats[settings.aggregate],
             };
         },
         (d) => d.measure, // facet
@@ -89,6 +85,7 @@ export default function summarize(data, set, settings) {
                 stratumDatum[1].sort((a, b) => set.visit.indexOf(a[0]) - set.visit.indexOf(b[0]));
 
             stratumDatum.color_value = stratumDatum[1][0][1].data[0][settings.color_var];
+            stratumDatum.offset = set.offsets[i];
 
             // Iterate over visits within strata.
             set.visit.forEach((visit, j) => {
