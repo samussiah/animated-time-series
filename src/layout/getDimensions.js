@@ -4,6 +4,6 @@ export default function getDimensions(container, settings) {
 
     return {
         width,
-        height
+        height,
     };
 }

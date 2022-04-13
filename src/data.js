@@ -9,8 +9,10 @@ export default function data() {
     this.set = set(this.data);
 
     this.set.offsets = d3.range(
-        Math.ceil(-this.set.stratification.length/2)*this.settings.offset + this.settings.offset/2*!(this.set.stratification.length%2),
-        Math.ceil(this.set.stratification.length/2)*this.settings.offset + this.settings.offset/2*!(this.set.stratification.length%2),
+        Math.ceil(-this.set.stratification.length / 2) * this.settings.offset +
+            (this.settings.offset / 2) * !(this.set.stratification.length % 2),
+        Math.ceil(this.set.stratification.length / 2) * this.settings.offset +
+            (this.settings.offset / 2) * !(this.set.stratification.length % 2),
         this.settings.offset
     );
 

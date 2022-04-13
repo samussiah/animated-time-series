@@ -29,9 +29,8 @@ export default function iterate(measure) {
 
         updateLines.call(this, measure.lines, measure.scales);
         updatePoints.call(this, measure.points, measure.scales);
-        if (this.settings.displayCIs)
-            updateCIs.call(this, measure.CIs, measure.scales);
+        if (this.settings.displayCIs) updateCIs.call(this, measure.CIs, measure.scales);
         if (this.settings.annotate)
             updateAnnotations.call(this, measure.annotations, measure.scales);
     }
-};
+}

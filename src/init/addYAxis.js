@@ -1,7 +1,5 @@
 export default function addYAxis(svg, yScale, dimensions) {
-    const yAxis = svg.append('g')
-        .classed('atm-axis', true)
-        .call(d3.axisLeft(yScale));
+    const yAxis = svg.append('g').classed('atm-axis', true).call(d3.axisLeft(yScale));
 
     yAxis.grid = svg.append('g').call((g) =>
         g

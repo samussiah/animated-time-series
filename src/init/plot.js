@@ -17,11 +17,7 @@ export default function plot(measure) {
     const dimensions = this.settings.dimensions;
 
     // common scales (x, color)
-    const xScale = getXScale(
-        this.settings.xType,
-        this.set[this.settings.xVar],
-        dimensions
-    );
+    const xScale = getXScale(this.settings.xType, this.set[this.settings.xVar], dimensions);
     const colorScale = getColorScale(this.set.color);
 
     const data = measure[1];
@@ -55,11 +51,7 @@ export default function plot(measure) {
         this.set,
         measure.visits
     );
-    measure.yAxis = addYAxis(
-        layout.svg,
-        measure.scales.y,
-        dimensions
-    );
+    measure.yAxis = addYAxis(layout.svg, measure.scales.y, dimensions);
 
     // graphical objects
     measure.lines = plotLines.call(this, layout.svg, data, measure.scales);

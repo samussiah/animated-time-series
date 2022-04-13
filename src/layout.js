@@ -15,7 +15,7 @@ export default function layout() {
         height,
         margin: this.settings.margin,
         widthAdj: width - this.settings.margin.left - this.settings.margin.right,
-        heightAdj: height - this.settings.margin.top - this.settings.margin.bottom
+        heightAdj: height - this.settings.margin.top - this.settings.margin.bottom,
     };
 
     //window.addEventListener('resize', resize.bind(this));

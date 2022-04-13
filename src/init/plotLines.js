@@ -23,7 +23,7 @@ export default function plotLines(svg, data, scales) {
             return scales.color(d.color_value);
         })
         .attr('stroke-width', this.settings.strokeWidth)
-    .attr('stroke-opacity', .75)
+        .attr('stroke-opacity', 0.75)
         .attr('fill', 'none');
 
     lines.lineGenerator = lineGenerator;

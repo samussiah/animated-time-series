@@ -10,7 +10,7 @@ export default function plotCIs(svg, data, scales) {
         .attr('stroke', (d) => {
             return scales.color(d.color_value);
         })
-        .attr('stroke-width', this.settings.strokeWidth)
+        .attr('stroke-width', this.settings.strokeWidth);
 
     const CIs = ciGroups
         .selectAll('line.ci')
