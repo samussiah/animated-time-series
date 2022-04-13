@@ -1,8 +1,8 @@
-export default function addXAxis(type, svg, set, xScale, visits = null) {
+export default function addXAxis(svg, xScale, dimensions, type, set, visits = null) {
     const xAxis = svg
         .append('g')
         .classed('atm-axis', true)
-        .attr('transform', 'translate(0,' + svg.dimensions.height + ')');
+        .attr('transform', 'translate(0,' + dimensions.heightAdj + ')');
 
     if (type === 'ordinal') {
         xAxis.call(d3.axisBottom(xScale));

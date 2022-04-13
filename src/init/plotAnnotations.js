@@ -12,7 +12,6 @@ export default function plotAnnotations(svg, data, scales) {
     annotations.datum((d) => {
         // Get visit datum.
         const datum = d[1][this.settings.timepoint];
-        console.log(datum.stratum.offset);
 
         return {
             x: scales.x(datum[this.settings.xVar]),
@@ -33,7 +32,7 @@ export default function plotAnnotations(svg, data, scales) {
         .attr('y', (d) => {
             return d.y;
         })
-        .attr('dx', this.settings.offset*3)
+        .attr('dx', this.settings.offset*2)
         .attr('dy', this.settings.fontSize / 3)
         .attr('fill', (d) => {
             return d.color;

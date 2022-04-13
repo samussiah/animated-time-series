@@ -97,7 +97,7 @@
     float: right;
 }
 .atm-container {
-    width: 50%;
+    width: 100%;
     display: inline-block;
     position: relative;
     margin-bottom: 2rem;
@@ -143,6 +143,9 @@
     /*fill: none;
     stroke: #000;
     shape-rendering: crispEdges;*/
+}
+.atm-axis .tick text {
+    font-size: 1.5em;
 }
 .grid-lines line {
     stroke: gray;

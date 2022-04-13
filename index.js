@@ -75,39 +75,44 @@
         // [ 'visit', 'timepoint' ]
         // y stuff
         // color stuff
-        offset: 7.5,
+        offset: 15,
         displayLegend: false,
         annotate: true,
-        pointRadius: 5,
-        strokeWidth: 4,
+        pointRadius: 7.5,
+        strokeWidth: 5,
         fontSize: 15,
         fontWeight: 'bold',
         // animation
         play: true,
         timepoint: 0,
+        measureIndex: 0,
         speed: 1000,
-        loopDelay: 10000,
+        pause: 5000,
         // dimensions
         width: null,
         // defined in ./layout/getDimensions
+        widthFactor: 1,
         height: null,
         // defined in ./layout/getDimensions
-        margin: {},
+        heightFactor: 3,
+        margin: {
+          top: 50,
+          right: 100,
+          bottom: 100,
+          left: 50
+        },
         // miscellaneous
         footnotes: [//`<sup>1</sup> Displaying [aggregate] [outcome].`,
         ]
       };
     }
 
-    function getDimensions(parent) {
-      var container = this.layout ? this.layout.charts : parent;
-      this.settings.width = container.node().clientWidth / 1;
-      this.settings.height = this.settings.width / 3;
-      this.settings.margin = {
-        top: 30,
-        right: 30,
-        bottom: 40,
-        left: 40
+    function getDimensions(container, settings) {
+      var width = container.node().clientWidth / settings.widthFactor;
+      var height = width / settings.heightFactor;
+      return {
+        width: width,
+        height: height
       };
     }
 
@@ -116,28 +121,26 @@
       return charts;
     }
 
-    function resize() {
-      getDimensions.call(this); //this.group.measure.forEach((measure) => {
-      //    measure.layout.svg.attr('width', this.settings.width).attr('height', this.settings.height);
-      //    measure.xScale.rangeRound([
-      //        this.settings.margin.left,
-      //        this.settings.width - this.settings.margin.right,
-      //    ]);
-      //    measure.yScale.rangeRound([
-      //        this.settings.height - this.settings.margin.bottom,
-      //        this.settings.margin.top,
-      //    ]);
-      //    draw.call(this, measure);
-      //});
-    }
-
     function layout() {
       var main = this.util.addElement('main', d3.select(this.element)); //const controls = layoutControls.call(this, main); //this.util.addElement('controls', main);
 
       var charts$1 = charts.call(this, main);
-      getDimensions.call(this, charts$1); // determine widths of DOM elements based on width of main container
 
-      window.addEventListener('resize', resize.bind(this));
+      var _getDimensions = getDimensions(charts$1, this.settings),
+          width = _getDimensions.width,
+          height = _getDimensions.height; // determine widths of DOM elements based on width of main container
+
+
+      this.settings.width = width;
+      this.settings.height = height;
+      this.settings.dimensions = {
+        width: width,
+        height: height,
+        margin: this.settings.margin,
+        widthAdj: width - this.settings.margin.left - this.settings.margin.right,
+        heightAdj: height - this.settings.margin.top - this.settings.margin.bottom
+      }; //window.addEventListener('resize', resize.bind(this));
+
       return {
         main: main,
         //...controls,
@@ -189,63 +192,6 @@
 
     function _nonIterableSpread() {
       throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-
-    function _createForOfIteratorHelper(o, allowArrayLike) {
-      var it;
-
-      if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) {
-        if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
-          if (it) o = it;
-          var i = 0;
-
-          var F = function () {};
-
-          return {
-            s: F,
-            n: function () {
-              if (i >= o.length) return {
-                done: true
-              };
-              return {
-                done: false,
-                value: o[i++]
-              };
-            },
-            e: function (e) {
-              throw e;
-            },
-            f: F
-          };
-        }
-
-        throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-      }
-
-      var normalCompletion = true,
-          didErr = false,
-          err;
-      return {
-        s: function () {
-          it = o[Symbol.iterator]();
-        },
-        n: function () {
-          var step = it.next();
-          normalCompletion = step.done;
-          return step;
-        },
-        e: function (e) {
-          didErr = true;
-          err = e;
-        },
-        f: function () {
-          try {
-            if (!normalCompletion && it.return != null) it.return();
-          } finally {
-            if (didErr) throw err;
-          }
-        }
-      };
     }
 
     function create(variable, data) {
@@ -476,39 +422,19 @@
       this.group = group(this.data);
       this.summary = summarize(this.data, this.set, this.settings);
       this.timepoint = timepoint(this.settings.timepoint, this.set);
-    }
-
-    function getDimensions$1(settings) {
-      var margin = {
-        top: settings.fontSize * 2,
-        right: 150,
-        bottom: 55,
-        left: 50
-      };
-      var width = 750 - margin.left - margin.right;
-      var height = 250 - margin.top - margin.bottom;
-      return {
-        margin: margin,
-        width: width,
-        height: height
-      };
+      this.measureIndex = 0;
+      this.measure = this.summary[this.measureIndex];
     }
 
     function getLayout(key, dimensions) {
-      var main = this.util.addElement('container', this.layout.charts);
+      var main = this.layout.charts.insert('div', ':first-child').classed('atm-container atm-div', true);
       var header = this.util.addElement('header', main, 'h3').text(key);
-      var width = dimensions.width + dimensions.margin.left + dimensions.margin.right;
-      var height = dimensions.height + dimensions.margin.top + dimensions.margin.bottom;
-      var margin = dimensions.margin;
-      var svg = this.util.addElement('time-series__svg', main, 'svg').attr('width', width).attr('height', height);
-      var g = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-      g.dimensions = dimensions;
-      g.width = width;
-      g.height = height;
-      g.margin = margin;
+      var svg = this.util.addElement('time-series__svg', main, 'svg').attr('width', dimensions.width).attr('height', dimensions.height);
+      var g = this.util.addElement('time-series__g', svg, 'g').attr('transform', 'translate(' + dimensions.margin.left + ',' + dimensions.margin.top + ')');
       return {
         main: main,
         header: header,
+        canvas: svg,
         svg: g
       };
     }
@@ -517,19 +443,19 @@
       var xScale;
 
       if (type === 'ordinal') {
-        xScale = d3.scalePoint().domain(domain).range([0, dimensions.width]).padding([0.5]);
+        xScale = d3.scalePoint().domain(domain).range([0, dimensions.widthAdj]).padding([0.5]);
       } else {
         var extent = d3.extent(domain);
         var range = extent[1] - extent[0];
         xScale = d3.scaleLinear().domain([extent[0] - range * 0.05, extent[1] + range * 0.05]) //.nice()
-        .range([0, dimensions.width]);
+        .range([0, dimensions.widthAdj]);
       }
 
       return xScale;
     }
 
     function getYScale(values, dimensions) {
-      var yScale = d3.scaleLinear().domain([d3.min(values), d3.max(values)]).nice().range([dimensions.height, 0]);
+      var yScale = d3.scaleLinear().domain([d3.min(values), d3.max(values)]).nice().range([dimensions.heightAdj, 0]);
       return yScale;
     }
 
@@ -539,8 +465,8 @@
       return colorScale;
     }
 
-    function addXAxis(type, svg, set, xScale) {
-      var xAxis = svg.append('g').classed('atm-axis', true).attr('transform', 'translate(0,' + svg.dimensions.height + ')');
+    function addXAxis(svg, xScale, dimensions, type, set) {
+      var xAxis = svg.append('g').classed('atm-axis', true).attr('transform', 'translate(0,' + dimensions.heightAdj + ')');
 
       if (type === 'ordinal') {
         xAxis.call(d3.axisBottom(xScale));
@@ -563,10 +489,10 @@
       return xAxis;
     }
 
-    function addYAxis(svg, yScale) {
+    function addYAxis(svg, yScale, dimensions) {
       var yAxis = svg.append('g').classed('atm-axis', true).call(d3.axisLeft(yScale));
       yAxis.grid = svg.append('g').call(function (g) {
-        return g.attr('class', 'grid-lines').selectAll('line').data(yScale.ticks()).join('line').attr('x1', 0).attr('x2', svg.dimensions.width).attr('y1', function (d) {
+        return g.attr('class', 'grid-lines').selectAll('line').data(yScale.ticks()).join('line').attr('x1', 0).attr('x2', dimensions.widthAdj).attr('y1', function (d) {
           return yScale(d);
         }).attr('y2', function (d) {
           return yScale(d);
@@ -575,16 +501,16 @@
       return yAxis;
     }
 
-    function addLegend(svg, colorScale) {
+    function addLegend(svg, colorScale, dimensions) {
       var legend = svg.append('g').classed('atm-legend', true);
-      legend.selectAll('mydots').data(colorScale.domain()).join('circle').attr('cx', svg.width - svg.margin.left - svg.margin.right + 10).attr('cy', function (d, i) {
-        return i * 20 - svg.margin.top / 2;
+      legend.selectAll('mydots').data(colorScale.domain()).join('circle').attr('cx', dimensions.width - dimensions.margin.left - dimensions.margin.right + 10).attr('cy', function (d, i) {
+        return i * 20 - dimensions.margin.top / 2;
       }) // 100 is where the first dot appears. 25 is the distance between dots
       .attr('r', 4).style('fill', function (d) {
         return colorScale(d);
       });
-      legend.selectAll('mylabels').data(colorScale.domain()).join('text').attr('x', svg.width - svg.margin.left - svg.margin.right + 15).attr('y', function (d, i) {
-        return i * 20 - svg.margin.top / 2;
+      legend.selectAll('mylabels').data(colorScale.domain()).join('text').attr('x', dimensions.width - dimensions.margin.left - dimensions.margin.right + 15).attr('y', function (d, i) {
+        return i * 20 - dimensions.margin.top / 2;
       }) // 100 is where the first dot appears. 25 is the distance between dots
       .style('fill', function (d) {
         return colorScale(d);
@@ -611,7 +537,7 @@
         return lineGenerator(pathData);
       }).attr('stroke', function (d) {
         return scales.color(d.color_value);
-      }).attr('stroke-width', this.settings.strokeWidth).attr('fill', 'none');
+      }).attr('stroke-width', this.settings.strokeWidth).attr('stroke-opacity', .75).attr('fill', 'none');
       lines.lineGenerator = lineGenerator;
       return lines;
     }
@@ -693,7 +619,6 @@
       annotations.datum(function (d) {
         // Get visit datum.
         var datum = d[1][_this.settings.timepoint];
-        console.log(datum.stratum.offset);
         return {
           x: scales.x(datum[_this.settings.xVar]),
           y: scales.y(datum[1].value),
@@ -708,12 +633,52 @@
         return d.x;
       }).attr('y', function (d) {
         return d.y;
-      }).attr('dx', this.settings.offset * 3).attr('dy', this.settings.fontSize / 3).attr('fill', function (d) {
+      }).attr('dx', this.settings.offset * 2).attr('dy', this.settings.fontSize / 3).attr('fill', function (d) {
         return d.color;
       }).style('font-size', this.settings.fontSize).style('font-weight', this.settings.fontWeight).text(function (d) {
         return d.text;
       });
       return annotations;
+    }
+
+    function plot(measure) {
+      var _this = this;
+
+      var dimensions = this.settings.dimensions; // common scales (x, color)
+
+      var xScale = getXScale(this.settings.xType, this.set[this.settings.xVar], dimensions);
+      var colorScale = getColorScale(this.set.color);
+      var data = measure[1]; // layout
+
+      var layout = getLayout.call(this, measure[0], dimensions); // y-scale
+
+      var yValues = measure.tabular.map(function (d) {
+        return d.value;
+      });
+
+      if (this.settings.displayCIs) {
+        data.map(function (d) {
+          return d[1];
+        }).flat().map(function (d) {
+          return d[1].stats["".concat(_this.settings.aggregate, "_ci")];
+        }).flat().forEach(function (ci) {
+          return yValues.push(ci);
+        });
+      }
+
+      measure.scales = {
+        x: xScale.copy(),
+        y: getYScale(yValues, dimensions),
+        color: colorScale.copy()
+      }; // axes
+
+      measure.xAxis = addXAxis(layout.svg, measure.scales.x, dimensions, this.settings.xType, this.set, measure.visits);
+      measure.yAxis = addYAxis(layout.svg, measure.scales.y, dimensions); // graphical objects
+
+      measure.lines = plotLines.call(this, layout.svg, data, measure.scales);
+      measure.points = plotPoints.call(this, layout.svg, data, measure.scales);
+      if (this.settings.displayCIs) measure.CIs = plotCIs.call(this, layout.svg, data, measure.scales);
+      if (this.settings.annotate) measure.annotations = plotAnnotations.call(this, layout.svg, data, measure.scales);else measure.legend = addLegend.call(this, layout.svg, measure.scales.color, dimensions);
     }
 
     function updateLines(lines, scales) {
@@ -801,97 +766,41 @@
       });
     }
 
-    function plot() {
+    function iterate(measure) {
       var _this = this;
 
-      //this.summary.forEach((stratum) => {
-      //    stratum.subset = stratum[1].slice(0, this.settings.timepoint + 1);
-      //});
-      var dimensions = getDimensions$1(this.settings);
-      var xScale = getXScale(this.settings.xType, this.set[this.settings.xVar], dimensions); // TODO: pass set in here
+      this.settings.timepoint++;
 
-      var colorScale = getColorScale(this.set.color); // Iterate through measures.
+      if (this.settings.timepoint >= this.set.visit.length) {
+        this.interval.stop();
+        d3.timeout(function () {
+          _this.settings.timepoint = 0;
+          _this.measureIndex++;
 
-      var _iterator = _createForOfIteratorHelper(this.summary),
-          _step;
-
-      try {
-        var _loop = function _loop() {
-          var measure = _step.value;
-          var data = measure[1]; // layout
-
-          var layout = getLayout.call(_this, measure[0], dimensions); // scales
-
-          var yValues = measure.tabular.map(function (d) {
-            return d.value;
-          });
-
-          if (_this.settings.displayCIs) {
-            data.map(function (d) {
-              return d[1];
-            }).flat().map(function (d) {
-              return d[1].stats["".concat(_this.settings.aggregate, "_ci")];
-            }).flat().forEach(function (ci) {
-              return yValues.push(ci);
-            });
+          if (_this.measureIndex < _this.summary.length) {
+            _this.measure = _this.summary[_this.measureIndex];
+            plot.call(_this, _this.measure);
+            _this.interval = d3.interval(function () {
+              iterate.call(_this, _this.measure);
+            }, _this.settings.speed);
           }
-
-          measure.scales = {
-            x: xScale.copy(),
-            y: getYScale(yValues, dimensions),
-            color: colorScale.copy()
-          }; // axes
-
-          measure.xAxis = addXAxis(_this.settings.xType, layout.svg, _this.set, measure.scales.x, measure.visits);
-          measure.yAxis = addYAxis(layout.svg, measure.scales.y); // graphical objects
-
-          measure.lines = plotLines.call(_this, layout.svg, data, measure.scales);
-          measure.points = plotPoints.call(_this, layout.svg, data, measure.scales);
-          if (_this.settings.displayCIs) measure.CIs = plotCIs.call(_this, layout.svg, data, measure.scales);
-          if (_this.settings.annotate) measure.annotations = plotAnnotations.call(_this, layout.svg, data, measure.scales);else measure.legend = addLegend.call(_this, layout.svg, measure.scales.color);
-        };
-
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          _loop();
-        } // increment timepoint and update plot accordingly
-
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
+        }, this.settings.pause);
+      } else {
+        this.timepoint = timepoint(this.settings.timepoint, this.set);
+        updateLines.call(this, measure.lines, measure.scales);
+        updatePoints.call(this, measure.points, measure.scales);
+        if (this.settings.displayCIs) updateCIs.call(this, measure.CIs, measure.scales);
+        if (this.settings.annotate) updateAnnotations.call(this, measure.annotations, measure.scales);
       }
+    }
 
-      var iterate = function iterate() {
-        this.settings.timepoint++;
+    function init() {
+      var _this = this;
 
-        if (this.settings.timepoint >= this.set.visit.length) {
-          this.interval.stop();
-          this.settings.timepoint = 0;
-        } else {
-          this.timepoint = timepoint(this.settings.timepoint, this.set);
-
-          var _iterator2 = _createForOfIteratorHelper(this.summary),
-              _step2;
-
-          try {
-            for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-              var measure = _step2.value;
-              updateLines.call(this, measure.lines, measure.scales);
-              updatePoints.call(this, measure.points, measure.scales);
-              if (this.settings.displayCIs) updateCIs.call(this, measure.CIs, measure.scales);
-              if (this.settings.annotate) updateAnnotations.call(this, measure.annotations, measure.scales);
-            }
-          } catch (err) {
-            _iterator2.e(err);
-          } finally {
-            _iterator2.f();
-          }
-        }
-      }; // initialize time interval
-
+      plot.call(this, this.measure); // initialize time interval
 
       this.interval = d3.interval(function () {
-        iterate.call(_this);
+        iterate.call(_this, _this.measure);
       }, this.settings.speed);
     }
 
@@ -910,7 +819,7 @@
 
       data.call(main); // mutate and structure data
 
-      plot.call(main); // define and render plots
+      init.call(main); // define and render plots
 
       return main;
     }

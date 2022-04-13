@@ -17,4 +17,6 @@ export default function data() {
     this.group = group(this.data);
     this.summary = summarize(this.data, this.set, this.settings);
     this.timepoint = timepoint(this.settings.timepoint, this.set);
+    this.measureIndex = 0;
+    this.measure = this.summary[this.measureIndex];
 }

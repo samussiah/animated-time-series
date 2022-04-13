@@ -37,24 +37,27 @@ export default function settings() {
         // y stuff
 
         // color stuff
-        offset: 7.5,
+        offset: 15,
         displayLegend: false,
         annotate: true,
-        pointRadius: 5,
-        strokeWidth: 4,
+        pointRadius: 7.5,
+        strokeWidth: 5,
         fontSize: 15,
         fontWeight: 'bold',
 
         // animation
         play: true,
         timepoint: 0,
+        measureIndex: 0,
         speed: 1000,
-        loopDelay: 10000,
+        pause: 5000,
 
         // dimensions
         width: null, // defined in ./layout/getDimensions
+        widthFactor: 1,
         height: null, // defined in ./layout/getDimensions
-        margin: {},
+        heightFactor: 3,
+        margin: { top: 50, right: 100, bottom: 100, left: 50 },
 
         // miscellaneous
         footnotes: [

@@ -9,8 +9,12 @@ fetch('../adlb-trend.csv')
             '#container',
             {
                 stratification_var: 'USUBJID',
+                color_var: 'ARMCD',
                 annotate: false,
-                color_var: 'ARMCD'
+                displayCIs: false,
+                offset: 0,
+                pointRadius: 2.5,
+                strokeWidth: 1,
             }
         );
     });

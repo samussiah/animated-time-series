@@ -3,7 +3,7 @@ export default function getYScale(values, dimensions) {
         .scaleLinear()
         .domain([d3.min(values), d3.max(values)])
         .nice()
-        .range([dimensions.height, 0]);
+        .range([dimensions.heightAdj, 0]);
 
     return yScale;
 }
