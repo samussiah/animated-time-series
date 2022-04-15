@@ -1,4 +1,4 @@
-export default function addLegend(svg, colorScale, dimensions) {
+export default function legend(svg, colorScale, dimensions) {
     const legend = svg.append('g').classed('atm-legend', true);
 
     legend

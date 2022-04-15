@@ -1,6 +1,6 @@
 import createSet from './set/create';
 
-export default function set(data) {
+export default function set(data, settings) {
     const set = {};
 
     set.stratification = createSet('stratification', data);
@@ -17,6 +17,15 @@ export default function set(data) {
             data.filter((d) => d.visit === visit),
             (d) => d.day
         )
+    );
+
+    // Calculate horizontal offsets of strata.
+    set.offsets = d3.range(
+        Math.ceil(-set.stratification.length / 2) * settings.offset +
+            (settings.offset / 2) * !(set.stratification.length % 2),
+        Math.ceil(set.stratification.length / 2) * settings.offset +
+            (settings.offset / 2) * !(set.stratification.length % 2),
+        settings.offset
     );
 
     return set;

@@ -1,4 +1,4 @@
-export default function getColorScale(domain, range = d3.schemeSet2) {
+export default function color(domain, range) {
     const colorScale = d3.scaleOrdinal().domain(domain).range(range);
 
     return colorScale;

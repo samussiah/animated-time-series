@@ -95,16 +95,13 @@
 .atm-charts {
     width: 100%;
     float: right;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 .atm-container {
-    width: 100%;
-    display: inline-block;
-    position: relative;
+    width: 50%;
     margin-bottom: 2rem;
-    /*
-    width: 48%;
-    padding: 1rem 0;
-*/
 }
 .atm-container:nth-child(odd) {
     /*

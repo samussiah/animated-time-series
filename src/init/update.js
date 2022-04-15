@@ -1,13 +1,13 @@
-import timepoint from '../data/timepoint';
+import getTimepoint from './getTimepoint';
 
-import updateLines from './updateLines';
-import updatePoints from './updatePoints';
-import updateCIs from './updateCIs';
-import updateAnnotations from './updateAnnotations';
+import updateLines from './update/lines';
+import updatePoints from './update/points';
+import updateCIs from './update/CIs';
+import updateAnnotations from './update/annotations';
 
 import plot from './plot';
 
-export default function iterate(measure) {
+export default function update(measure) {
     this.settings.timepoint++;
 
     if (this.settings.timepoint >= this.set.visit.length) {

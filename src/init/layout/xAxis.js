@@ -1,4 +1,4 @@
-export default function addXAxis(svg, xScale, dimensions, type, set, visits = null) {
+export default function xAxis(svg, xScale, dimensions, type, set, visits = null) {
     const xAxis = svg
         .append('g')
         .classed('atm-axis', true)

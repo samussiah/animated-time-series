@@ -1,4 +1,4 @@
-import updateSpacing from './annotations/updateSpacing';
+import updateSpacing from '../plot/annotations/updateSpacing';
 
 export default function updateAnnotations(annotations, scales) {
     annotations.datum((d) => {
