@@ -21,21 +21,18 @@ export default function init() {
         )
     };
 
-    // TODO: handle y-scale in getMeasure()
     this.measure = getMeasure(
-        this.settings.measureIndex,
         this.data.nested,
         this.scales,
-        this.settings.dimensions
+        this.settings
     );
-    throw '';
 
-    layout.call(this, this.measure);
+    this.measure.layout = layout.call(this, this.measure);
     plot.call(this, this.measure);
 
     // TODO: plot.on('end', () => update)
     // initialize time interval
-    this.interval = d3.interval(() => {
-        update.call(this, this.measure);
-    }, this.settings.speed);
+    //this.interval = d3.interval(() => {
+    //    update.call(this, this.measure);
+    //}, this.settings.speed);
 }

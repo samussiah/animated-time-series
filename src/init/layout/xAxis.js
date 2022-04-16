@@ -1,5 +1,5 @@
-export default function xAxis(svg, xScale, dimensions, type, set, visits = null) {
-    const xAxis = svg
+export default function xAxis(canvas, xScale, dimensions, type, set, visits = null) {
+    const xAxis = canvas
         .append('g')
         .classed('atm-axis', true)
         .attr('transform', 'translate(0,' + dimensions.heightAdj + ')');

@@ -1,7 +1,10 @@
-export default function yAxis(svg, yScale, dimensions) {
-    const yAxis = svg.append('g').classed('atm-axis', true).call(d3.axisLeft(yScale));
+export default function yAxis(canvas, yScale, dimensions) {
+    const yAxis = canvas
+        .append('g')
+        .classed('atm-axis', true)
+        .call(d3.axisLeft(yScale));
 
-    yAxis.grid = svg.append('g').call((g) =>
+    yAxis.grid = canvas.append('g').call((g) =>
         g
             .attr('class', 'grid-lines')
             .selectAll('line')

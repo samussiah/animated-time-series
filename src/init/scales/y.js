@@ -1,11 +1,10 @@
-export default function y(data, range) {
-    console.log(data);
+export default function y(data, range, settings) {
     const values = data.tabular.map((d) => d.value);
 
-    if (this.settings.displayCIs) {
-        data.map((d) => d[1])
+    if (settings.displayCIs) {
+        data[1].map((d) => d[1])
             .flat()
-            .map((d) => d[1].stats[`${this.settings.aggregate}_ci`])
+            .map((d) => d[1].stats[`${settings.aggregate}_ci`])
             .flat()
             .forEach((ci) => values.push(ci));
     }

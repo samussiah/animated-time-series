@@ -10,7 +10,7 @@ import plot from './plot';
 export default function update(measure) {
     this.settings.timepoint++;
 
-    if (this.settings.timepoint >= this.set.visit.length) {
+    if (this.settings.timepoint >= this.data.set.visit.length) {
         this.interval.stop();
 
         d3.timeout(() => {
@@ -25,11 +25,12 @@ export default function update(measure) {
             }
         }, this.settings.pause);
     } else {
-        this.timepoint = timepoint(this.settings.timepoint, this.set);
+        this.timepoint = getTimepoint(this.settings.timepoint, this.data.set);
 
         updateLines.call(this, measure.lines, measure.scales);
         updatePoints.call(this, measure.points, measure.scales);
-        if (this.settings.displayCIs) updateCIs.call(this, measure.CIs, measure.scales);
+        if (this.settings.displayCIs)
+            updateCIs.call(this, measure.CIs, measure.scales);
         if (this.settings.annotate)
             updateAnnotations.call(this, measure.annotations, measure.scales);
     }

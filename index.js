@@ -448,16 +448,32 @@
       return timepoint;
     }
 
-    function getMeasure(index, data, scales, dimensions) {
+    function y(data, range, settings) {
+      var values = data.tabular.map(function (d) {
+        return d.value;
+      });
+
+      if (settings.displayCIs) {
+        data[1].map(function (d) {
+          return d[1];
+        }).flat().map(function (d) {
+          return d[1].stats["".concat(settings.aggregate, "_ci")];
+        }).flat().forEach(function (ci) {
+          return values.push(ci);
+        });
+      }
+
+      var yScale = d3.scaleLinear().domain([d3.min(values), d3.max(values)]).nice().range(range);
+      return yScale;
+    }
+
+    function getMeasure(data, scales, settings) {
       var measure = {
-        index: index,
-        data: data[index],
-        scales: scales.map(function (scale) {
-          return scale.copy();
-        })
+        index: settings.measureIndex,
+        data: data[settings.measureIndex],
+        scales: scales
       };
-      console.log(measure);
-      measure.scales.y = scales.y(measure.data, [dimensions.heightAdj, 0]);
+      measure.scales.y = y(measure.data, [settings.dimensions.heightAdj, 0], settings);
       return measure;
     }
 
@@ -468,36 +484,12 @@
         xScale = d3.scalePoint().domain(domain).range(range).padding([0.5]);
       } else {
         var extent = d3.extent(domain);
-
-        var _range = extent[1] - extent[0];
-
-        xScale = d3.scaleLinear().domain([extent[0] - _range * 0.05, extent[1] + _range * 0.05]) //.nice()
-        .range(_range);
+        var extentDiff = extent[1] - extent[0];
+        xScale = d3.scaleLinear().domain([extent[0] - extentDiff * 0.05, extent[1] + extentDiff * 0.05]) //.nice()
+        .range(range);
       }
 
       return xScale;
-    }
-
-    function y(data, range) {
-      var _this = this;
-
-      console.log(data);
-      var values = data.tabular.map(function (d) {
-        return d.value;
-      });
-
-      if (this.settings.displayCIs) {
-        data.map(function (d) {
-          return d[1];
-        }).flat().map(function (d) {
-          return d[1].stats["".concat(_this.settings.aggregate, "_ci")];
-        }).flat().forEach(function (ci) {
-          return values.push(ci);
-        });
-      }
-
-      var yScale = d3.scaleLinear().domain([d3.min(values), d3.max(values)]).nice().range(range);
-      return yScale;
     }
 
     function color(domain, range) {
@@ -511,17 +503,213 @@
       color: color
     };
 
-    function init() {
+    function canvas(key, dimensions) {
+      var main = this.layout.charts.insert('div', ':first-child') //.append('div')
+      .classed('atm-container atm-div', true);
+      var header = this.util.addElement('header', main, 'h3').text(key).style('display', 'none');
+      var svg = this.util.addElement('time-series__svg', main, 'svg').attr('width', dimensions.width).attr('height', dimensions.height).style('display', 'none');
+      var canvas = this.util.addElement('time-series__g', svg, 'g').attr('transform', 'translate(' + dimensions.margin.left + ',' + dimensions.margin.top + ')').style('display', 'none');
+      main.style('width', '0%').transition().duration(this.settings.speed).style('width', '50%').on('end', function () {
+        header.style('display', null);
+        svg.style('display', null);
+        canvas.style('display', null);
+      });
+      return canvas;
+    }
 
+    function xAxis(canvas, xScale, dimensions, type, set) {
+      var xAxis = canvas.append('g').classed('atm-axis', true).attr('transform', 'translate(0,' + dimensions.heightAdj + ')');
+
+      if (type === 'ordinal') {
+        xAxis.call(d3.axisBottom(xScale));
+      } else {
+        xAxis.call(d3.axisBottom(xScale).tickValues(set.timepoint).tickFormat(function (d, i) {
+          return set.visit[i];
+        }));
+      }
+
+      xAxis.selectAll('text').style('text-anchor', 'end').attr('transform', 'rotate(-45)').attr('dx', '-.8em').attr('dy', '.15em'); // TODO: make this work with a discrete time scale
+      //if (visits !== null)
+      //    xAxis
+      //        .selectAll('.tick')
+      //        .classed(
+      //            'atm-missing',
+      //            (d) => {
+      //                visits.includes(d) === false
+      //            });
+
+      return xAxis;
+    }
+
+    function yAxis(canvas, yScale, dimensions) {
+      var yAxis = canvas.append('g').classed('atm-axis', true).call(d3.axisLeft(yScale));
+      yAxis.grid = canvas.append('g').call(function (g) {
+        return g.attr('class', 'grid-lines').selectAll('line').data(yScale.ticks()).join('line').attr('x1', 0).attr('x2', dimensions.widthAdj).attr('y1', function (d) {
+          return yScale(d);
+        }).attr('y2', function (d) {
+          return yScale(d);
+        });
+      });
+      return yAxis;
+    }
+
+    function layout$1(measure) {
+      var dimensions = this.settings.dimensions;
+      var canvas$1 = canvas.call(this, measure.data[0], dimensions);
+      var xAxis$1 = xAxis(canvas$1, measure.scales.x, dimensions, this.settings.xType, this.data.set, measure.visits);
+      var yAxis$1 = yAxis(canvas$1, measure.scales.y, dimensions);
+      return {
+        canvas: canvas$1,
+        xAxis: xAxis$1,
+        yAxis: yAxis$1
+      };
+    }
+
+    function plotLines(svg, data, scales) {
+      var _this = this;
+
+      var lineGenerator = d3.line().x(function (d) {
+        return scales.x(d[_this.settings.xVar]) + d.stratum.offset;
+      }).y(function (d) {
+        return scales.y(d[1].value);
+      });
+      var lines = svg.selectAll('path.line').data(data).join('path').classed('line', true);
+      lines.attr('d', function (d) {
+        var currentTimepoint = d[1][_this.settings.timepoint];
+        var pathData = d[1].map(function (d, i) {
+          return i >= _this.settings.timepoint ? currentTimepoint : d;
+        });
+        return lineGenerator(pathData);
+      }).attr('stroke', function (d) {
+        return scales.color(d.color_value);
+      }).attr('stroke-width', this.settings.strokeWidth).attr('stroke-opacity', 0.75).attr('fill', 'none');
+      lines.lineGenerator = lineGenerator;
+      return lines;
+    }
+
+    function plotPoints(svg, data, scales) {
+      var _this = this;
+
+      var pointGroups = svg.selectAll('g.point-group').data(data, function (d) {
+        return d[0];
+      }).join('g').classed('point-group', true);
+      pointGroups //.attr('fill-opacity', .75)
+      .attr('fill', function (d) {
+        return scales.color(d.color_value);
+      });
+      var points = pointGroups.selectAll('circle.point').data(function (d) {
+        return d[1].slice(0, _this.settings.timepoint + 1);
+      }, function (d, i) {
+        return [d.stratum[0], i].join('|');
+      }).join('circle').classed('point', true);
+      points.attr('cx', function (d) {
+        return scales.x(d[_this.settings.xVar]) + d.stratum.offset;
+      }).attr('cy', function (d) {
+        return scales.y(d[1].value);
+      }).attr('r', this.settings.pointRadius).attr('stroke', 'white');
+      return pointGroups;
+    }
+
+    function plotCIs(svg, data, scales) {
+      var _this = this;
+
+      var ciGroups = svg.selectAll('g.ci-group').data(data, function (d) {
+        return d[0];
+      }).join('g').classed('ci-group', true);
+      ciGroups //.attr('fill-opacity', .75)
+      .attr('stroke', function (d) {
+        return scales.color(d.color_value);
+      }).attr('stroke-width', this.settings.strokeWidth);
+      var CIs = ciGroups.selectAll('line.ci').data(function (d) {
+        return d[1].slice(0, _this.settings.timepoint + 1);
+      }, function (d, i) {
+        return [d.stratum[0], i].join('|');
+      }).join('line').classed('ci', true);
+      CIs.attr('x1', function (d) {
+        return scales.x(d[_this.settings.xVar]) + d.stratum.offset;
+      }).attr('x2', function (d) {
+        return scales.x(d[_this.settings.xVar]) + d.stratum.offset;
+      }).attr('y1', function (d) {
+        return scales.y(d[1].stats["".concat(_this.settings.aggregate, "_ci")][0]);
+      }).attr('y2', function (d) {
+        return scales.y(d[1].stats["".concat(_this.settings.aggregate, "_ci")][1]);
+      }).attr('stroke-linecap', 'round');
+      return ciGroups;
+    }
+
+    // TODO: reverse algorithm to shift text upward - add top margin as needed
+    //
+    // reposition annotations to avoid overlap
+    function updateSpacing(data) {
+      var spacing = this.settings.fontSize;
+      data.sort(function (a, b) {
+        return b.y - a.y;
+      }).forEach(function (d, i) {
+        if (i > 0) {
+          var diff = data[i - 1].y - d.y;
+
+          if (diff < spacing) {
+            d.y = d.y - (spacing - diff);
+          }
+        }
+      });
+    }
+
+    function plotAnnotations(svg, data, scales) {
+      var _this = this;
+
+      // create elements
+      var annotations = svg.selectAll('text.annotation').data(data).join('text').classed('annotation', true); // bind data
+
+      annotations.datum(function (d) {
+        // Get visit datum.
+        var datum = d[1][_this.settings.timepoint];
+        return {
+          x: scales.x(datum[_this.settings.xVar]),
+          y: scales.y(datum[1].value),
+          color: scales.color(d[0]),
+          text: d[0],
+          stratum: d
+        };
+      });
+      updateSpacing.call(this, annotations.data()); // apply attributes
+
+      annotations.attr('x', function (d) {
+        return d.x;
+      }).attr('y', function (d) {
+        return d.y;
+      }).attr('dx', this.settings.offset * 2).attr('dy', this.settings.fontSize / 3).attr('fill', function (d) {
+        return d.color;
+      }).style('font-size', this.settings.fontSize).style('font-weight', this.settings.fontWeight).text(function (d) {
+        return d.text;
+      });
+      return annotations;
+    }
+
+    function plot(measure) {
+      var data = measure.data[1]; //measure.timeout = d3.timeout(() => {
+
+      measure.lines = plotLines.call(this, measure.layout.canvas, data, measure.scales);
+      measure.points = plotPoints.call(this, measure.layout.canvas, data, measure.scales);
+      if (this.settings.displayCIs) measure.CIs = plotCIs.call(this, measure.layout.canvas, data, measure.scales);
+      if (this.settings.annotate) measure.annotations = plotAnnotations.call(this, measure.layout.canvas, data, measure.scales);
+      if (this.settings.displayLegend) measure.legend = addLegend.call(this, measure.layout.canvas, measure.scales.color, dimensions); //}, this.settings.speed*2);
+    }
+
+    function init() {
       this.timepoint = getTimepoint(this.settings.timepoint, this.data.set); // common scales (x, color)
 
       this.scales = {
         x: scales.x(this.data.set[this.settings.xVar], [0, this.settings.dimensions.widthAdj], this.settings.xType),
         color: scales.color(this.data.set.color, this.settings.colorScheme)
-      }; // TODO: handle y-scale in getMeasure()
-
-      this.measure = getMeasure(this.settings.measureIndex, this.data.nested, this.scales, this.settings.dimensions);
-      throw '';
+      };
+      this.measure = getMeasure(this.data.nested, this.scales, this.settings);
+      this.measure.layout = layout$1.call(this, this.measure);
+      plot.call(this, this.measure); // TODO: plot.on('end', () => update)
+      // initialize time interval
+      //this.interval = d3.interval(() => {
+      //    update.call(this, this.measure);
+      //}, this.settings.speed);
     }
 
     function animatedTimeSeries(_data_) {

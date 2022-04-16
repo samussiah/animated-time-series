@@ -1,13 +1,16 @@
-export default function getMeasure(index, data, scales, dimensions) {
+import y from './scales/y';
+
+export default function getMeasure(data, scales, settings) {
     const measure = {
-        index,
-        data: data[index],
-        scales: scales.map(scale => scale.copy())
+        index: settings.measureIndex,
+        data: data[settings.measureIndex],
+        scales
     };
-    console.log(measure);
-    measure.scales.y = scales.y(
+
+    measure.scales.y = y(
         measure.data,
-        [dimensions.heightAdj, 0]
+        [settings.dimensions.heightAdj, 0],
+        settings
     );
 
     return measure;
