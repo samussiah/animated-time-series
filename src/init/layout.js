@@ -7,7 +7,11 @@ import addLegend from './layout/legend';
 export default function layout(measure) {
     const dimensions = this.settings.dimensions;
 
-    const canvas = addCanvas.call(this, measure.data[0], dimensions);
+    const { canvas, mainTransition, transitionEnd } = addCanvas.call(
+        this,
+        measure.data[0],
+        dimensions
+    );
 
     const xAxis = addXAxis(
         canvas,
@@ -18,15 +22,20 @@ export default function layout(measure) {
         measure.visits
     );
 
-    const yAxis = addYAxis(
-        canvas,
-        measure.scales.y,
-        dimensions
-    );
+    const yAxis = addYAxis(canvas, measure.scales.y, dimensions);
+
+    //const legend = addLegend(
+    //    canvas,
+    //    measure.scales.color,
+    //    dimensions,
+    //    this.settings
+    //);
 
     return {
         canvas,
+        mainTransition,
+        transitionEnd,
         xAxis,
-        yAxis
+        yAxis,
     };
 }

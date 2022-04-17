@@ -5,17 +5,26 @@ import plotAnnotations from './plot/annotations';
 
 export default function plot(measure) {
     const data = measure.data[1];
-    //measure.timeout = d3.timeout(() => {
-        measure.lines = plotLines.call(this, measure.layout.canvas, data, measure.scales);
-        measure.points = plotPoints.call(this, measure.layout.canvas, data, measure.scales);
 
-        if (this.settings.displayCIs)
-            measure.CIs = plotCIs.call(this, measure.layout.canvas, data, measure.scales);
+    measure.lines = plotLines.call(this, measure.layout.canvas, data, measure.scales);
+    measure.points = plotPoints.call(this, measure.layout.canvas, data, measure.scales);
 
-        if (this.settings.annotate)
-            measure.annotations = plotAnnotations.call(this, measure.layout.canvas, data, measure.scales);
+    if (this.settings.displayCIs)
+        measure.CIs = plotCIs.call(this, measure.layout.canvas, data, measure.scales);
 
-        if (this.settings.displayLegend)
-            measure.legend = addLegend.call(this, measure.layout.canvas, measure.scales.color, dimensions);
-    //}, this.settings.speed*2);
+    if (this.settings.annotate)
+        measure.annotations = plotAnnotations.call(
+            this,
+            measure.layout.canvas,
+            data,
+            measure.scales
+        );
+
+    if (this.settings.displayLegend)
+        measure.legend = addLegend.call(
+            this,
+            measure.layout.canvas,
+            measure.scales.color,
+            dimensions
+        );
 }

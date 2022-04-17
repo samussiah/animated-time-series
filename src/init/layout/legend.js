@@ -1,5 +1,6 @@
-export default function legend(canvas, colorScale, dimensions) {
-    const legend = svg.append('g').classed('atm-legend', true);
+export default function legend(canvas, colorScale, dimensions, settings) {
+    console.log(settings);
+    const legend = canvas.append('g').classed('atm-legend', true);
 
     legend
         .selectAll('mydots')
@@ -29,8 +30,8 @@ export default function legend(canvas, colorScale, dimensions) {
             return d;
         })
         .attr('text-anchor', 'left')
-        .style('font-size', this.settings.fontSize)
-        .style('font-weight', this.settings.fontWeight)
+        .style('font-size', settings.fontSize)
+        .style('font-weight', settings.fontWeight)
         .style('alignment-baseline', 'middle');
 
     return legend;

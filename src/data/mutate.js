@@ -3,7 +3,7 @@ export default function mutate(data, settings) {
 
     const cleansed = data
         .map((d) => {
-            const datum = {...d};
+            const datum = { ...d };
 
             // Rename data variables.
             Object.keys(settings)
@@ -23,13 +23,12 @@ export default function mutate(data, settings) {
 
             return datum;
         })
-        .filter(d => !isNaN(d.result));
+        .filter((d) => !isNaN(d.result));
 
     const nRowsCleansed = cleansed.length;
     const nRowsRemoved = nRows - nRowsCleansed;
 
-    if (nRowsRemoved > 0)
-        console.warn(`${nRowsRemoved} rows without results removed.`);
+    if (nRowsRemoved > 0) console.warn(`${nRowsRemoved} rows without results removed.`);
 
     return cleansed;
 }

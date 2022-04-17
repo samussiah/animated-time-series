@@ -1,7 +1,5 @@
 export default function summarize(group, settings) {
-    const results = group
-        .map((d) => d.result)
-        .sort((a, b) => a - b);
+    const results = group.map((d) => d.result).sort((a, b) => a - b);
 
     const jObj = jStat(results);
 

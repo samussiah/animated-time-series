@@ -5,5 +5,5 @@ import color from './color';
 export default {
     x,
     y,
-    color
+    color,
 };

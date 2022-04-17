@@ -2,7 +2,8 @@ export default function y(data, range, settings) {
     const values = data.tabular.map((d) => d.value);
 
     if (settings.displayCIs) {
-        data[1].map((d) => d[1])
+        data[1]
+            .map((d) => d[1])
             .flat()
             .map((d) => d[1].stats[`${settings.aggregate}_ci`])
             .flat()

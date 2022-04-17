@@ -15,24 +15,21 @@ export default function init() {
             [0, this.settings.dimensions.widthAdj],
             this.settings.xType
         ),
-        color: scales.color(
-            this.data.set.color,
-            this.settings.colorScheme
-        )
+        color: scales.color(this.data.set.color, this.settings.colorScheme),
     };
 
-    this.measure = getMeasure(
-        this.data.nested,
-        this.scales,
-        this.settings
-    );
+    this.measure = getMeasure(this.data.nested, this.scales, this.settings);
 
     this.measure.layout = layout.call(this, this.measure);
-    plot.call(this, this.measure);
+    this.measure.layout.mainTransition.on('end', () => {
+        this.measure.layout.transitionEnd();
+        plot.call(this, this.measure);
 
-    // TODO: plot.on('end', () => update)
-    // initialize time interval
-    //this.interval = d3.interval(() => {
-    //    update.call(this, this.measure);
-    //}, this.settings.speed);
+        d3.timeout(() => {
+            // initialize time interval
+            this.interval = d3.interval(() => {
+                update.call(this, this.measure);
+            }, this.settings.speed);
+        }, this.settings.speed * 2);
+    });
 }
