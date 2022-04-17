@@ -1,59 +1,8 @@
-// import nest from './summarize/nest';
-// import shell from './summarize/shell';
-// TODO: refactor - this shit's hard to pull apart
-// TODO: define and display continuous x-axis
-export default function summarize(data, set, settings) {
-    // Nest data by measure, stratification, and visit and average results.
-    const nested = d3.rollups(
-        data,
-        (group) => {
-            const results = group.map((d) => d.result).sort((a, b) => a - b);
-
-            const jObj = jStat(results);
-
-            const n = group.length;
-            const mean = d3.mean(results);
-            const deviation = d3.deviation(results);
-            const mean_ci = jStat.tci(mean, settings.alpha, results);
-
-            const min = d3.min(results);
-            const median = d3.median(results);
-            const max = d3.max(results);
-
-            const geomean = jStat.geomean(results);
-            const geomean_ci = jStat
-                .tci(
-                    Math.log(geomean),
-                    settings.alpha,
-                    results.map((result) => Math.log(result))
-                )
-                .map((bound) => Math.exp(bound));
-
-            const stats = {
-                n,
-                mean,
-                deviation,
-                mean_ci,
-                min,
-                median,
-                max,
-                geomean,
-                geomean_ci,
-            };
-
-            return {
-                data: group,
-                stats,
-                value: stats[settings.aggregate],
-            };
-        },
-        (d) => d.measure, // facet
-        (d) => d.stratification, // color
-        (d) => d.visit // x,y
-    );
+export default function impute(nested, set, settings) {
+    let imputed = structuredClone(nested);
 
     // Iterate over measures to generate tabular summary.
-    nested.forEach((measure, i) => {
+    imputed.forEach((measure, i) => {
         // Create array with as many elements as stratification and visit values combined.
         const tabular = Array(set.stratification.length * set.visit.length);
 
@@ -124,5 +73,5 @@ export default function summarize(data, set, settings) {
         measure.visits = [...new Set(measure.tabular.map((d) => d.visit)).values()];
     });
 
-    return nested;
+    return imputed;
 }

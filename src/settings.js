@@ -37,11 +37,12 @@ export default function settings() {
         // y stuff
 
         // color stuff
-        offset: 15,
+        colorScheme: d3.schemeSet2,
+        offset: 7.5,
         displayLegend: false,
         annotate: true,
-        pointRadius: 7.5,
-        strokeWidth: 5,
+        pointRadius: 5,
+        strokeWidth: 3,
         fontSize: 15,
         fontWeight: 'bold',
 
@@ -54,10 +55,10 @@ export default function settings() {
 
         // dimensions
         width: null, // defined in ./layout/getDimensions
-        widthFactor: 1,
+        widthFactor: 2,
         height: null, // defined in ./layout/getDimensions
-        heightFactor: 3,
-        margin: { top: 50, right: 100, bottom: 100, left: 50 },
+        heightFactor: 2,
+        margin: { top: 50, right: 100, bottom: 100, left: 75 },
 
         // miscellaneous
         footnotes: [

@@ -31,8 +31,11 @@ export default function plotPoints(svg, data, scales) {
         .attr('cy', (d) => {
             return scales.y(d[1].value);
         })
-        .attr('r', this.settings.pointRadius)
-        .attr('stroke', 'white');
+        .attr('stroke', 'white')
+        .attr('r', 0)
+        .transition()
+        .duration(this.settings.speed / 2)
+        .attr('r', this.settings.pointRadius);
 
     return pointGroups;
 }

@@ -37,9 +37,15 @@ export default function plotAnnotations(svg, data, scales) {
         .attr('fill', (d) => {
             return d.color;
         })
-        .style('font-size', this.settings.fontSize)
         .style('font-weight', this.settings.fontWeight)
-        .text((d) => d.text);
+        .text((d) => d.text)
+        .attr('font-size', 0);
+
+    annotations
+        .transition()
+        .duration(this.settings.speed / this.data.set.stratification.length)
+        .delay((d, i) => (i * this.settings.speed) / this.data.set.stratification.length)
+        .attr('font-size', this.settings.fontSize);
 
     return annotations;
 }
