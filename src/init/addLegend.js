@@ -17,6 +17,5 @@ export default function addLegend(container, colorScale) {
     legendContent
         .insert('text')
         .classed('atm-legend-item__text', true)
-        .text((d,i) => d);
-    console.log(legendContainers);
+        .text((d,i) => `${d} (n=${100})`);
 }

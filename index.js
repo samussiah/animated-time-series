@@ -322,12 +322,29 @@
       return set;
     }
 
-    function summarize(group, settings) {
+    function summarize(group, settings, minResults) {
+      var measure = group[0].measure;
+      var stratum = group[0].stratification;
+      var minResult = minResults.get(measure);
       var results = group.map(function (d) {
         return d.result;
       }).sort(function (a, b) {
         return a - b;
-      });
+      }); // Set non-positive results to minimum positive result when aggregating with geometric mean.
+
+      if (['geomean'].includes(settings.aggregate)) {
+        var nValid = 0;
+        results = results.map(function (result) {
+          if (result <= 0) {
+            result = minResult;
+            nValid++;
+          }
+
+          return result;
+        });
+        if (nValid > 0) console.warn("".concat(nValid, " non-positive ").concat(measure, " results for ").concat(stratum, " set to ").concat(minResult, ", the smallest positive result."));
+      }
+
       var jObj = jStat(results);
       var n = group.length;
       var mean = d3.mean(results);
@@ -433,9 +450,18 @@
     }
 
     function nest(data, set, settings) {
-      // Nest data by measure, stratification, and visit and average results.
+      var minResults = d3.rollup(data, function (group) {
+        return d3.min(group.map(function (d) {
+          return d.result;
+        }).filter(function (result) {
+          return result > 0;
+        }));
+      }, function (d) {
+        return d.measure;
+      }); // Nest data by measure, stratification, and visit and average results.
+
       var nested = d3.rollups(data, function (group) {
-        return summarize(group, settings);
+        return summarize(group, settings, minResults);
       }, // calculate statistics
       function (d) {
         return d.measure;
@@ -530,9 +556,8 @@
         return colorScale(d);
       });
       legendContent.insert('text').classed('atm-legend-item__text', true).text(function (d, i) {
-        return d;
+        return "".concat(d, " (n=", 100, ")");
       });
-      console.log(legendContainers);
     }
 
     function canvas(key, dimensions) {
@@ -751,6 +776,11 @@
 
     function plot(measure) {
       var data = measure.data[1];
+      console.log(data[0][1][0][1].data.map(function (d) {
+        return d.result;
+      }).sort(function (a, b) {
+        return a - b;
+      }));
       measure.lines = plotLines.call(this, measure.layout.canvas, data, measure.scales);
       measure.points = plotPoints.call(this, measure.layout.canvas, data, measure.scales);
       if (this.settings.displayCIs) measure.CIs = plotCIs.call(this, measure.layout.canvas, data, measure.scales);

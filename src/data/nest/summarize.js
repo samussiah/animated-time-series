@@ -1,5 +1,24 @@
-export default function summarize(group, settings) {
-    const results = group.map((d) => d.result).sort((a, b) => a - b);
+export default function summarize(group, settings, minResults) {
+    const measure = group[0].measure;
+    const stratum = group[0].stratification;
+    const minResult = minResults.get( measure );
+    let results = group.map((d) => d.result).sort((a, b) => a - b);
+
+    // Set non-positive results to minimum positive result when aggregating with geometric mean.
+    if (['geomean'].includes(settings.aggregate)) {
+        let nValid = 0;
+        results = results.map(result => {
+            if (result <= 0) {
+                result = minResult;
+                nValid++;
+            }
+
+            return result;
+        });
+
+        if (nValid > 0)
+            console.warn(`${ nValid } non-positive ${ measure } results for ${ stratum } set to ${ minResult }, the smallest positive result.`)
+    }
 
     const jObj = jStat(results);
 

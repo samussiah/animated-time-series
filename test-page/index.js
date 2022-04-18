@@ -4,6 +4,7 @@ fetch('./adlb-trend.csv')
     .then(data => {
         const main = animatedTimeSeries(
             data.filter(d => (
+                /WBC/.test(d.PARAM) &&
                 !(+d.AVISITN%1) // remove "unscheduled" visits
             )),
             '#container',
@@ -12,6 +13,13 @@ fetch('./adlb-trend.csv')
                 xType: 'discrete',
                 displayLegend: true,
                 colorScheme: ['red', 'black', 'blue'],
+                varLabels: {
+                    result: '% of Baseline'
+                },
+                aggregateLabels: {
+                    geomean: 'Geo. Mean',
+                },
+                aggregate: 'geomean',
                 speed: 500,
                 pause: 500,
             }
