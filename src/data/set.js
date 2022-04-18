@@ -11,6 +11,21 @@ export default function set(data, settings) {
     set.day = createSet('day', data);
     set.measure = createSet('measure', data);
 
+    set.strata = set.stratification
+        .reduce(
+            (curr, prev) => {
+                const ids = data
+                    .filter(d => d.stratification === prev)
+                    .map(d => d.id);
+
+                const n = new Set(ids).size;
+                curr[prev] = n;
+
+                return curr;
+            },
+            {}
+        );
+
     // Calculate median continuous timepoint of each ordinal timepoint.
     set.timepoint = set.visit.map((visit) =>
         d3.median(

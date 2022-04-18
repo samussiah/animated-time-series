@@ -308,7 +308,17 @@
       set.visit = create('visit', data);
       set.visit_order = create('visit_order', data);
       set.day = create('day', data);
-      set.measure = create('measure', data); // Calculate median continuous timepoint of each ordinal timepoint.
+      set.measure = create('measure', data);
+      set.strata = set.stratification.reduce(function (curr, prev) {
+        var ids = data.filter(function (d) {
+          return d.stratification === prev;
+        }).map(function (d) {
+          return d.id;
+        });
+        var n = new Set(ids).size;
+        curr[prev] = n;
+        return curr;
+      }, {}); // Calculate median continuous timepoint of each ordinal timepoint.
 
       set.timepoint = set.visit.map(function (visit) {
         return d3.median(data.filter(function (d) {
@@ -322,7 +332,7 @@
       return set;
     }
 
-    function summarize(group, settings, minResults) {
+    function getResults(group, settings, minResults) {
       var measure = group[0].measure;
       var stratum = group[0].stratification;
       var minResult = minResults.get(measure);
@@ -345,6 +355,15 @@
         if (nValid > 0) console.warn("".concat(nValid, " non-positive ").concat(measure, " results for ").concat(stratum, " set to ").concat(minResult, ", the smallest positive result."));
       }
 
+      var nonInfinity = results.filter(function (result) {
+        return result !== Infinity;
+      });
+      if (nonInfinity.length < results.length) console.warn("".concat(results.length - nonInfinity.length, " infinite ").concat(measure, " results for ").concat(stratum, " removed."));
+      return nonInfinity;
+    }
+
+    function summarize(group, settings, minResults) {
+      var results = getResults(group, settings, minResults);
       var jObj = jStat(results);
       var n = group.length;
       var mean = d3.mean(results);
@@ -550,13 +569,15 @@
     };
 
     function addLegend(container, colorScale) {
+      var _this = this;
+
       var legendContainers = container.selectAll('div.atm-legend-item').data(colorScale.domain()).join('div').classed('atm-legend-item', true);
       var legendContent = legendContainers.append('p').classed('atm-legend-item__content', true);
       legendContent.append('span').classed('atm-legend-item__symbol', true).style('background', function (d, i) {
         return colorScale(d);
       });
       legendContent.insert('text').classed('atm-legend-item__text', true).text(function (d, i) {
-        return "".concat(d, " (n=", 100, ")");
+        return "".concat(d, " (n=").concat(_this.data.set.strata[d], ")");
       });
     }
 
@@ -776,11 +797,6 @@
 
     function plot(measure) {
       var data = measure.data[1];
-      console.log(data[0][1][0][1].data.map(function (d) {
-        return d.result;
-      }).sort(function (a, b) {
-        return a - b;
-      }));
       measure.lines = plotLines.call(this, measure.layout.canvas, data, measure.scales);
       measure.points = plotPoints.call(this, measure.layout.canvas, data, measure.scales);
       if (this.settings.displayCIs) measure.CIs = plotCIs.call(this, measure.layout.canvas, data, measure.scales);

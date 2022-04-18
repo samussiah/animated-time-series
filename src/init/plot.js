@@ -5,7 +5,6 @@ import plotAnnotations from './plot/annotations';
 
 export default function plot(measure) {
     const data = measure.data[1];
-    console.log(data[0][1][0][1].data.map(d => d.result).sort((a,b) => a-b));
 
     measure.lines = plotLines.call(this, measure.layout.canvas, data, measure.scales);
     measure.points = plotPoints.call(this, measure.layout.canvas, data, measure.scales);
