@@ -28,12 +28,14 @@ export default function layout(measure) {
         dimensions
     );
 
-    //const legend = addLegend(
-    //    canvas,
-    //    measure.scales.color,
-    //    dimensions,
-    //    this.settings
-    //);
+    //let legend;
+    //if (this.settings.displayLegend)
+    //    legend = addLegend(
+    //        canvas,
+    //        measure.scales.color,
+    //        dimensions,
+    //        this.settings
+    //    );
 
     return {
         canvas,
@@ -41,5 +43,6 @@ export default function layout(measure) {
         transitionEnd,
         xAxis,
         yAxis,
+        //legend
     };
 }

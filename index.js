@@ -143,6 +143,7 @@
     function layout() {
       var main = this.util.addElement('main', d3.select(this.element)); //const controls = layoutControls.call(this, main); //this.util.addElement('controls', main);
 
+      var legend = this.util.addElement('legend', main);
       var charts$1 = charts.call(this, main);
 
       var _getDimensions = getDimensions(charts$1, this.settings),
@@ -163,6 +164,7 @@
       return {
         main: main,
         //...controls,
+        legend: legend,
         charts: charts$1
       };
     }
@@ -521,6 +523,18 @@
       color: color
     };
 
+    function addLegend(container, colorScale) {
+      var legendContainers = container.selectAll('div.atm-legend-item').data(colorScale.domain()).join('div').classed('atm-legend-item', true);
+      var legendContent = legendContainers.append('p').classed('atm-legend-item__content', true);
+      legendContent.append('span').classed('atm-legend-item__symbol', true).style('background', function (d, i) {
+        return colorScale(d);
+      });
+      legendContent.insert('text').classed('atm-legend-item__text', true).text(function (d, i) {
+        return d;
+      });
+      console.log(legendContainers);
+    }
+
     function canvas(key, dimensions) {
       var main = this.layout.charts //.insert('div', ':first-child')
       .append('div').classed('atm-container atm-div', true);
@@ -588,19 +602,22 @@
           transitionEnd = _addCanvas$call.transitionEnd;
 
       var xAxis$1 = xAxis.call(this, canvas$1, measure.scales.x, dimensions, this.settings.xType, this.data.set, measure.visits);
-      var yAxis$1 = yAxis.call(this, canvas$1, measure.scales.y, dimensions); //const legend = addLegend(
-      //    canvas,
-      //    measure.scales.color,
-      //    dimensions,
-      //    this.settings
-      //);
+      var yAxis$1 = yAxis.call(this, canvas$1, measure.scales.y, dimensions); //let legend;
+      //if (this.settings.displayLegend)
+      //    legend = addLegend(
+      //        canvas,
+      //        measure.scales.color,
+      //        dimensions,
+      //        this.settings
+      //    );
 
       return {
         canvas: canvas$1,
         mainTransition: mainTransition,
         transitionEnd: transitionEnd,
         xAxis: xAxis$1,
-        yAxis: yAxis$1
+        yAxis: yAxis$1 //legend
+
       };
     }
 
@@ -738,7 +755,6 @@
       measure.points = plotPoints.call(this, measure.layout.canvas, data, measure.scales);
       if (this.settings.displayCIs) measure.CIs = plotCIs.call(this, measure.layout.canvas, data, measure.scales);
       if (this.settings.annotate) measure.annotations = plotAnnotations.call(this, measure.layout.canvas, data, measure.scales);
-      if (this.settings.displayLegend) measure.legend = addLegend.call(this, measure.layout.canvas, measure.scales.color, dimensions);
     }
 
     function updateLines(lines, scales) {
@@ -813,8 +829,8 @@
         return {
           x: scales.x(datum[_this.settings.xVar]),
           y: scales.y(datum[1].value),
-          color: scales.color(d[0]),
-          text: d[0],
+          color: scales.color(d.stratum[0]),
+          text: d.stratum[0],
           stratum: d.stratum
         };
       });
@@ -873,6 +889,7 @@
         x: scales.x(this.data.set[this.settings.xVar], [0, this.settings.dimensions.widthAdj], this.settings.xType),
         color: scales.color(this.data.set.color, this.settings.colorScheme)
       };
+      if (this.settings.displayLegend) addLegend.call(this, this.layout.legend, this.scales.color);
       this.measure = getMeasure(this.data.nested, this.scales, this.settings);
       this.measure.layout = layout$1.call(this, this.measure);
       this.measure.layout.mainTransition.on('end', function () {

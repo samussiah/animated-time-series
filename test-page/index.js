@@ -9,7 +9,11 @@ fetch('./adlb-trend.csv')
             '#container',
             {
                 stratification_var: 'ARMCD',
-                xType: 'discrete'
+                xType: 'discrete',
+                displayLegend: true,
+                colorScheme: ['red', 'black', 'blue'],
+                speed: 500,
+                pause: 500,
             }
         );
     });

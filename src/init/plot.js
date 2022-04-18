@@ -19,12 +19,4 @@ export default function plot(measure) {
             data,
             measure.scales
         );
-
-    if (this.settings.displayLegend)
-        measure.legend = addLegend.call(
-            this,
-            measure.layout.canvas,
-            measure.scales.color,
-            dimensions
-        );
 }
