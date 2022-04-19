@@ -1,3 +1,4 @@
+// TODO: offset annotation irrespective of point offsets
 fetch('./adlb-trend.csv')
     .then(response => response.text())
     .then(text => d3.csvParse(text))
@@ -24,7 +25,7 @@ fetch('./adlb-trend.csv')
                     mean: 'Mean',
                     geomean: 'Geo. Mean',
                 },
-                //aggregate: 'geomean',
+                aggregate: 'geomean',
                 speed: 500,
                 pause: 500,
             }

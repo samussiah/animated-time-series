@@ -23,7 +23,7 @@ export default function settings() {
             visit_order: 'Visit Order',
             day: 'Study Day',
             measure: 'Measure',
-            result: 'Result'
+            result: 'Result',
         },
 
         // x
@@ -41,7 +41,7 @@ export default function settings() {
             mean: 'Mean',
             median: 'Median',
             geomean: 'Geometric Mean',
-            deviation: 'Standard Deviation'
+            deviation: 'Standard Deviation',
         },
         displayCIs: true, // applies only to mean and geometric mean
         alpha: 0.05,

@@ -13,7 +13,8 @@ export default function layout(measure) {
         dimensions
     );
 
-    const xAxis = addXAxis.call(this,
+    const xAxis = addXAxis.call(
+        this,
         canvas,
         measure.scales.x,
         dimensions,
@@ -22,11 +23,7 @@ export default function layout(measure) {
         measure.visits
     );
 
-    const yAxis = addYAxis.call(this,
-        canvas,
-        measure.scales.y,
-        dimensions
-    );
+    const yAxis = addYAxis.call(this, canvas, measure.scales.y, dimensions);
 
     //let legend;
     //if (this.settings.displayLegend)

@@ -32,7 +32,7 @@ export default function plotAnnotations(svg, data, scales) {
         .attr('y', (d) => {
             return d.y;
         })
-        .attr('dx', this.settings.offset * 2)
+        .attr('dx', (this.settings.offset * this.data.set.stratification.length) / 2 + 3)
         .attr('dy', this.settings.fontSize / 3)
         .attr('fill', (d) => {
             return d.color;

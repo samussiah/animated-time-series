@@ -4,8 +4,8 @@ import impute from './nest/impute';
 export default function nest(data, set, settings) {
     const minResults = d3.rollup(
         data,
-        group => d3.min(group.map(d => d.result).filter(result => result > 0)),
-        d => d.measure
+        (group) => d3.min(group.map((d) => d.result).filter((result) => result > 0)),
+        (d) => d.measure
     );
 
     // Nest data by measure, stratification, and visit and average results.

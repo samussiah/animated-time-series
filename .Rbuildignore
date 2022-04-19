@@ -1,0 +1,5 @@
+^animatedTimeSeries\.Rproj$
+^\.Rproj\.user$
+node_modules/
+src/
+test-page/

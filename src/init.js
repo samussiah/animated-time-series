@@ -19,11 +19,7 @@ export default function init() {
         color: scales.color(this.data.set.color, this.settings.colorScheme),
     };
 
-    if (this.settings.displayLegend)
-        addLegend.call(this,
-            this.layout.legend,
-            this.scales.color
-        );
+    if (this.settings.displayLegend) addLegend.call(this, this.layout.legend, this.scales.color);
 
     this.measure = getMeasure(this.data.nested, this.scales, this.settings);
 
