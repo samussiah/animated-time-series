@@ -53,9 +53,7 @@ export default function impute(nested, set, settings) {
                 if (visitDatum === undefined) {
                     console.log(measure[0], stratum, visit);
                     console.log(stratumDatum[1][j][0]);
-                    visitDatum = j > 0
-                        ? [...stratumDatum[1][j - 1]]
-                        : [...stratumDatum[1][j]];
+                    visitDatum = j > 0 ? [...stratumDatum[1][j - 1]] : [...stratumDatum[1][j]];
                     console.log(visitDatum);
                     stratumDatum[1].splice(j, 0, visitDatum);
                 }

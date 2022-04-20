@@ -1,5 +1,8 @@
-export default function yAxis(canvas, yScale, dimensions) {
-    const yAxis = canvas.append('g').classed('atm-axis', true).call(d3.axisLeft(yScale));
+export default function yAxis(canvas, yScale, dimensions, yTicks) {
+    const yAxis = canvas.append('g').classed('atm-axis', true);
+
+    if (yTicks === undefined) yAxis.call(d3.axisLeft(yScale));
+    else yAxis.call(d3.axisLeft(yScale).tickValues(yTicks.value));
 
     yAxis.gridLines = canvas.append('g').call((g) => {
         g.attr('class', 'grid-lines')

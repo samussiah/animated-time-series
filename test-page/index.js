@@ -29,6 +29,12 @@ fetch(`./data/${dataset}.csv`)
                 speed: 500,
                 pause: 500,
                 measureOrder,
+                measureYTicks: [
+                    {
+                        key: 'WBC count (x 109 cells/L)',
+                        value: [50, 150, 250, 350, 450, 550]
+                    }
+                ],
                 result_var: 'pct_baseline',
                 varLabels: {
                     result: '% of Baseline'

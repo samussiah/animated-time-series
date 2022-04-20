@@ -13,15 +13,19 @@ export default function set(data, settings) {
 
     // Sort measures.
     if (settings.measureOrder !== null && Array.isArray(settings.measureOrder))
-        set.measure.sort((a,b) => {
-            const aIndex = settings.measureOrder.findIndex(measure => measure === a);
-            const bIndex = settings.measureOrder.findIndex(measure => measure === b);
+        set.measure.sort((a, b) => {
+            const aIndex = settings.measureOrder.findIndex((measure) => measure === a);
+            const bIndex = settings.measureOrder.findIndex((measure) => measure === b);
 
             return ~aIndex && ~bIndex
                 ? aIndex - bIndex
                 : ~aIndex || ~bIndex
                 ? -1
-                : a < b ? -1 : b < a ? 1 : 0;
+                : a < b
+                ? -1
+                : b < a
+                ? 1
+                : 0;
         });
 
     set.strata = set.stratification.reduce((curr, prev) => {
