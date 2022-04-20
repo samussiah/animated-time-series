@@ -27,8 +27,8 @@ export default function settings() {
         },
 
         // panel
-        measureOrder: null, // array of strings
-        measureYTicks: null, // array of arrays with measure value and y-axis tick values
+        measureOrder: [], // array of strings
+        measureYTicks: [], // array of arrays with measure value and y-axis tick values
 
         // x
         xType: 'ordinal', // [ 'ordinal' , 'discrete' ]

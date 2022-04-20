@@ -117,7 +117,7 @@
 
 .atm-legend {
     position: absolute;
-    top: 0;
+    top: -65px;
     right: 30px;
     /*
     left: 50%;

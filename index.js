@@ -150,9 +150,9 @@
                     result: 'Result',
                 },
                 // panel
-                measureOrder: null,
+                measureOrder: [],
                 // array of strings
-                measureYTicks: null,
+                measureYTicks: [],
                 // array of arrays with measure value and y-axis tick values
                 // x
                 xType: 'ordinal',
