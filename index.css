@@ -2,6 +2,7 @@
 
 .atm-main {
     width: 100%;
+    position: relative;
 }
 .atm-hidden {
     display: none !important;
@@ -122,6 +123,13 @@
     left: 50%;
     transform: translateX(-50%);
     */
+}
+
+.atm-legend-item__symbol {
+    display: inline-block;
+    height: 10px;
+    margin-right: 0.5em;
+    width: 10px;
 }
 
 .atm-header {

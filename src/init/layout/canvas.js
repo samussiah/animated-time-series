@@ -1,8 +1,5 @@
 export default function canvas(key, dimensions) {
-    const main = this.layout.charts
-        //.insert('div', ':first-child')
-        .append('div')
-        .classed('atm-container atm-div', true);
+    const main = this.layout.charts.append('div').classed('atm-container atm-div', true);
 
     const header = this.util.addElement('header', main, 'h3').text(key).style('display', 'none');
 
@@ -24,6 +21,7 @@ export default function canvas(key, dimensions) {
         header.style('display', null);
         svg.style('display', null);
         canvas.style('display', null);
+        main.style('opacity', 0).transition().duration(this.settings.speed).style('opacity', 1);
     };
 
     const mainTransition = main
@@ -31,7 +29,6 @@ export default function canvas(key, dimensions) {
         .transition()
         .duration(this.settings.speed)
         .style('width', '50%');
-    //.on('end', transitionEnd);
 
     return {
         canvas,

@@ -30,140 +30,6 @@
         addElement: addElement,
     };
 
-    function update(settings) {
-        // TODO: support non-stratified outputs.
-        // Set stratification variable to whatever.
-        //if (settings.stratification_var === null)
-        //    settings.stratificaton_var = '?';//settings.stratification_var;
-        // Set color variable to stratification variable if null.
-        if (settings.color_var === null) settings.color_var = settings.stratification_var; //
-
-        if (settings.var_labels.stratification === null)
-            settings.var_labels.stratification = settings.stratification_var;
-        if (!['ordinal', 'discrete'].includes(settings.xType)) settings.xType = 'ordinal';
-        if (settings.xType === 'ordinal') settings.xVar = 'visit';
-        else if (settings.xType === 'discrete') settings.xVar = 'timepoint';
-
-        if (settings.stratification_var !== settings.color_var) {
-            settings.annotate = false;
-            settings.displayLegend = true;
-        } // Update footnotes.
-
-        settings.footnotes = settings.footnotes.map(function (text) {
-            return text
-                .replace('[aggregate]', settings.aggregate)
-                .replace('[outcome]', settings.outcome);
-        });
-        return settings;
-    }
-
-    function settings() {
-        return {
-            update: update,
-            // variable mapping
-            stratification_var: null,
-            color_var: null,
-            id_var: 'USUBJID',
-            visit_var: 'AVISIT',
-            visit_order_var: 'AVISITN',
-            day_var: 'ADY',
-            measure_var: 'PARAM',
-            result_var: 'AVAL',
-            var_labels: {
-                stratification: null,
-                color_var: null,
-                id: 'Participant ID',
-                visit: 'Visit',
-                visit_order: 'Visit Order',
-                day: 'Study Day',
-                measure: 'Measure',
-                result: 'Result',
-            },
-            // statistics
-            aggregate: 'mean',
-            displayCIs: true,
-            alpha: 0.05,
-            // x stuff
-            xType: 'ordinal',
-            // [ 'ordinal' , 'discrete' ]
-            xVar: 'visit',
-            // [ 'visit', 'timepoint' ]
-            // y stuff
-            // color stuff
-            colorScheme: d3.schemeSet2,
-            offset: 7.5,
-            displayLegend: false,
-            annotate: true,
-            pointRadius: 5,
-            strokeWidth: 3,
-            fontSize: 15,
-            fontWeight: 'bold',
-            // animation
-            play: true,
-            timepoint: 0,
-            measureIndex: 0,
-            speed: 1000,
-            pause: 5000,
-            // dimensions
-            width: null,
-            // defined in ./layout/getDimensions
-            widthFactor: 2,
-            height: null,
-            // defined in ./layout/getDimensions
-            heightFactor: 2,
-            margin: {
-                top: 50,
-                right: 100,
-                bottom: 100,
-                left: 75,
-            },
-            // miscellaneous
-            footnotes: [
-                //`<sup>1</sup> Displaying [aggregate] [outcome].`,
-            ],
-        };
-    }
-
-    function getDimensions(container, settings) {
-        var width = container.node().clientWidth / settings.widthFactor;
-        var height = width / settings.heightFactor;
-        return {
-            width: width,
-            height: height,
-        };
-    }
-
-    function charts(main) {
-        var charts = this.util.addElement('charts', main);
-        return charts;
-    }
-
-    function layout() {
-        var main = this.util.addElement('main', d3.select(this.element)); //const controls = layoutControls.call(this, main); //this.util.addElement('controls', main);
-
-        var charts$1 = charts.call(this, main);
-
-        var _getDimensions = getDimensions(charts$1, this.settings),
-            width = _getDimensions.width,
-            height = _getDimensions.height; // determine widths of DOM elements based on width of main container
-
-        this.settings.width = width;
-        this.settings.height = height;
-        this.settings.dimensions = {
-            width: width,
-            height: height,
-            margin: this.settings.margin,
-            widthAdj: width - this.settings.margin.left - this.settings.margin.right,
-            heightAdj: height - this.settings.margin.top - this.settings.margin.bottom,
-        }; //window.addEventListener('resize', resize.bind(this));
-
-        return {
-            main: main,
-            //...controls,
-            charts: charts$1,
-        };
-    }
-
     function _defineProperty(obj, key, value) {
         if (key in obj) {
             Object.defineProperty(obj, key, {
@@ -177,45 +43,6 @@
         }
 
         return obj;
-    }
-
-    function ownKeys(object, enumerableOnly) {
-        var keys = Object.keys(object);
-
-        if (Object.getOwnPropertySymbols) {
-            var symbols = Object.getOwnPropertySymbols(object);
-            if (enumerableOnly)
-                symbols = symbols.filter(function (sym) {
-                    return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-                });
-            keys.push.apply(keys, symbols);
-        }
-
-        return keys;
-    }
-
-    function _objectSpread2(target) {
-        for (var i = 1; i < arguments.length; i++) {
-            var source = arguments[i] != null ? arguments[i] : {};
-
-            if (i % 2) {
-                ownKeys(Object(source), true).forEach(function (key) {
-                    _defineProperty(target, key, source[key]);
-                });
-            } else if (Object.getOwnPropertyDescriptors) {
-                Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-            } else {
-                ownKeys(Object(source)).forEach(function (key) {
-                    Object.defineProperty(
-                        target,
-                        key,
-                        Object.getOwnPropertyDescriptor(source, key)
-                    );
-                });
-            }
-        }
-
-        return target;
     }
 
     function _toConsumableArray(arr) {
@@ -260,11 +87,177 @@
         );
     }
 
+    function update(settings) {
+        // variable mapping
+        if (settings.stratification_var === null) settings.stratificaton_var = settings.id_var;
+        if (settings.color_var === null) settings.color_var = settings.stratification_var; // variable labels
+
+        if (settings.varLabels.stratification === null)
+            settings.varLabels.stratification = settings.stratification_var; // x
+
+        if (!['ordinal', 'discrete'].includes(settings.xType)) settings.xType = 'ordinal';
+        if (settings.xType === 'ordinal') settings.xVar = 'visit';
+        else if (settings.xType === 'discrete') settings.xVar = 'timepoint'; // y
+
+        if (settings.yLabel === null)
+            settings.yLabel = ''
+                .concat(settings.varLabels[settings.yVar], ' - ')
+                .concat(settings.aggregateLabels[settings.aggregate]);
+        if (!['mean', 'geomean'].includes(settings.aggregate)) settings.displayCIs = false;
+        if ((settings.alpha <= 0) | (settings.alpha >= 1)) settings.alpha = 0.05;
+        if (settings.displayCIs === true)
+            settings.yLabel = ''
+                .concat(settings.yLabel, ' (')
+                .concat((1 - settings.alpha) * 100, '% CI)'); // stratification and color
+
+        if (settings.stratification_var !== settings.color_var) {
+            settings.annotate = false;
+            settings.displayLegend = true;
+        } // Update footnotes.
+
+        settings.footnotes = settings.footnotes.map(function (text) {
+            return text
+                .replace('[aggregate]', settings.aggregate)
+                .replace('[outcome]', settings.outcome);
+        });
+        return settings;
+    }
+
+    function settings() {
+        var _ref;
+
+        return (
+            (_ref = {
+                update: update,
+                // variable mapping
+                stratification_var: null,
+                color_var: null,
+                id_var: 'USUBJID',
+                visit_var: 'AVISIT',
+                visit_order_var: 'AVISITN',
+                day_var: 'ADY',
+                measure_var: 'PARAM',
+                result_var: 'AVAL',
+                // variable labels
+                varLabels: {
+                    stratification: null,
+                    color_var: null,
+                    id: 'Participant ID',
+                    visit: 'Visit',
+                    visit_order: 'Visit Order',
+                    day: 'Study Day',
+                    measure: 'Measure',
+                    result: 'Result',
+                },
+                // panel
+                measureOrder: null,
+                // array of strings
+                measureYTicks: null,
+                // array of arrays with measure value and y-axis tick values
+                // x
+                xType: 'ordinal',
+                // [ 'ordinal' , 'discrete' ]
+                xVar: 'visit',
+                // [ 'visit', 'timepoint' ]
+                xLabel: 'Visit',
+                rotateXTickLabels: true,
+                // y
+                yType: 'continuous',
+                yVar: 'result',
+                yLabel: null,
+                aggregate: 'mean',
+                // [ 'mean', 'median', 'geomean', 'deviation' ]
+                aggregateLabels: {
+                    mean: 'Mean',
+                    median: 'Median',
+                    geomean: 'Geometric Mean',
+                    deviation: 'Standard Deviation',
+                },
+                displayCIs: true,
+                // applies only to mean and geometric mean
+                alpha: 0.05,
+                // stratification and color
+                colorScheme: d3.schemeSet2,
+                displayLegend: false,
+                annotate: true,
+                offset: 7.5,
+                // aesthetics
+                pointRadius: 5,
+                strokeWidth: 3,
+                fontSize: 15,
+                fontWeight: 'bold',
+                // animation
+                play: true,
+                timepoint: 0,
+                measureIndex: 0,
+            }),
+            _defineProperty(_ref, 'measureOrder', []),
+            _defineProperty(_ref, 'speed', 1000),
+            _defineProperty(_ref, 'pause', 5000),
+            _defineProperty(_ref, 'width', null),
+            _defineProperty(_ref, 'widthFactor', 2),
+            _defineProperty(_ref, 'height', null),
+            _defineProperty(_ref, 'heightFactor', 2),
+            _defineProperty(_ref, 'margin', {
+                top: 50,
+                right: 100,
+                bottom: 100,
+                left: 75,
+            }),
+            _defineProperty(_ref, 'footnotes', [
+                //`<sup>1</sup> Displaying [aggregate] [outcome].`,
+            ]),
+            _ref
+        );
+    }
+
+    function getDimensions(container, settings) {
+        var width = container.node().clientWidth / settings.widthFactor;
+        var height = width / settings.heightFactor;
+        return {
+            width: width,
+            height: height,
+        };
+    }
+
+    function charts(main) {
+        var charts = this.util.addElement('charts', main);
+        return charts;
+    }
+
+    function layout() {
+        var main = this.util.addElement('main', d3.select(this.element)); //const controls = layoutControls.call(this, main); //this.util.addElement('controls', main);
+
+        var legend = this.util.addElement('legend', main);
+        var charts$1 = charts.call(this, main);
+
+        var _getDimensions = getDimensions(charts$1, this.settings),
+            width = _getDimensions.width,
+            height = _getDimensions.height; // determine widths of DOM elements based on width of main container
+
+        this.settings.width = width;
+        this.settings.height = height;
+        this.settings.dimensions = {
+            width: width,
+            height: height,
+            margin: this.settings.margin,
+            widthAdj: width - this.settings.margin.left - this.settings.margin.right,
+            heightAdj: height - this.settings.margin.top - this.settings.margin.bottom,
+        }; //window.addEventListener('resize', resize.bind(this));
+
+        return {
+            main: main,
+            //...controls,
+            legend: legend,
+            charts: charts$1,
+        };
+    }
+
     function mutate(data, settings) {
         var nRows = data.length;
         var cleansed = data
             .map(function (d) {
-                var datum = _objectSpread2({}, d); // Rename data variables.
+                var datum = {}; // Rename data variables.
 
                 Object.keys(settings)
                     .filter(function (setting) {
@@ -274,18 +267,29 @@
                         datum[setting.replace(/_var$/, '')] = [
                             'visit_order_var',
                             'day_var',
-                            'result_var',
-                            'baseline_var',
-                            'change_var',
-                            'percent_change_var',
+                            'result_var', //'baseline_var',
+                            //'change_var',
+                            //'percent_change_var',
                         ].includes(setting)
                             ? parseFloat(d[settings[setting]])
-                            : datum[settings[setting]];
+                            : d[settings[setting]];
                     });
                 return datum;
             })
             .filter(function (d) {
                 return !isNaN(d.result);
+            })
+            .sort(function (a, b) {
+                var measureSort = a.measure < b.measure ? -1 : b.measure < a.measure ? 1 : 0;
+                var visitSort = a.visit_order - b.visit_order;
+                var stratumSort =
+                    a.stratification < b.stratification
+                        ? -1
+                        : b.stratification < a.stratification
+                        ? 1
+                        : 0;
+                var idSort = a.id < b.id ? -1 : b.id < a.id ? 1 : 0;
+                return measureSort | visitSort | stratumSort | idSort;
             });
         var nRowsCleansed = cleansed.length;
         var nRowsRemoved = nRows - nRowsCleansed;
@@ -332,17 +336,48 @@
 
     function set(data, settings) {
         var set = {};
-        set.stratification = create('stratification', data);
-        set.color = create('color', data);
-        set.id = create('id', data);
-        set.visit = create('visit', data);
-        set.visit_order = create('visit_order', data);
-        set.day = create('day', data);
-        set.measure = create('measure', data); // Calculate median continuous timepoint of each ordinal timepoint.
+        set.id = create('id', data.cleansed);
+        set.stratification = create('stratification', data.cleansed);
+        set.color = create('color', data.cleansed);
+        set.visit = create('visit', data.cleansed);
+        set.visit_order = create('visit_order', data.cleansed);
+        set.day = create('day', data.cleansed);
+        set.measure = create('measure', data.cleansed); // Sort measures.
+
+        if (settings.measureOrder !== null && Array.isArray(settings.measureOrder))
+            set.measure.sort(function (a, b) {
+                var aIndex = settings.measureOrder.findIndex(function (measure) {
+                    return measure === a;
+                });
+                var bIndex = settings.measureOrder.findIndex(function (measure) {
+                    return measure === b;
+                });
+                return ~aIndex && ~bIndex
+                    ? aIndex - bIndex
+                    : ~aIndex || ~bIndex
+                    ? -1
+                    : a < b
+                    ? -1
+                    : b < a
+                    ? 1
+                    : 0;
+            });
+        set.strata = set.stratification.reduce(function (curr, prev) {
+            var ids = data.raw
+                .filter(function (d) {
+                    return d[settings.stratification_var] === prev;
+                })
+                .map(function (d) {
+                    return d[settings.id_var];
+                });
+            var n = new Set(ids).size;
+            curr[prev] = n;
+            return curr;
+        }, {}); // Calculate median continuous timepoint of each ordinal timepoint.
 
         set.timepoint = set.visit.map(function (visit) {
             return d3.median(
-                data.filter(function (d) {
+                data.cleansed.filter(function (d) {
                     return d.visit === visit;
                 }),
                 function (d) {
@@ -361,14 +396,53 @@
         return set;
     }
 
-    function summarize(group, settings) {
+    function getResults(group, settings, minResults) {
+        var measure = group[0].measure;
+        var stratum = group[0].stratification;
+        var minResult = minResults.get(measure);
         var results = group
             .map(function (d) {
                 return d.result;
             })
             .sort(function (a, b) {
                 return a - b;
+            }); // Set non-positive results to minimum positive result when aggregating with geometric mean.
+
+        if (['geomean'].includes(settings.aggregate)) {
+            var nValid = 0;
+            results = results.map(function (result) {
+                if (result <= 0) {
+                    result = minResult;
+                    nValid++;
+                }
+
+                return result;
             });
+            if (nValid > 0)
+                console.warn(
+                    ''
+                        .concat(nValid, ' non-positive ')
+                        .concat(measure, ' results for ')
+                        .concat(stratum, ' set to ')
+                        .concat(minResult, ', the smallest positive result.')
+                );
+        }
+
+        var nonInfinity = results.filter(function (result) {
+            return result !== Infinity;
+        });
+        if (nonInfinity.length < results.length)
+            console.warn(
+                ''
+                    .concat(results.length - nonInfinity.length, ' infinite ')
+                    .concat(measure, ' results for ')
+                    .concat(stratum, ' removed.')
+            );
+        return nonInfinity;
+    }
+
+    function summarize(group, settings, minResults) {
+        var results = getResults(group, settings, minResults);
         var jObj = jStat(results);
         var n = group.length;
         var mean = d3.mean(results);
@@ -440,18 +514,32 @@
                     stratumDatum[1].sort(function (a, b) {
                         return set.visit.indexOf(a[0]) - set.visit.indexOf(b[0]);
                     });
-                stratumDatum.color_value = stratumDatum[1][0][1].data[0][settings.color_var];
+
+                try {
+                    stratumDatum.color_value = stratumDatum[1][0][1].data[0].color;
+                } catch (_unused) {
+                    console.warn('Missing [ color ] identified:');
+                    console.log(measure);
+                    console.log(stratum);
+                    console.log(stratumDatum[1][0][1]);
+                }
+
                 stratumDatum.offset = set.offsets[i]; // Iterate over visits within strata.
 
                 set.visit.forEach(function (visit, j) {
                     // Return data for given measure / stratum / visit.
                     var visitDatum = stratumDatum[1].find(function (d) {
                         return d[0] === visit;
-                    }); // TODO: what if measure is not captured at first visit?  Use next visit?
-                    // Handle missing data. If measure is not captured at given visit, use previous visit.
+                    }); // Handle missing data. If measure is not captured at given visit, use previous visit.
 
                     if (visitDatum === undefined) {
-                        visitDatum = _toConsumableArray(stratumDatum[1][j - 1]);
+                        console.log(measure[0], stratum, visit);
+                        console.log(stratumDatum[1][j][0]);
+                        visitDatum =
+                            j > 0
+                                ? _toConsumableArray(stratumDatum[1][j - 1])
+                                : _toConsumableArray(stratumDatum[1][j]);
+                        console.log(visitDatum);
                         stratumDatum[1].splice(j, 0, visitDatum);
                     }
 
@@ -490,33 +578,52 @@
     }
 
     function nest(data, set, settings) {
-        // Nest data by measure, stratification, and visit and average results.
-        var nested = d3.rollups(
+        var minResults = d3.rollup(
             data,
             function (group) {
-                return summarize(group, settings);
-            }, // calculate statistics
+                return d3.min(
+                    group
+                        .map(function (d) {
+                            return d.result;
+                        })
+                        .filter(function (result) {
+                            return result > 0;
+                        })
+                );
+            },
             function (d) {
                 return d.measure;
-            }, // nest by outcome (panel)
-            function (d) {
-                return d.stratification;
-            }, // nest by stratum (stratification)
-            function (d) {
-                return d.visit;
-            } // nest by timepoint (x-axis value)
-        ); // Identify and generate missing combinations of outcome / stratum / timepoint.
+            }
+        ); // Nest data by measure, stratification, and visit and average results.
 
-        var imputed = impute(nested, set, settings);
+        var nested = d3
+            .rollups(
+                data,
+                function (group) {
+                    return summarize(group, settings, minResults);
+                }, // calculate statistics
+                function (d) {
+                    return d.measure;
+                }, // nest by outcome (panel)
+                function (d) {
+                    return d.stratification;
+                }, // nest by stratum (stratification)
+                function (d) {
+                    return d.visit;
+                } // nest by timepoint (x-axis value)
+            )
+            .sort(function (a, b) {
+                return set.measure.indexOf(a[0]) - set.measure.indexOf(b[0]);
+            }); // Identify and generate missing combinations of outcome / stratum / timepoint.
+
+        var imputed = impute(nested, set);
         return imputed;
     }
 
     function data() {
         this.data.cleansed = mutate.call(this, this.data.raw, this.settings);
-        this.data.set = set.call(this, this.data.cleansed, this.settings);
-        console.log(this.data.set.measure);
+        this.data.set = set.call(this, this.data, this.settings);
         this.data.nested = nest.call(this, this.data.cleansed, this.data.set, this.settings);
-        console.log(this.data.nested);
     }
 
     function getTimepoint(index, set) {
@@ -563,7 +670,11 @@
             data: data[settings.measureIndex],
             scales: scales,
         };
+        measure.key = measure.data[0];
         measure.scales.y = y(measure.data, [settings.dimensions.heightAdj, 0], settings);
+        measure.yTicks = settings.measureYTicks.find(function (yTicks) {
+            return yTicks.key === measure.key;
+        });
         return measure;
     }
 
@@ -595,10 +706,33 @@
         color: color,
     };
 
+    function addLegend(container, colorScale) {
+        var _this = this;
+
+        var legendContainers = container
+            .selectAll('div.atm-legend-item')
+            .data(colorScale.domain())
+            .join('div')
+            .classed('atm-legend-item', true);
+        var legendContent = legendContainers.append('p').classed('atm-legend-item__content', true);
+        legendContent
+            .append('span')
+            .classed('atm-legend-item__symbol', true)
+            .style('background', function (d, i) {
+                return colorScale(d);
+            });
+        legendContent
+            .insert('text')
+            .classed('atm-legend-item__text', true)
+            .text(function (d, i) {
+                return ''.concat(d, ' (n=').concat(_this.data.set.strata[d], ')');
+            });
+    }
+
     function canvas(key, dimensions) {
-        var main = this.layout.charts //.insert('div', ':first-child')
-            .append('div')
-            .classed('atm-container atm-div', true);
+        var _this = this;
+
+        var main = this.layout.charts.append('div').classed('atm-container atm-div', true);
         var header = this.util.addElement('header', main, 'h3').text(key).style('display', 'none');
         var svg = this.util
             .addElement('time-series__svg', main, 'svg')
@@ -617,14 +751,17 @@
             header.style('display', null);
             svg.style('display', null);
             canvas.style('display', null);
+            main.style('opacity', 0)
+                .transition()
+                .duration(_this.settings.speed)
+                .style('opacity', 1);
         };
 
         var mainTransition = main
             .style('width', '0%')
             .transition()
             .duration(this.settings.speed)
-            .style('width', '50%'); //.on('end', transitionEnd);
-
+            .style('width', '50%');
         return {
             canvas: canvas,
             mainTransition: mainTransition,
@@ -633,6 +770,7 @@
     }
 
     function xAxis(canvas, xScale, dimensions, type, set) {
+        var _this = this;
         var xAxis = canvas
             .append('g')
             .classed('atm-axis', true)
@@ -651,27 +789,33 @@
             );
         }
 
-        xAxis
-            .selectAll('text')
-            .style('text-anchor', 'end')
-            .attr('transform', 'rotate(-45)')
-            .attr('dx', '-.8em')
-            .attr('dy', '.15em'); // TODO: make this work with a discrete time scale
-        //if (visits !== null)
-        //    xAxis
-        //        .selectAll('.tick')
-        //        .classed(
-        //            'atm-missing',
-        //            (d) => {
-        //                visits.includes(d) === false
-        //            });
-
+        if (this.settings.rotateXTickLabels)
+            xAxis
+                .selectAll('text')
+                .style('text-anchor', 'end')
+                .attr('transform', 'rotate(-45)')
+                .attr('dx', '-.8em')
+                .attr('dy', '.15em');
+        xAxis.label = canvas.append('g').call(function (g) {
+            g.append('text')
+                .attr('class', 'axis-label')
+                .attr('text-anchor', 'middle')
+                .attr('font-size', 16)
+                .attr('font-weight', 'bold')
+                .attr('x', dimensions.widthAdj / 2)
+                .attr('y', dimensions.heightAdj + dimensions.margin.bottom - 32)
+                .text(_this.settings.xLabel);
+        });
         return xAxis;
     }
 
-    function yAxis(canvas, yScale, dimensions) {
-        var yAxis = canvas.append('g').classed('atm-axis', true).call(d3.axisLeft(yScale));
-        yAxis.grid = canvas.append('g').call(function (g) {
+    function yAxis(canvas, yScale, dimensions, yTicks) {
+        var _this = this;
+
+        var yAxis = canvas.append('g').classed('atm-axis', true);
+        if (yTicks === undefined) yAxis.call(d3.axisLeft(yScale));
+        else yAxis.call(d3.axisLeft(yScale).tickValues(yTicks.value));
+        yAxis.gridLines = canvas.append('g').call(function (g) {
             g.attr('class', 'grid-lines')
                 .selectAll('line')
                 .data(yScale.ticks())
@@ -684,14 +828,17 @@
                 .attr('y2', function (d) {
                     return yScale(d);
                 });
+        });
+        yAxis.label = canvas.append('g').call(function (g) {
             g.append('text')
                 .attr('class', 'axis-label')
                 .attr('transform', 'rotate(-90)')
-                .attr('text-anchor', 'middle') //.attr('alignment-baseline', 'middle')
+                .attr('text-anchor', 'middle')
                 .attr('font-size', 16)
+                .attr('font-weight', 'bold')
                 .attr('x', -dimensions.heightAdj / 2)
                 .attr('y', -(dimensions.margin.left - 32))
-                .text('Result');
+                .text(_this.settings.yLabel);
         });
         return yAxis;
     }
@@ -704,7 +851,8 @@
             mainTransition = _addCanvas$call.mainTransition,
             transitionEnd = _addCanvas$call.transitionEnd;
 
-        var xAxis$1 = xAxis(
+        var xAxis$1 = xAxis.call(
+            this,
             canvas$1,
             measure.scales.x,
             dimensions,
@@ -712,19 +860,21 @@
             this.data.set,
             measure.visits
         );
-        var yAxis$1 = yAxis(canvas$1, measure.scales.y, dimensions); //const legend = addLegend(
-        //    canvas,
-        //    measure.scales.color,
-        //    dimensions,
-        //    this.settings
-        //);
+        var yAxis$1 = yAxis.call(this, canvas$1, measure.scales.y, dimensions, measure.yTicks); //let legend;
+        //if (this.settings.displayLegend)
+        //    legend = addLegend(
+        //        canvas,
+        //        measure.scales.color,
+        //        dimensions,
+        //        this.settings
+        //    );
 
         return {
             canvas: canvas$1,
             mainTransition: mainTransition,
             transitionEnd: transitionEnd,
             xAxis: xAxis$1,
-            yAxis: yAxis$1,
+            yAxis: yAxis$1, //legend
         };
     }
 
@@ -899,7 +1049,7 @@
             .attr('y', function (d) {
                 return d.y;
             })
-            .attr('dx', this.settings.offset * 2)
+            .attr('dx', (this.settings.offset * this.data.set.stratification.length) / 2 + 3)
             .attr('dy', this.settings.fontSize / 3)
             .attr('fill', function (d) {
                 return d.color;
@@ -931,13 +1081,6 @@
                 measure.layout.canvas,
                 data,
                 measure.scales
-            );
-        if (this.settings.displayLegend)
-            measure.legend = addLegend.call(
-                this,
-                measure.layout.canvas,
-                measure.scales.color,
-                dimensions
             );
     }
 
@@ -1058,8 +1201,8 @@
             return {
                 x: scales.x(datum[_this.settings.xVar]),
                 y: scales.y(datum[1].value),
-                color: scales.color(d[0]),
-                text: d[0],
+                color: scales.color(d.stratum[0]),
+                text: d.stratum[0],
                 stratum: d.stratum,
             };
         });
@@ -1127,6 +1270,8 @@
             ),
             color: scales.color(this.data.set.color, this.settings.colorScheme),
         };
+        if (this.settings.displayLegend)
+            addLegend.call(this, this.layout.legend, this.scales.color);
         this.measure = getMeasure(this.data.nested, this.scales, this.settings);
         this.measure.layout = layout$1.call(this, this.measure);
         this.measure.layout.mainTransition.on('end', function () {
@@ -1153,6 +1298,7 @@
             },
             element: _element_,
             settings: settings().update(Object.assign(settings(), _settings_)),
+            // TODO: merge settings
             util: util,
         };
         main.layout = layout.call(main); // add elements to DOM

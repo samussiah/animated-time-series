@@ -14,7 +14,8 @@ export default function settings() {
         measure_var: 'PARAM',
         result_var: 'AVAL',
 
-        var_labels: {
+        // variable labels
+        varLabels: {
             stratification: null,
             color_var: null,
             id: 'Participant ID',
@@ -25,22 +26,37 @@ export default function settings() {
             result: 'Result',
         },
 
-        // statistics
-        aggregate: 'mean',
-        displayCIs: true,
-        alpha: 0.05,
+        // panel
+        measureOrder: null, // array of strings
+        measureYTicks: null, // array of arrays with measure value and y-axis tick values
 
-        // x stuff
+        // x
         xType: 'ordinal', // [ 'ordinal' , 'discrete' ]
         xVar: 'visit', // [ 'visit', 'timepoint' ]
+        xLabel: 'Visit',
+        rotateXTickLabels: true,
 
-        // y stuff
+        // y
+        yType: 'continuous',
+        yVar: 'result',
+        yLabel: null,
+        aggregate: 'mean', // [ 'mean', 'median', 'geomean', 'deviation' ]
+        aggregateLabels: {
+            mean: 'Mean',
+            median: 'Median',
+            geomean: 'Geometric Mean',
+            deviation: 'Standard Deviation',
+        },
+        displayCIs: true, // applies only to mean and geometric mean
+        alpha: 0.05,
 
-        // color stuff
+        // stratification and color
         colorScheme: d3.schemeSet2,
-        offset: 7.5,
         displayLegend: false,
         annotate: true,
+        offset: 7.5,
+
+        // aesthetics
         pointRadius: 5,
         strokeWidth: 3,
         fontSize: 15,
@@ -50,6 +66,7 @@ export default function settings() {
         play: true,
         timepoint: 0,
         measureIndex: 0,
+        measureOrder: [],
         speed: 1000,
         pause: 5000,
 

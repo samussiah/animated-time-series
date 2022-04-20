@@ -13,7 +13,8 @@ export default function layout(measure) {
         dimensions
     );
 
-    const xAxis = addXAxis(
+    const xAxis = addXAxis.call(
+        this,
         canvas,
         measure.scales.x,
         dimensions,
@@ -22,14 +23,16 @@ export default function layout(measure) {
         measure.visits
     );
 
-    const yAxis = addYAxis(canvas, measure.scales.y, dimensions);
+    const yAxis = addYAxis.call(this, canvas, measure.scales.y, dimensions, measure.yTicks);
 
-    //const legend = addLegend(
-    //    canvas,
-    //    measure.scales.color,
-    //    dimensions,
-    //    this.settings
-    //);
+    //let legend;
+    //if (this.settings.displayLegend)
+    //    legend = addLegend(
+    //        canvas,
+    //        measure.scales.color,
+    //        dimensions,
+    //        this.settings
+    //    );
 
     return {
         canvas,
@@ -37,5 +40,6 @@ export default function layout(measure) {
         transitionEnd,
         xAxis,
         yAxis,
+        //legend
     };
 }

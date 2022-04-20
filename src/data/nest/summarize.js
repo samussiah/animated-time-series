@@ -1,5 +1,7 @@
-export default function summarize(group, settings) {
-    const results = group.map((d) => d.result).sort((a, b) => a - b);
+import getResults from './summarize/getResults';
+
+export default function summarize(group, settings, minResults) {
+    const results = getResults(group, settings, minResults);
 
     const jObj = jStat(results);
 

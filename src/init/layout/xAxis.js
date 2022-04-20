@@ -15,22 +15,24 @@ export default function xAxis(canvas, xScale, dimensions, type, set, visits = nu
         );
     }
 
-    xAxis
-        .selectAll('text')
-        .style('text-anchor', 'end')
-        .attr('transform', 'rotate(-45)')
-        .attr('dx', '-.8em')
-        .attr('dy', '.15em');
+    if (this.settings.rotateXTickLabels)
+        xAxis
+            .selectAll('text')
+            .style('text-anchor', 'end')
+            .attr('transform', 'rotate(-45)')
+            .attr('dx', '-.8em')
+            .attr('dy', '.15em');
 
-    // TODO: make this work with a discrete time scale
-    //if (visits !== null)
-    //    xAxis
-    //        .selectAll('.tick')
-    //        .classed(
-    //            'atm-missing',
-    //            (d) => {
-    //                visits.includes(d) === false
-    //            });
+    xAxis.label = canvas.append('g').call((g) => {
+        g.append('text')
+            .attr('class', 'axis-label')
+            .attr('text-anchor', 'middle')
+            .attr('font-size', 16)
+            .attr('font-weight', 'bold')
+            .attr('x', dimensions.widthAdj / 2)
+            .attr('y', dimensions.heightAdj + dimensions.margin.bottom - 32)
+            .text(this.settings.xLabel);
+    });
 
     return xAxis;
 }

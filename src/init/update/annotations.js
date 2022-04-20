@@ -7,8 +7,8 @@ export default function updateAnnotations(annotations, scales) {
         return {
             x: scales.x(datum[this.settings.xVar]),
             y: scales.y(datum[1].value),
-            color: scales.color(d[0]),
-            text: d[0],
+            color: scales.color(d.stratum[0]),
+            text: d.stratum[0],
             stratum: d.stratum,
         };
     });

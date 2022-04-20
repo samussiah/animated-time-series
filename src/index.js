@@ -10,7 +10,7 @@ export default function animatedTimeSeries(_data_, _element_ = 'body', _settings
             raw: _data_,
         },
         element: _element_,
-        settings: settings().update(Object.assign(settings(), _settings_)),
+        settings: settings().update(Object.assign(settings(), _settings_)), // TODO: merge settings
         util,
     };
 

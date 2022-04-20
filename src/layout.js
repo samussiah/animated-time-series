@@ -6,6 +6,7 @@ import layoutCharts from './layout/charts';
 export default function layout() {
     const main = this.util.addElement('main', d3.select(this.element));
     //const controls = layoutControls.call(this, main); //this.util.addElement('controls', main);
+    const legend = this.util.addElement('legend', main);
     const charts = layoutCharts.call(this, main);
     const { width, height } = getDimensions(charts, this.settings); // determine widths of DOM elements based on width of main container
     this.settings.width = width;
@@ -23,6 +24,7 @@ export default function layout() {
     return {
         main,
         //...controls,
+        legend,
         charts,
     };
 }

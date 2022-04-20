@@ -1,5 +1,4 @@
 export default function legend(canvas, colorScale, dimensions, settings) {
-    console.log(settings);
     const legend = canvas.append('g').classed('atm-legend', true);
 
     legend

@@ -1,6 +1,7 @@
 import getTimepoint from './init/getTimepoint';
 import getMeasure from './init/getMeasure';
 import scales from './init/scales/index';
+import addLegend from './init/addLegend';
 import layout from './init/layout';
 import plot from './init/plot';
 import update from './init/update';
@@ -17,6 +18,8 @@ export default function init() {
         ),
         color: scales.color(this.data.set.color, this.settings.colorScheme),
     };
+
+    if (this.settings.displayLegend) addLegend.call(this, this.layout.legend, this.scales.color);
 
     this.measure = getMeasure(this.data.nested, this.scales, this.settings);
 

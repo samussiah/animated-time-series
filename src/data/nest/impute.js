@@ -33,7 +33,15 @@ export default function impute(nested, set, settings) {
             if (stratumDatum)
                 stratumDatum[1].sort((a, b) => set.visit.indexOf(a[0]) - set.visit.indexOf(b[0]));
 
-            stratumDatum.color_value = stratumDatum[1][0][1].data[0][settings.color_var];
+            try {
+                stratumDatum.color_value = stratumDatum[1][0][1].data[0].color;
+            } catch {
+                console.warn('Missing [ color ] identified:');
+                console.log(measure);
+                console.log(stratum);
+                console.log(stratumDatum[1][0][1]);
+            }
+
             stratumDatum.offset = set.offsets[i];
 
             // Iterate over visits within strata.
@@ -41,10 +49,12 @@ export default function impute(nested, set, settings) {
                 // Return data for given measure / stratum / visit.
                 let visitDatum = stratumDatum[1].find((d) => d[0] === visit);
 
-                // TODO: what if measure is not captured at first visit?  Use next visit?
                 // Handle missing data. If measure is not captured at given visit, use previous visit.
                 if (visitDatum === undefined) {
-                    visitDatum = [...stratumDatum[1][j - 1]];
+                    console.log(measure[0], stratum, visit);
+                    console.log(stratumDatum[1][j][0]);
+                    visitDatum = j > 0 ? [...stratumDatum[1][j - 1]] : [...stratumDatum[1][j]];
+                    console.log(visitDatum);
                     stratumDatum[1].splice(j, 0, visitDatum);
                 }
 
