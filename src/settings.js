@@ -26,6 +26,9 @@ export default function settings() {
             result: 'Result',
         },
 
+        // panel
+        measureOrder: null,
+
         // x
         xType: 'ordinal', // [ 'ordinal' , 'discrete' ]
         xVar: 'visit', // [ 'visit', 'timepoint' ]

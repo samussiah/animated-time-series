@@ -15,7 +15,7 @@ export default function nest(data, set, settings) {
         (d) => d.measure, // nest by outcome (panel)
         (d) => d.stratification, // nest by stratum (stratification)
         (d) => d.visit // nest by timepoint (x-axis value)
-    );
+    ).sort((a,b) => set.measure.indexOf(a[0]) - set.measure.indexOf(b[0]));
 
     // Identify and generate missing combinations of outcome / stratum / timepoint.
     const imputed = impute(nested, set, settings);
