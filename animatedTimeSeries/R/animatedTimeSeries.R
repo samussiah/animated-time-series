@@ -12,8 +12,6 @@ animatedTimeSeries <- function(
     height = NULL,
     elementId = NULL
 ) {
-
-    # forward options using x
     inputs <- list(
         data = data,
         settings = jsonlite::toJSON(
@@ -27,8 +25,8 @@ animatedTimeSeries <- function(
     htmlwidgets::createWidget(
         name = 'animatedTimeSeries',
         inputs,
-        # width = width,
-        # height = height,
+        width = width,
+        height = height,
         package = 'animatedTimeSeries',
         elementId = elementId
     )
